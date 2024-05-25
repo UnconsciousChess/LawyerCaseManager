@@ -1,1 +1,6 @@
 .venv
+
+# test 不上传
+/test
+
+
