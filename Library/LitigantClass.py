@@ -1,5 +1,3 @@
-from openpyxl import load_workbook
-
 class Litigant():
     # 构造函数，在构造函数里面，先初始化各类属性，后面的添加通过后续添加函数来完成
     def __init__(self):
@@ -13,6 +11,8 @@ class Litigant():
         self._ContactNumber = ""
         # 5.身份证照片/营业执照上传路径
         self._DocumentsPath = ""
+        # 6.诉讼地位（原告、被告、第三人）
+        self._LitigantPosition = -1
 
 
     # 定义外部获取诉讼参与人姓名的方法
@@ -30,6 +30,9 @@ class Litigant():
     # 定义外部获取诉讼参与人身份证照片/营业执照上传路径的方法
     def GetDocumentsPath(self):
         return self._DocumentsPath
+    # 定义外部获取诉讼参与人在诉讼中的地位（原告、被告、第三人）的方法
+    def GetLitigantPosition(self):
+        return self._LitigantPosition
     # 定义外部获取诉讼代理人属性的方法
     def GetLawsuitRepresentative(self):
         if hasattr(self,"_LawsuitRepresentative"):
@@ -54,6 +57,9 @@ class Litigant():
     # 定义外部设置诉讼参与人身份证照片/营业执照上传路径的方法
     def SetDocumentsPath(self,DocumentsPath):
         self._DocumentsPath = DocumentsPath
+    # 定义外部设置诉讼参与人在诉讼中的地位（原告、被告、第三人）的方法
+    def SetLitigantPosition(self,LitigantPosition):
+        self._LitigantPosition = LitigantPosition
 
     # 定义外部设置诉讼代理人属性的方法通过BindLawyer方法完成，因此不另外定义一个方法
 
@@ -238,11 +244,7 @@ class PersonLitigant(Litigant):
             print("该实例无性别属性")
         return 0
 
-    # 定义一个从excel文件当前行获取身份信息的函数
-    def GetInfoFromExcel(ExcelFilePath):
-        wb = load_workbook(ExcelFilePath)
-        ws = wb.active()
-        # 读取表头
+
         
 
 # ==在诉讼参与人的类的基础上，定义诉讼参与人（公司或非法人组织）==
@@ -284,37 +286,19 @@ class CompanyLitigant(Litigant):
         # 如果名称里面包括公司就是法人，否则就视为非法人组织
         if "公司" in self._Name:
             self.__LitigantType = 2
-            print("该诉讼参与人为法人")
+            # print("该诉讼参与人为法人")
         else:
             self.__LitigantType = 3
-            print("该诉讼参与人为非法人组织")
+            # print("该诉讼参与人为非法人组织")
         return 
 
-    
 
     # 定义一个方法，该方法可以直接通过一个txt的方法用于输入诉讼参与人信息。
     # 该方法是一个暂时的方法接口，后续如果没有这个需要的话（比如后期都是通过excel或数据库读取，或者民事起诉状语义识别的话）
     # 该方法在后续如不需要的话，可废弃
     def UpdateLitigantInfoByTxt(self,InfoFile):
-        with open(file=InfoFile,mode="r",encoding="utf-8") as f:
-            LitigantInfoFromTxt = f.read()
-        LitigantInfoFromTxtList = LitigantInfoFromTxt.split("\n")
-        for information in LitigantInfoFromTxtList:
-            if "Name" in information:
-                self.Name = information.split("=")[-1]
-            if "IDCode" in information:
-                self.IDCode = information.split("=")[-1]
-            if "Location" in information:
-                self.Location = information.split("=")[-1]
-            if "ContactNumber" in information:
-                self.ContactNumber = information.split("=")[-1]
-            if "DocumentsPath" in information:
-                self.DocumentsPath = information.split("=")[-1]
-            if "LegalRepresentative" in information:
-                self.LegalRepresentative = information.split("=")[-1]
-            if "LegalRepresentativeIDCode" in information:
-                self.LegalRepresentativeIDCode = information.split("=")[-1]
-        # 在读取完材料以后，直接调用GetCompanyLitigantType判断类型
+        super().UpdateLitigantInfoByTxt(InfoFile)
+        # 调取父函数读取完信息以后，自动运行下面的函数
         self.GetCompanyLitigantType()
 
     def UpdateInfo(self, **Attributes):
@@ -445,3 +429,5 @@ class AssistLawyer(LeadLawyer):
         print("禁止协办律师再绑定其他对象")
         return
 
+import os
+print(os.getcwd())

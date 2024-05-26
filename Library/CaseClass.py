@@ -1,5 +1,6 @@
-import os.path
-from LitigantClass import *
+import os,sys
+
+from Library.LitigantClass import *
 
 class Case():
 
@@ -325,16 +326,19 @@ class Case():
             # 原告1  被告2  第三人3
             if ALitigant.GetLitigantPosition() == 1:
                 print("该诉讼参与人为原告")
+                ALitigant.PrintInfo()
                 self._PlaintiffList.append(ALitigant)
                 print("添加原告成功")
                 return True
             elif ALitigant.GetLitigantPosition()  == 2:
                 print("该诉讼参与人为被告")
+                ALitigant.PrintInfo()
                 self._DefendantList.append(ALitigant)
                 print("添加被告成功")
                 return True
             elif ALitigant.GetLitigantPosition() == 3:
                 print("该诉讼参与人为第三人")
+                ALitigant.PrintInfo()
                 self._LegalThirdPartyList.append(ALitigant)
                 print("添加第三人成功")
                 return True
