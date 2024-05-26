@@ -1,6 +1,9 @@
 .venv
 
 # test 不上传
-/test
+/Test
 
+/Data/PrivateDocument
 
+# 字节码不上传
+*.pyc
