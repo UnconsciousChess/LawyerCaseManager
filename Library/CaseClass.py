@@ -1,4 +1,5 @@
 import os,sys
+sys.path.append(os.path.split(sys.path[0])[0])
 
 from Library.LitigantClass import *
 
@@ -32,6 +33,9 @@ class Case():
         self._Mediation = False
         # 拒绝调解理由
         self._RejectMediationReasonText = ""
+        # 案件代理的阶段
+        self._CaseAgentStage = []
+
     # 定义外部访问时，返回各属性的函数
     # 案件类型
     def GetCaseType(self):
@@ -81,6 +85,10 @@ class Case():
     # 拒绝调解理由
     def GetRejectMediationReasonText(self):
         return self._RejectMediationReasonText
+    # 案件代理的阶段
+    def GetCaseAgentStage(self):
+        return self._CaseAgentStage
+
 
     # 定义外部访问的时候的设置属性
     # 案件类型设定方法，1为民事案件，2为行政案件，3为执行案件
@@ -192,78 +200,18 @@ class Case():
             self._RejectReason = RejectReason
         else:
             print("该输入对象的类型与属性不匹配,拒绝理由输入值为字符串")
-
-
-    # 定义设置属性的函数，传入数量不定的参数，来进行赋值
-    # （这个方法由于过于麻烦，特别是参数的名称需要增加记忆成本，考虑后期抛弃该方法）
-    def SetAttribute(self,**Attribute):  
-        for k,v in Attribute.items():
-            if k == "案件类型":
-                if isinstance(v,int):
-                    self._CaseType = v
-                else:
-                    print("该输入对象的类型与属性不匹配,案件类型要求输入值为整数")                    
-                continue
-            elif k == "诉讼标的额":
-                if isinstance(v,int) or isinstance(v,float):
-                    self._LitigationAmount = v
-                else:
-                    print("该输入对象的类型与属性不匹配,诉讼标的额要求输入值为整数或浮点数")     
-                continue
-            elif k == "案由":
-                self._CaseOfAction = v
-                continue   
-            elif k == "管辖法院":
-                # 确保管辖法院的值里面包括法院
-                if "法院" in v: 
-                    self._Jurisdiction = v
-            elif k == "上传文件列表":
-                self._UploadFilesList = v
-                continue   
-            elif k == "诉讼请求":
-                self._ClaimText = v
-                continue      
-            elif k == "事实与理由":
-                self._FactAndReasonText = v
-                continue        
-            elif k == "案件文件所在文件夹路径":
-                self._CaseFolderPath = v
-                continue
-            elif k == "原告主体列表":
-                if isinstance(v,list):
-                    self._PlaintiffList = v
-                else:
-                    print("输入对象的类型与属性类型不匹配,原告主体列表要求输入值类型为列表")
-                continue        
-            elif k == "被告主体列表":
-                if isinstance(v,list):
-                    self._DefendantList = v
-                else:
-                    print("该输入对象的类型与属性不匹配,被告主体列表要求输入值为列表")
-                continue                                                     
-            elif k == "第三人主体列表":
-                if isinstance(v,list):
-                    self._LegalThirdPartyList = v
-                else:
-                    print("该输入对象的类型与属性不匹配,第三人主体列表要求输入值为列表")
-                continue        
-            elif k == "备注":
-                self._CommentText = v
-                continue        
-            elif k == "调解意向":
-                # 判断输入的内容是否合法
-                if isinstance(v,bool):
-                    self._Mediation = v
-                else:
-                    print("该输入对象的类型与属性不匹配,调解意向属性要求输入值为布尔值")
-                continue       
-            elif k == "拒绝调解理由":
-                self._RejectMediationReasonText = v
-                continue 
-
-            # 输入的参数名全部不符合要求    
-            else:
-                print("属性名[%s]在本类中不存在,因此该属性无法添加" % k)
+    # 案件代理阶段设定方法
+    def SetCaseAgentStage(self,CaseAgentStage):
+        if isinstance(CaseAgentStage,list):
+            # 对比新列表的数字是否与现有的列表重复
+            for i in CaseAgentStage:
+                if i not in self._CaseAgentStage and i in [1,2,3,4,5]:
+                    self._CaseAgentStage.append(i)
+        elif isinstance(CaseAgentStage,int):
+            if CaseAgentStage not in self._CaseAgentStage and CaseAgentStage in [1,2,3,4,5]:
+                self._CaseAgentStage.append(CaseAgentStage)
+        else:
+            print("SetCaseAgentStage报错：该输入对象的类型与属性不匹配,案件代理阶段输入值为列表或1-5的整数")
 
     # 定义一个检查函数，确保Case对象里面的所有属性都是符合输入到网页的规范的，避免在填表单的时候报错
     # 无误返回True，否则返回False
@@ -346,3 +294,23 @@ class Case():
                 print("当前添加的诉讼参与人缺失诉讼地位参数LitigantPosition，无法添加到列表之中")
                 return False
 
+    # 定义一些测试函数方便打印信息的
+    # 打印案件代理阶段
+    def PrintCaseAgentStage(self):
+        CaseAgentStageOutputString = "本案涉及的案件代理阶段有："
+        if self._CaseAgentStage == []:
+            return "无案件代理阶段信息"
+        for i in self._CaseAgentStage:
+            if i == 1:
+                CaseAgentStageOutputString += "一审立案阶段、"
+            elif i == 2:
+                CaseAgentStageOutputString += "一审开庭阶段、"
+            elif i == 3:
+                CaseAgentStageOutputString += "二审阶段、"
+            elif i == 4:
+                CaseAgentStageOutputString += "执行阶段、"
+            elif i == 5:
+                CaseAgentStageOutputString += "再审阶段、"
+        # 去掉最后一个顿号
+        CaseAgentStageOutputString = CaseAgentStageOutputString[:-1]
+        return CaseAgentStageOutputString
