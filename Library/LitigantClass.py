@@ -13,6 +13,8 @@ class Litigant():
         self._DocumentsPath = ""
         # 6.诉讼地位（原告、被告、第三人）
         self._LitigantPosition = -1
+        # 7.是否为我方当事人
+        self._OurClient = False
 
 
     # 定义外部获取诉讼参与人姓名的方法
@@ -40,6 +42,16 @@ class Litigant():
         else:
             print("该诉讼参与人没有设置诉讼代理人属性")
             return None
+    # 定义外部获取银行账户属性的方法
+    def GetBankAccount(self):
+        if hasattr(self,"_BankAccount"):
+            return self._BankAccount
+        else:
+            print("该诉讼参与人没有设置银行账户属性")
+            return None
+    # 定义外部获取是否为我方当事人的方法
+    def IsOurClient(self):
+        return self._OurClient
 
     
     # 定义外部设置诉讼参与人姓名的方法
@@ -185,6 +197,16 @@ class Litigant():
             print("%s的代理律师已绑定为%s" % (self._Name,self._LawsuitRepresentative._Name))
         else:
             print("传入的参数并非律师对象，无法绑定")
+    
+    # 绑定银行账户的方法
+    def BindBankAccount(self,ABankAccount):
+        # 随后判断传进来的参数是不是BankAccount对象，如果是就可以绑定BankAccount（银行账户）属性
+        if isinstance(ABankAccount,BankAccount):
+            self._BankAccount = ABankAccount
+            print("%s的银行账户已绑定为%s" % (self._Name,self._BankAccount._AccountName))
+        else:
+            print("传入的参数并非银行账户对象，无法绑定")
+        return
 
 # ==在诉讼参与人的类的基础上，定义诉讼参与人（自然人）==
 class PersonLitigant(Litigant):
@@ -245,7 +267,7 @@ class PersonLitigant(Litigant):
         return 0
 
 
-        
+         
 
 # ==在诉讼参与人的类的基础上，定义诉讼参与人（公司或非法人组织）==
 class CompanyLitigant(Litigant):
@@ -298,8 +320,19 @@ class CompanyLitigant(Litigant):
     # 该方法在后续如不需要的话，可废弃
     def UpdateLitigantInfoByTxt(self,InfoFile):
         super().UpdateLitigantInfoByTxt(InfoFile)
-        # 调取父函数读取完信息以后，自动运行下面的函数
+        # 调取父函数读取完信息以后，自动运行下面的的函数以判断公司类型
         self.GetCompanyLitigantType()
+        # 再次读取txt文件，获取法定代表人信息
+        with open(file=InfoFile,mode="r",encoding="utf-8") as f:
+            LitigantInfoFromTxt = f.read()
+        LitigantInfoFromTxtList = LitigantInfoFromTxt.split("\n")
+        for information in LitigantInfoFromTxtList:
+            # 法定代表人名称
+            if "LegalRepresentative" in information:
+                self.__LegalRepresentative = information.split("=")[-1]
+            # 法定代表人身份证号码
+            if "RepresentativeID" in information:
+                self.__LegalRepresentativeIDCode = information.split("=")[-1]
 
     def UpdateInfo(self, **Attributes):
         # 执行一次父函数
@@ -322,7 +355,7 @@ class CompanyLitigant(Litigant):
 
     def PrintInfo(self):
         super().PrintInfo()
-        if hasattr(self,"LegalRepresentative"):
+        if hasattr(self,"_LegalRepresentative"):
             print(str(self._Name)+"的法定代表人="+str(self._LegalRepresentative)+"\n")
         else:
             print("该实例缺少法定代表人属性")
@@ -429,5 +462,47 @@ class AssistLawyer(LeadLawyer):
         print("禁止协办律师再绑定其他对象")
         return
 
-import os
-print(os.getcwd())
+class BankAccount():
+
+    def __init__(self) -> None:
+        self._AccountName = ""
+        self._AccountNumber = ""
+        self._BankName = ""
+
+    # 定义外部获取银行账户名的方法
+    def GetAccountName(self):
+        return self._AccountName
+    # 定义外部获取银行账户号码的方法
+    def GetAccountNumber(self):
+        return self._AccountNumber
+    # 定义外部获取开户行的方法
+    def GetBankName(self):
+        return self._BankName
+    
+    # 定义外部设置银行账户名的方法
+    def SetAccountName(self,AccountName):
+        self._AccountName = AccountName
+    # 定义外部设置银行账户号码的方法
+    def SetAccountNumber(self,AccountNumber):
+        self._AccountNumber = AccountNumber
+    # 定义外部设置开户行的方法 
+    def SetBankName(self,BankName):
+        self._BankName = BankName
+
+
+    # 定义一个方法，该方法可以直接通过一个txt的方法用于输入银行账户信息。
+    def UpdateBankAccountInfoByTxt(self,InfoFile):
+        with open(file=InfoFile,mode="r",encoding="utf-8") as f:
+            BankAccountInfoFromTxt = f.read()
+        BankAccountInfoFromTxtList = BankAccountInfoFromTxt.split("\n")
+        for information in BankAccountInfoFromTxtList:
+            # 银行账户名
+            if "AccountName" in information:
+                self._AccountName = information.split("=")[-1]
+            # 银行账户号码
+            if "AccountNumber" in information:
+                self._AccountNumber = information.split("=")[-1]
+            # 开户行
+            if "BankName" in information:
+                self._BankName = information.split("=")[-1]
+        return

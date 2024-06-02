@@ -35,6 +35,15 @@ class Case():
         self._RejectMediationReasonText = ""
         # 案件代理的阶段
         self._CaseAgentStage = []
+        # 风险代理情况
+        self._RiskAgentStatus = None
+        # 风险代理前期费用
+        self._RiskAgentUpfrontFee = 0
+        # 风险代理后期比例
+        self._RiskAgentPostFeeRate = 0
+        # 非风险代理的固定费用(是一个数组，第一个元素对应第一个阶段的费用，第二个元素对应第二个阶段的费用...)
+        self._AgentFixedFee = []
+
 
     # 定义外部访问时，返回各属性的函数
     # 案件类型
@@ -88,7 +97,35 @@ class Case():
     # 案件代理的阶段
     def GetCaseAgentStage(self):
         return self._CaseAgentStage
+    # 风险代理情况
+    def GetRiskAgentStatus(self):
+        return self._RiskAgentStatus
+    # 风险代理前期费用
+    def GetRiskAgentUpfrontFee(self):
+        return self._RiskAgentUpfrontFee
+    # 风险代理后期比例
+    def GetRiskAgentPostFeeRate(self):
+        return self._RiskAgentPostFeeRate
+    # 非风险代理的固定费用数组
+    def GetAgentFixedFee(self):
+        return self._AgentFixedFee
+    
 
+    # 非直接返回值，进行一些字符串处理的函数
+    # 返回所有原告的名称的函数
+    def GetAllPlaintiffNames(self) -> str:
+        Plaintiffs = ""
+        for litigant in self._PlaintiffList:
+            Plaintiffs += litigant.GetName() + "、"
+        Plaintiffs = Plaintiffs[:-1]
+        return Plaintiffs
+    # 返回所有被告的名称的函数
+    def GetAllDefendantNames(self) -> str:
+        Defendants = ""
+        for litigant in self._DefendantList:
+            Defendants += litigant.GetName() + "、"
+        Defendants = Defendants[:-1]
+        return Defendants
 
     # 定义外部访问的时候的设置属性
     # 案件类型设定方法，1为民事案件，2为行政案件，3为执行案件
