@@ -105,7 +105,15 @@ class Litigant():
                 try:
                     self._LitigantPosition = int(information.split("=")[-1])
                 except:
-                    print("诉讼参与人在诉讼中的地位输入错误，请输入整数")
+                    print("UpdateLitigantInfoByTxt函数报错：诉讼参与人在诉讼中的地位输入错误，请输入整数")
+            # 诉讼参与人是否为我方当事人
+            if "OurClient" in information:
+                if information.split("=")[-1] == "True":
+                    self._OurClient = True
+                elif information.split("=")[-1] == "False":
+                    self._OurClient = False
+                else:
+                    print("UpdateLitigantInfoByTxt函数报错：是否为我方当事人输入错误，请输入True或False")
 
 
     # 改变诉讼参与人各项属性的方法

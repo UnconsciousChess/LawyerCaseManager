@@ -43,6 +43,8 @@ class Case():
         self._RiskAgentPostFeeRate = 0
         # 非风险代理的固定费用(是一个数组，第一个元素对应第一个阶段的费用，第二个元素对应第二个阶段的费用...)
         self._AgentFixedFee = []
+        # 案号
+        self._CaseCourtCode = ""
 
 
     # 定义外部访问时，返回各属性的函数
@@ -109,6 +111,9 @@ class Case():
     # 非风险代理的固定费用数组
     def GetAgentFixedFee(self):
         return self._AgentFixedFee
+    # 法院案号
+    def GetCaseCourtCode(self):
+        return self._CaseCourtCode
     
 
     # 非直接返回值，进行一些字符串处理的函数
@@ -126,6 +131,44 @@ class Case():
             Defendants += litigant.GetName() + "、"
         Defendants = Defendants[:-1]
         return Defendants
+    # 返回代理阶段代码对应的中文字符串
+    def GetCaseAgentStageStr(self) -> str:
+        CaseAgentStageOutputString = ""
+        if self._CaseAgentStage == []:
+            return CaseAgentStageOutputString
+        for i in self._CaseAgentStage:
+            if i == 1:
+                CaseAgentStageOutputString += "一审立案阶段、"
+            elif i == 2:
+                CaseAgentStageOutputString += "一审开庭阶段、"
+            elif i == 3:
+                CaseAgentStageOutputString += "二审阶段、"
+            elif i == 4:
+                CaseAgentStageOutputString += "执行阶段、"
+            elif i == 5:
+                CaseAgentStageOutputString += "再审阶段、"
+        # 去掉最后一个顿号
+        CaseAgentStageOutputString = CaseAgentStageOutputString[:-1]
+        return CaseAgentStageOutputString        
+
+    
+    # 返回我方当事人列表及代理方向
+    def GetOurClientListAndSide(self) -> list:
+        OurClientList = []
+        OurClientSide = ""
+        for plaintiff in self.GetPlaintiffList():
+            if plaintiff.IsOurClient():
+                OurClientList.append(plaintiff)
+                OurClientSide = "p"
+        # 如果我方不是代理原告，则为代理被告
+        if OurClientSide != "p" :
+            for defendant in self.GetDefendantList():
+                if defendant.IsOurClient():
+                    OurClientList.append(defendant)
+                    OurClientSide = "d"
+
+        return OurClientList,OurClientSide
+
 
     # 定义外部访问的时候的设置属性
     # 案件类型设定方法，1为民事案件，2为行政案件，3为执行案件
@@ -310,44 +353,19 @@ class Case():
             # 判断诉讼地位是原告、被告还是第三人
             # 原告1  被告2  第三人3
             if ALitigant.GetLitigantPosition() == 1:
-                print("该诉讼参与人为原告")
-                ALitigant.PrintInfo()
                 self._PlaintiffList.append(ALitigant)
-                print("添加原告成功")
+                print("添加原告【%s】成功" % ALitigant.GetName())
                 return True
             elif ALitigant.GetLitigantPosition()  == 2:
-                print("该诉讼参与人为被告")
-                ALitigant.PrintInfo()
                 self._DefendantList.append(ALitigant)
-                print("添加被告成功")
+                print("添加被告【%s】成功" % ALitigant.GetName())
                 return True
             elif ALitigant.GetLitigantPosition() == 3:
-                print("该诉讼参与人为第三人")
-                ALitigant.PrintInfo()
                 self._LegalThirdPartyList.append(ALitigant)
-                print("添加第三人成功")
+                print("添加第三人【%s】成功" % ALitigant.GetName())
                 return True
             else:
-                print("当前添加的诉讼参与人缺失诉讼地位参数LitigantPosition，无法添加到列表之中")
+                print("当前添加的诉讼参与人【%s】缺失诉讼地位参数LitigantPosition，无法添加到列表之中" % ALitigant.GetName())
                 return False
 
-    # 定义一些测试函数方便打印信息的
-    # 打印案件代理阶段
-    def PrintCaseAgentStage(self):
-        CaseAgentStageOutputString = "本案涉及的案件代理阶段有："
-        if self._CaseAgentStage == []:
-            return "无案件代理阶段信息"
-        for i in self._CaseAgentStage:
-            if i == 1:
-                CaseAgentStageOutputString += "一审立案阶段、"
-            elif i == 2:
-                CaseAgentStageOutputString += "一审开庭阶段、"
-            elif i == 3:
-                CaseAgentStageOutputString += "二审阶段、"
-            elif i == 4:
-                CaseAgentStageOutputString += "执行阶段、"
-            elif i == 5:
-                CaseAgentStageOutputString += "再审阶段、"
-        # 去掉最后一个顿号
-        CaseAgentStageOutputString = CaseAgentStageOutputString[:-1]
-        return CaseAgentStageOutputString
+
