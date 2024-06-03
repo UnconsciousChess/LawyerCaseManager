@@ -7,61 +7,49 @@ from docx.shared import Pt    # 字体大小模块
 # 导入第三方库docxtpl
 from docxtpl import DocxTemplate
 
-
-def RenderMaterialCreator(Case,number) -> dict:
-    # 本函数用于生成渲染材料字典，用于填充模板文件
-    # 输入值为案件的实例，通过一系列规则生成渲染材料字典
-    # 输出值类型为字典
-
-    # 初始化材料字典
-    RenderMaterialDict = {}
-
-    # 原被告姓名
-    RenderMaterialDict["PlaintiffName"] = Case.GetPlaintiffList()[number].GetName()
-    RenderMaterialDict["DefendantName"] = Case.GetDefendantList()[number].GetName()
-
-    RenderMaterialDict["PlaintiffIDCode"] = Case.GetPlaintiffList()[number].GetIDCode()
-    RenderMaterialDict["DefendantIDCode"] = Case.GetDefendantList()[number].GetIDCode()
-
-    RenderMaterialDict["PlaintiffContactNumber"] = Case.GetPlaintiffList()[number].GetContactNumber()
-    RenderMaterialDict["DefendantContactNumber"] = Case.GetDefendantList()[number].GetContactNumber()
-
-    RenderMaterialDict["PlaintiffAddress"] = Case.GetPlaintiffList()[number].GetLocation()
-    RenderMaterialDict["DefendantAddress"] = Case.GetDefendantList()[number].GetLocation()
-
-    RenderMaterialDict["CauseOfAction"] = Case.GetCauseOfAction()
-    RenderMaterialDict["Jurisdiction"] = Case.GetJurisdiction()
-
-    RenderMaterialDict["BankAccountName"] = Case.GetPlaintiffList()[number].GetBankAccount().GetAccountName()
-    RenderMaterialDict["BankName"] = Case.GetPlaintiffList()[number].GetBankAccount().GetBankName()
-    RenderMaterialDict["BankAccountNumber"] = Case.GetPlaintiffList()[number].GetBankAccount().GetAccountNumber()
+def DeleteFileIfExist(OutputDir,FileName) -> None:
+    # 判断是否存在同名文件，如果存在就删除原文件
+    if os.path.exists(OutputDir + "\\" + os.path.split(FileName)[1]):
+        # 防止因文件被WINWORD或其他应用打开中而删除失败
+        while True:
+            try:
+                os.remove(OutputDir + "\\" + os.path.split(FileName)[1])
+                break
+            except:
+                time.sleep(3)
+                print("该文件被其他程序占用，删除原同名文件失败,等待3秒后重试")
+    return
     
 
-    # 如果原告是法人，则需要读取法人代表信息
-    if Case.GetPlaintiffList()[number].GetLitigantType() == 2 or Case.GetPlaintiffList()[number].GetLitigantType() == 3:
-        # 法人代表名称
-         RenderMaterialDict["PlaintiffLegalRepresentative"] = Case.GetPlaintiffList()[number].GetLegalRepresentative()
-        # 法人代表身份证号码
-         RenderMaterialDict["PlaintiffLegalRepresentativeIDCode"] = Case.GetPlaintiffList()[number].GetLegalRepresentativeIDCode()
-    else:
-         RenderMaterialDict["PlaintiffLegalRepresentative"] = None
-         RenderMaterialDict["PlaintiffLegalRepresentativeIDCode"] = None
+def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
+        
+    # 读取模板文件
+    doc = DocxTemplate(TemplateFileDir)
 
-    # 如果被告是法人，则需要读取法人代表信息
-    if Case.GetDefendantList()[number].GetLitigantType() == 2 or Case.GetDefendantList()[number].GetLitigantType() == 3:
-        # 法人代表名称
-         RenderMaterialDict["DefendantLeagalRepresentative"] = Case.GetDefendantList()[number].GetLegalRepresentative()
-    else:
-         RenderMaterialDict["DefendantLeagalRepresentative"] = None
+    TemplaterFileName = TemplateFileDir.split("\\")[-1]
     
-    # 委托部分
+    context = {
+        # 自动生成时间信息
+        '年' : time.strftime("%Y",time.localtime()),
+        '月' : time.strftime("%m",time.localtime()),
+        '日' : time.strftime("%d",time.localtime()),
+    }
+
+    # 案件共同信息（非当事人信息）
+
+    context["案由"] = Case.GetCauseOfAction()
+    context["管辖法院"] = Case.GetJurisdiction()
+    context["案号"] = Case.GetCaseCourtCode()
+    context["委托阶段"] = Case.GetCaseAgentStageStr()
+
+    # 委托付费信息
+
     # 先判断是否需要收费,如果status是None，则不需要收费；是True则为风险收费；是False则为固定收费
     if Case.GetRiskAgentStatus() is not None:
         # 先判断是否为风险收费
         if Case.GetRiskAgentStatus() == True:                 # 风险收费
-            RenderMaterialDict["RiskAgentUpfrontFee"] = Case.GetRiskAgentUpfrontFee()
-            RenderMaterialDict["RiskAgentPostFeeRate"] = Case.GetRiskAgentPostFeeRate()
-
+            context["风险代理前期律师费"] = Case.GetRiskAgentUpfrontFee()
+            context["风险代理后期比例"] = Case.GetRiskAgentPostFeeRate()
         if Case.GetRiskAgentStatus() == False:                # 固定收费
             FixedFeeRuleStr = ""
             i = 0
@@ -76,7 +64,7 @@ def RenderMaterialCreator(Case,number) -> dict:
                             FixedFeeRuleStr += "一审审理阶段收费：" + str(Case.GetAgentFixedFee()[i]) + "元；"
                             i += 1
                         elif stage == 3:
-                            FixedFeeRuleStr += "二审阶段：" + str(Case.GetAgentFixedFee()[i]) + "元；"
+                            FixedFeeRuleStr += "二审阶段收费：" + str(Case.GetAgentFixedFee()[i]) + "元；"
                             i += 1                  
                         elif stage == 4:
                             FixedFeeRuleStr += "执行阶段收费" + str(Case.GetAgentFixedFee()[i]) + "元；"
@@ -84,110 +72,66 @@ def RenderMaterialCreator(Case,number) -> dict:
                         elif stage == 5:
                             FixedFeeRuleStr += "再审阶段：" + str(Case.GetAgentFixedFee()[i]) + "元；"
                             i += 1    
-                    # 最后赋值到RenderMaterial字典中的FixedAgentFeeRuleStr键里面
-                    RenderMaterialDict["FixedAgentFeeRuleStr"] = FixedFeeRuleStr
-                else:
-                    print("RenderMaterialCreator函数报错：固定收费列表为空，请检查")        
-            else:
-                print("RenderMaterialCreatorh函数报错：案件阶段与案件收费规则不一致，请检查")           
-    return RenderMaterialDict
+            # 最后赋值到RenderMaterial字典中的FixedAgentFeeRuleStr键里面
+            context["固定代理费收费规则"] = FixedFeeRuleStr
 
+    # 获取我方当事人列表
+    OurClientList,OurClientSide = Case.GetOurClientListAndSide()
+    # 如果代理原告
+    if OurClientSide == "p":
+        context['对方全部当事人'] = Case.GetAllDefendantNames()
 
-def RenderFileInDocxtpl(TemplateFile,Case,OutputDir) -> None:
-        
-    # 读取模板文件
-    doc = DocxTemplate(TemplateFile)
+    if OurClientSide == "d":
+        context['对方全部当事人'] = Case.GetAllPlaintiffNames()
     
-    context = {
-        # 自动生成时间信息
-        '年' : time.strftime("%Y",time.localtime()),
-        '月' : time.strftime("%m",time.localtime()),
-        '日' : time.strftime("%d",time.localtime()),
-    }
+    # 得到我方当事人的字符串AllClients，以顿号分割
+    AllClients = "" 
+    for client in OurClientList:
+        AllClients += client.GetName() + "、"
+    context['我方全部当事人'] = AllClients[:-1]    # 去掉最后一个顿号
 
-    # 用函数生成渲染材料字典
-    RenderMaterialDict = RenderMaterialCreator(Case)
-    # 将字典放入context中
-    if "PlaintiffName" in RenderMaterialDict:
-        context["原告"] = RenderMaterialDict["PlaintiffName"]
-    if "DefendantName" in RenderMaterialDict:
-        context["被告"] = RenderMaterialDict["DefendantName"]
-    if "PlaintiffIDCode" in RenderMaterialDict:
-        context["原告身份号码"] = RenderMaterialDict["PlaintiffIDCode"]
-    if "DefendantIDCode" in RenderMaterialDict:
-        context["被告身份号码"] = RenderMaterialDict["DefendantIDCode"]
-    if "PlaintiffContactNumber" in RenderMaterialDict:
-        context["原告电话"] = RenderMaterialDict["PlaintiffContactNumber"]
-    if "DefendantContactNumber" in RenderMaterialDict:
-        context["被告电话"] = RenderMaterialDict["DefendantContactNumber"]
-    if "PlaintiffAddress" in RenderMaterialDict:
-        context["原告地址"] = RenderMaterialDict["PlaintiffAddress"]
-    if "DefendantAddress" in RenderMaterialDict:
-        context["被告地址"] = RenderMaterialDict["DefendantAddress"]
+       
+    MultipleFileList = ["授权委托书","征求意见表","账户确认书","提交材料清单","地址确认书"]
+    # 判断是否为需要分开不同人做的材料
+    for name in MultipleFileList:
+        if name in TemplaterFileName:
+            # 如果文件名在上述列表之中，则遍历我方当事人列表来逐个做
+            for client in OurClientList:
+                # 如果我方当事人是法人或者其他组织
+                if client.GetLitigantType() == 2 or client.GetLitigantType() == 3:
+                    # 如果该文书是自然人的模版，则跳过该当事人
+                    if "自然人版"  in TemplaterFileName:
+                        continue
+                    # 下面获取法人代表名称
+                    context["我方当事人法定代表人"] = client.GetLegalRepresentative()
+                    # 获取法人代表身份证号码
+                    context["我方当事人法定代表人身份号码"] = client.GetLegalRepresentativeIDCode()
 
-    # 诉讼参与人为公司时
-    if "PlaintiffLegalRepresentative" in RenderMaterialDict :
-        context["原告法定代表人"] = RenderMaterialDict["PlaintiffLegalRepresentative"]
-    if "PlaintiffLegalRepresentativeIDCode" in RenderMaterialDict:
-        context["原告法定代表人身份号码"] = RenderMaterialDict["PlaintiffLegalRepresentativeIDCode"]
-    if "DefendantLeagalRepresentative" in RenderMaterialDict:
-        context["被告法定代表人"] = RenderMaterialDict["DefendantLeagalRepresentative"]
+                # 填入context
+                context['我方当事人名称'] = client.GetName()
+                context['我方当事人身份号码'] = client.GetIDCode()
+                context['我方当事人地址'] = client.GetLocation()
+                context['我方当事人电话'] = client.GetContactNumber()
+                context['我方当事人银行账户名'] = client.GetBankAccount().GetAccountName()
+                context['我方当事人开户行'] = client.GetBankAccount().GetBankName()
+                context['我方当事人银行账户号码'] = client.GetBankAccount().GetAccountNumber()
 
-    # 案件信息
-    if "CauseOfAction" in RenderMaterialDict:
-        context["案由"] = RenderMaterialDict["CauseOfAction"]
-    if "Jurisdiction" in RenderMaterialDict:
-        context["管辖法院"] = RenderMaterialDict["Jurisdiction"]
-    if "CourtCaseCode" in RenderMaterialDict:
-        context["案号"] = RenderMaterialDict["CourtCaseCode"]
-    if "CaseAgentStage" in RenderMaterialDict:
-        context["委托阶段"] = RenderMaterialDict["CaseAgentStageStr"]
+                # 渲染模板
+                doc.render(context)
+                DocSaveName = TemplaterFileName.replace(".docx", "（" + client.GetName() + "）.docx")
+                # 判断是否存在同名文件，如果存在就删除原文件
+                DeleteFileIfExist(OutputDir,DocSaveName)
+                # 保存文件
+                doc.save(OutputDir + "\\" + DocSaveName)
 
-    # 执行人银行账户信息
-    if "BankAccountName" in RenderMaterialDict:
-        context["银行账户"] = RenderMaterialDict["BankAccountName"]
-    if "BankName" in RenderMaterialDict:
-        context["开户行"] = RenderMaterialDict["BankName"]
-    if "BankAccountNumber" in RenderMaterialDict:
-        context["账号"] = RenderMaterialDict["BankAccountNumber"]
+    return
+              
 
-    # 委托付费信息
-    if "RiskAgentUpfrontFee" in RenderMaterialDict:
-        context["风险代理前期律师费"] = RenderMaterialDict["RiskAgentUpfrontFee"]
-    if "RiskAgentPostFeeRate" in RenderMaterialDict:
-        context["风险代理后期比例"] = RenderMaterialDict["RiskAgentPostFeeRate"]
-    if "FixedAgentFeeRuleStr" in RenderMaterialDict:
-        context["固定代理费收费规则"] = RenderMaterialDict["FixedAgentFeeRuleStr"]
-
-    # 当事人信息
-    if "ClientName" in RenderMaterialDict:
-        context["当事人"] = RenderMaterialDict["ClientName"]
-    if "ClientIDCode" in RenderMaterialDict:
-        context["'当事人身份号码"] = RenderMaterialDict["ClientIDCode"]
-
-    # 将context填充到模板中
-    doc.render(context)
-
-    # 判断是否存在同名文件，如果存在就删除原文件
-    if os.path.exists(OutputDir + "\\" + os.path.split(TemplateFile)[1]):
-        # 防止因文件用word打开中而失败
-        while True:
-            try:
-                os.remove(OutputDir + "\\" + os.path.split(TemplateFile)[1])
-                break
-            except:
-                time.sleep(3)
-                print("该文件被其他程序占用，删除原同名文件失败,等待3秒后重试")
-    
-    # 最后保存文件
-    doc.save(OutputDir + "\\" + os.path.split(TemplateFile)[1])
-
-
-def RenderFileInDOCX(TemplateFile,Case,OutputDir) -> None:
+def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
     # 如果TemplateFile的文件名为起诉状，则用下面的代码
-    if "起诉状" in TemplateFile.split("\\")[-1]:
+    if "起诉状" in TemplateFileDir.split("\\")[-1]:
         # 实例化一个Document对象
-        Doc = Document(TemplateFile)
+        Doc = Document(TemplateFileDir)
         for para in Doc.paragraphs:
             # 填写诉讼参与人信息
             if "LitigantInformation" in para.text:
@@ -272,18 +216,18 @@ def RenderFileInDOCX(TemplateFile,Case,OutputDir) -> None:
                 para.style.font.size = Pt(12)
             
         # 判断是否存在同名文件，如果存在就删除原文件
-        if os.path.exists(OutputDir + "\\" + os.path.split(TemplateFile)[1]):
+        if os.path.exists(OutputDir + "\\" + os.path.split(TemplateFileDir)[1]):
             # 防止因文件用word打开中而失败
             while True:
                 try:
-                    os.remove(OutputDir + "\\" + os.path.split(TemplateFile)[1])
+                    os.remove(OutputDir + "\\" + os.path.split(TemplateFileDir)[1])
                     break
                 except:
                     time.sleep(3)
                     print("该文件被其他程序占用，删除原同名文件失败,等待3秒后重试")
 
         # 最后保存文件
-        FileName = OutputDir + "\\" + os.path.split(TemplateFile)[1]
+        FileName = OutputDir + "\\" + os.path.split(TemplateFileDir)[1]
         # 去掉文件名后缀
         FileName = FileName.replace(".docx","")
         # 加上原被告双方的名字，中间用"V."隔开，再加上后缀

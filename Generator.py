@@ -154,12 +154,12 @@ def FolderCreator(case,OutputDir,TemplateListDir) -> None:
                     shutil.copy(fileandtype[0],os.getcwd())
                 # 如果FileType为1，调用docxtpl库，直接用模板来进行文书生成
                 elif fileandtype[1] == 1:
-                    RenderFileInDocxtpl(TemplateFile=fileandtype[0],
+                    RenderFileInDocxtpl(TemplateFileDir=fileandtype[0],
                                         Case=case,
                                         OutputDir=os.getcwd())
                 # 如果FileType为2，调用docx库，进行文书生成（更复杂一些）
                 elif fileandtype[1] == 2:
-                    RenderFileInDOCX(TemplateFile=fileandtype[0],
+                    RenderFileInDOCX(TemplateFileDir=fileandtype[0],
                                      Case=case,
                                      OutputDir=os.getcwd())
                 else:
