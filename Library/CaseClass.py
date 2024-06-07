@@ -47,7 +47,8 @@ class Case():
         self._CaseCourtCode = ""
 
 
-    # 定义外部访问时，返回各属性的函数
+    # 定义外部访问时，直接返回各属性的函数
+
     # 案件类型
     def GetCaseType(self):
         return self._CaseType
@@ -75,15 +76,9 @@ class Case():
     # 原告主体列表
     def GetPlaintiffList(self):
         return self._PlaintiffList
-    # 获取原告数量
-    def GetPlaintiffCount(self):
-        return len(self._PlaintiffList)
     # 被告主体列表
     def GetDefendantList(self):
         return self._DefendantList
-    # 获取被告数量
-    def GetDefendantCount(self):
-        return len(self._DefendantList)
     # 第三人主体列表
     def GetLegalThirdPartyList(self):
         return self._LegalThirdPartyList
@@ -293,79 +288,31 @@ class Case():
         else:
             print("SetCaseAgentStage报错：该输入对象的类型与属性不匹配,案件代理阶段输入值为列表或1-5的整数")
 
-    # 定义一个检查函数，确保Case对象里面的所有属性都是符合输入到网页的规范的，避免在填表单的时候报错
-    # 无误返回True，否则返回False
-    # 后续如果每个函数的set方法里面都自带写好了检测的话，该方法可以废弃
-    def CaseAttributeIsCorrect(self) -> bool:
-        # 避免所有属性存在空值
-        for v in self.__dict__.values():
-            if v is None:
-                print("有属性存在空值")
-                return False
-        # 避免案件类型错误,案件类型只能为1 2 3  
-        if (self.CaseType != 1  and 
-            self.CaseType != 2  and
-            self.CaseType != 3):
-            print("案件类型错误")
-            return False
-        # 避免诉讼标的额为负数
-        if self.LitigationAmount < 0 :
-            print("诉讼标的额只能为正数或等于零")
-            return False
-        # 要写一个案由筛选，从一个txt里面进行读取，对案由进行比较
-        with open(file="CaseOfAction.txt",mode='r',encoding="utf-8") as f:
-            # CaseOfActionArray是所有合法案由的列表
-            CaseOfActionArray = f.read().split("\n")
-        for CaseOfAction in CaseOfActionArray:
-            # 如果找到与案由列表相等的案由，就终止循环
-            if self.CaseOfAction == CaseOfAction:
-                break   
-        #  如果找遍了整个案由列表都没有找到的话，就视为该案由是有问题的，返回False
-        else:
-            print("案由内容错误")
-            return False
-        # 检测上传文件列表里面的文件有效性，判断是否为一个存在的文件
-        for FilePath in self.UploadFilesList:
-            if os.path.isfile(FilePath) == False:
-                print("%s路径无法读取或路径存在错误" % (FilePath))
-                return False
-        # 检测诉讼请求不得为空
-        if self.ClaimText == "":
-            print("诉讼请求为空")
-            return False
-        # 检测事实和理由不得为空
-        if self.FactAndReasonText == "":
-            print("事实和理由为空")
-            return False
-        # 当选择拒绝调解的时候，自动给拒绝理由赋值，避免出错
-        if self.Mediation == False:
-            if self.RejectMediationReasonText == "":
-                self.RejectMediationReasonText = "对方拒绝调解"
-
-        # 经过所有检验都没问题后最终返回 True
-        return True
-
     # 下面的方法是用于增加诉讼参与人的，和直接通过列表的方式列表添加的方法并存
     # 后面可能主要使用该方法来添加
-    def AppendLitigant(self,ALitigant) -> bool:
+    def AppendLitigant(self,ALitigant,PrintLogMode=False) -> bool:
         # 先判断添加进来的东西是什么
         if isinstance(ALitigant,Litigant):
             # 判断诉讼地位是原告、被告还是第三人
             # 原告1  被告2  第三人3
             if ALitigant.GetLitigantPosition() == 1:
                 self._PlaintiffList.append(ALitigant)
-                print("添加原告【%s】成功" % ALitigant.GetName())
+                if PrintLogMode:
+                    print("添加原告【%s】成功" % ALitigant.GetName())   
                 return True
             elif ALitigant.GetLitigantPosition()  == 2:
                 self._DefendantList.append(ALitigant)
-                print("添加被告【%s】成功" % ALitigant.GetName())
+                if PrintLogMode:
+                    print("添加被告【%s】成功" % ALitigant.GetName())
                 return True
             elif ALitigant.GetLitigantPosition() == 3:
                 self._LegalThirdPartyList.append(ALitigant)
-                print("添加第三人【%s】成功" % ALitigant.GetName())
+                if PrintLogMode:
+                    print("添加第三人【%s】成功" % ALitigant.GetName()) 
                 return True
             else:
-                print("当前添加的诉讼参与人【%s】缺失诉讼地位参数LitigantPosition，无法添加到列表之中" % ALitigant.GetName())
+                if PrintLogMode:
+                    print("当前添加的诉讼参与人【%s】缺失诉讼地位参数LitigantPosition，无法添加到列表之中" % ALitigant.GetName())
                 return False
 
 
