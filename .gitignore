@@ -1,11 +1,13 @@
+# 虚拟环境不提交
 .venv
 
-# test 不上传
+# test 不提交
 /Test
 
 /Data/PrivateDocument
 
-# 字节码不上传
+# 字节码不提交
 *.pyc
 
-CLI.py
+# 用户界面暂不提交
+/Interface
