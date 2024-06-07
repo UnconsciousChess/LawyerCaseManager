@@ -211,7 +211,7 @@ class Litigant():
         # 随后判断传进来的参数是不是BankAccount对象，如果是就可以绑定BankAccount（银行账户）属性
         if isinstance(ABankAccount,BankAccount):
             self._BankAccount = ABankAccount
-            print("%s的银行账户已绑定为%s" % (self._Name,self._BankAccount._AccountName))
+            # print("%s的银行账户已绑定为%s" % (self._Name,self._BankAccount._AccountNumber))
         else:
             print("传入的参数并非银行账户对象，无法绑定")
         return

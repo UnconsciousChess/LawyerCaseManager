@@ -6,7 +6,7 @@ import shutil
 from Library.CaseClass import Case
 
 # 导入自写库
-from RenderFile import RenderMaterialCreator,RenderFileInDocxtpl,RenderFileInDOCX
+from RenderFile import RenderFileInDocxtpl,RenderFileInDOCX
 
 # 将当前文件夹加入sys.path
 sys.path.append(os.path.split(sys.path[0])[0])
