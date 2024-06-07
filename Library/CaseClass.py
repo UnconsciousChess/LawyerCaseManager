@@ -1,5 +1,7 @@
 import os,sys
-sys.path.append(os.path.split(sys.path[0])[0])
+
+# 将当前工作目录添加到系统路径中
+sys.path.append(os.getcwd())
 
 from Library.LitigantClass import *
 

@@ -1,11 +1,6 @@
 import time
 import os,sys
 
-
-# 将当前文件夹的上一级目录添加到系统路径中
-sys.path.append(os.path.split(sys.path[0])[0])
-
-
 # 从txt中逐行读取文本生成MergeList
 def ReadTxtToMergeList(txtPath) -> list:
     MergeList = []
