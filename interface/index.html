@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Temp</title>
+    <script src="./js/test.js">
+    </script>
+</head>
+<body>  
+    <h1>归档目录生成</h1>
+    
+    <div>
+        <input type="text"  placeholder="保存路径" id="save-dir" class="user-input">
+        <button onclick="sendInputToBackEnd()">一键生成归档目录测试</button>
+    </div>
+    <p id = "response"></p>  
+
+    <HR align=center width=300 color=#987cb9 SIZE=1>
+
+    <h1>案件生成</h1>
+    <div>
+        <input type="text"  placeholder="原告信息txt地址" id="plaintiff-txt-dir" class="user-input2">
+        <input type="text"  placeholder="被告信息txt地址" id="defendant-txt-dir" class="user-input2">
+        <input type="text"  placeholder="文件夹生成路径" id="casefolder-save-dir" class="user-input2">
+        <button onclick="sendCaseToBackEnd()">一键生成案件测试</button>
+    </div>
+</body>
+</html>
