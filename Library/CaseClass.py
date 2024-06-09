@@ -3,7 +3,7 @@ import os,sys
 # 将当前工作目录添加到系统路径中
 sys.path.append(os.getcwd())
 
-from Library.LitigantClass import *
+from library.LitigantClass import *
 
 class Case():
 
@@ -16,10 +16,16 @@ class Case():
         # 案由
         self._CaseOfAction = ""
         # 管辖法院
-        self._Jurisdiction = ""        
+        self._JurisdictionDict = {
+            "一审": "",
+            "二审": "",
+            "再审": "",
+            "执行": "",
+            "仲裁": "",
+        }        
         # 上传文件列表
         self._UploadFilesList = []
-        # 诉讼请求
+        # 诉讼请求（上诉请求）
         self._ClaimText = ""
         # 事实与理由
         self._FactAndReasonText = ""
@@ -61,8 +67,8 @@ class Case():
     def GetCauseOfAction(self):
         return self._CaseOfAction
     # 管辖法院
-    def GetJurisdiction(self):
-        return self._Jurisdiction
+    def GetJurisdictionDict(self):
+        return self._JurisdictionDict
     # 上传文件列表
     def GetUploadFilesList(self):
         return self._UploadFilesList
@@ -214,37 +220,52 @@ class Case():
             self._CaseOfAction = CaseOfAction
             print("输入的案由【%s】添加成功" % CaseOfAction)
         else:
-            print("你输入的【%s】名称不符合现有民事、行政、执行案由规定,请重新输入" % CaseOfAction)
-    # 管辖法院设定方法(考虑使用检测，但这个不是必须的，因为有可能没有必要)
-    def SetJurisdiction(self,Jurisdiction):
+            print("输入的【%s】名称不符合现有民事、行政、执行案由规定,请重新输入" % CaseOfAction)
+    
+    # 管辖法院设定方法
+    def SetJurisdictionDict(self,InputJurisdictionDict,debugmode=False):
         # 准备所有合法法院名称的列表，方便进行对比，以防止输入的法院名称有误
         with open("Data\PublicInfomationList\CourtNameList.txt","r",encoding="utf-8") as f:
-            JurisdictionList = f.readlines()
+            StandardJurisdictionList = f.readlines()
         # 去除每个法院名称的换行符
-        JurisdictionList = [i.strip() for i in JurisdictionList]
-        if (Jurisdiction in JurisdictionList):
-            self._Jurisdiction = Jurisdiction
-            print("添加管辖法院【%s】成功" % Jurisdiction)
-        else:
-            print("你输入的【%s】名称不符合现有法院名称,请重新输入" % Jurisdiction)
+        StandardJurisdictionList = [i.strip() for i in StandardJurisdictionList]
+
+        for stage,jurisdictionname in InputJurisdictionDict.items():
+             #如果输入的键名（阶段）在现有的字典的键名（阶段）中,则进一步判断输入的键值是否合法  
+            if stage in self._JurisdictionDict.keys():      
+                    # 判断输入的键名（法院名称）是否在Standard法院列表中，即是否合法  
+                    if (jurisdictionname in StandardJurisdictionList):
+                        self._JurisdictionDict[stage] = jurisdictionname
+                        if debugmode:
+                            print("添加【%s】管辖法院【%s】成功" % (stage,jurisdictionname))
+                    else:
+                        if debugmode:
+                            print("输入的【%s】名称不符合现有法院名称。" % jurisdictionname)
+            else:
+                if debugmode:
+                    print("输入的【%s】键名不符合规范" % stage)
+
     # 上传文件列表设定方法
     def SetUploadFilesList(self,UploadFilesList):
         if isinstance(UploadFilesList,list):      
             self._UploadFilesList = UploadFilesList
         else:
             print("该输入对象的类型与属性不匹配,文件上传列表输入值为列表")
+
     # 诉讼请求设定方法
     def SetClaimText(self,ClaimText):
         if isinstance(ClaimText,str):
             self._ClaimText = ClaimText
         else:
             print("该输入对象的类型与属性不匹配,诉讼请求输入值为字符串")
+
     # 事实与理由设定方法
     def SetFactAndReasonText(self,FactAndReasonText):
         if isinstance(FactAndReasonText,str):
             self._FactAndReasonText = FactAndReasonText
         else:
             print("该输入对象的类型与属性不匹配,事实与理由输入值为字符串")
+
     # 案件文件所在文件夹路径设定方法
     def SetCaseFolderPath(self,CaseFolderPath):
         if isinstance(CaseFolderPath,str):
@@ -272,18 +293,21 @@ class Case():
             self._Comment = Comment
         else:
             print("该输入对象的类型与属性不匹配,备注输入值为字符串")
+
     # 调解意愿设定方法
     def SetMediationIntention(self,MediationIntention):
         if isinstance(MediationIntention,bool):
             self._MediationIntention = MediationIntention
         else:
             print("该输入对象的类型与属性不匹配,调解意向输入值为布尔值")
+
     # 拒绝理由设定方法
     def SetRejectMediationReasonText(self,RejectReason):
         if isinstance(RejectReason,str):
             self._RejectReason = RejectReason
         else:
             print("该输入对象的类型与属性不匹配,拒绝理由输入值为字符串")
+
     # 案件代理阶段设定方法
     def SetCaseAgentStage(self,CaseAgentStage):
         if isinstance(CaseAgentStage,list):
