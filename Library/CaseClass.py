@@ -113,7 +113,7 @@ class Case():
         return self._CaseCourtCode
     
 
-    # 非直接返回值，进行一些字符串处理的函数
+    # 非直接返回属性值，进行一些字符串处理的函数
     # 返回所有原告的名称的函数
     def GetAllPlaintiffNames(self) -> str:
         Plaintiffs = ""
@@ -166,6 +166,13 @@ class Case():
 
         return OurClientList,OurClientSide
 
+    def GetOurClientNames(self) -> str:
+        OurClientList,OurClientSide = self.GetOurClientListAndSide()
+        OurClientNames = ""
+        for litigant in OurClientList:
+            OurClientNames += litigant.GetName() + "、"
+        OurClientNames = OurClientNames[:-1]
+        return OurClientNames
 
     # 定义外部访问的时候的设置属性
     # 案件类型设定方法，1为民事案件，2为行政案件，3为执行案件
