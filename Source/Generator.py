@@ -3,7 +3,7 @@ import sys,os
 import shutil
 
 # 导入案件类
-from Library.CaseClass import Case
+from library.CaseClass import Case
 
 # 导入自写库
 from RenderFile import RenderFileInDocxtpl,RenderFileInDOCX

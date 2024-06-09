@@ -27,7 +27,6 @@ def ConvertAndMergePdfPackage(FolderPath,MergeList,MergeOutputName) -> None:
 
     # 导入第三方库-docx2pdf
     from docx2pdf import convert    
-
     # 获取当前文件夹中的所有文件,并储存在files这一个列表中
     files = AllFilesList(FolderPath,[])
     # 文件计数器初始化
