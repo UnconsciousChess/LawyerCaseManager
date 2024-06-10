@@ -151,9 +151,12 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
             context['我方当事人身份号码'] = client.GetIDCode()
             context['我方当事人地址'] = client.GetLocation()
             context['我方当事人电话'] = client.GetContactNumber()
-            context['我方当事人银行账户名'] = client.GetBankAccount().GetAccountName()
-            context['我方当事人开户行'] = client.GetBankAccount().GetBankName()
-            context['我方当事人银行账户号码'] = client.GetBankAccount().GetAccountNumber()
+            
+            # 如果当事人存在银行账户信息
+            if client.GetBankAccount() != None:
+                context['我方当事人银行账户名'] = client.GetBankAccount().GetAccountName()
+                context['我方当事人开户行'] = client.GetBankAccount().GetBankName()
+                context['我方当事人银行账户号码'] = client.GetBankAccount().GetAccountNumber()
 
             # 渲染模板
             doc.render(context)
@@ -494,7 +497,6 @@ def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
         DeleteFileIfExist(OutputDir,FileName)           
         # 保存文件
         Doc.save(OutputDir + FileName)
-
 
 
 # 归档卷内目录自动生成功能
