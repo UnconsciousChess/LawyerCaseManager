@@ -2,6 +2,9 @@
 import sys,os
 import shutil
 
+# 将当前工作目录添加到系统路径中
+sys.path.append(os.getcwd())
+
 # 导入案件类
 from library.CaseClass import Case
 
