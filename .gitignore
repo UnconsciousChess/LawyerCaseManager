@@ -13,3 +13,9 @@
 /interface/*.py
 
 /source/temp/
+
+
+/.VSCodeCounter
+
+Pipfile
+Pipfile.lock
