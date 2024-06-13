@@ -509,7 +509,6 @@ class Case():
             FixedFeeList = [float(i) for i in FixedFeeList]
             self.SetAgentFixedFeeByList(FixedFeeList)
             
-
         elif Key == '法院案号':
             self.SetCaseCourtCode(Value)
 
@@ -543,12 +542,26 @@ class Case():
 
     # 读取一个excel文档的路径来输入上述案件信息
     def InputCaseInfoFromExcel(self,CaseInfoFilePath,DebugMode=False):
-        pass
-    
+        from openpyxl import load_workbook
+        wb = load_workbook(CaseInfoFilePath)
+        ws = wb.active
+        # 读取第一列的数据
+        for row in ws.iter_rows(min_row=1,max_row=ws.max_row,min_col=1,max_col=1,values_only=True):
+            for cell in row:
+                # 判断是否为空行，是则跳过
+                if cell == "":
+                    continue
+                # 第一列的数据是键名
+                Key = cell.value
+                # 第二列的数据是键值
+                Value = ws.cell(row=cell.row,column=2).value
+                # 对上述分割出来的键值对进行处理
+                self.SetCaseInfoWithKeyAndValue(Key,Value)
+
     # 从应用前端中输入案件信息
     def InputCaseInfoFromFrontEnd(self,CaseInfoDict,DebugMode=False):
         if isinstance(CaseInfoDict,dict):
-            # 对于字典中的逐个键值对读取
+            # 对于字典中的逐个键值对读取，并调用SetCaseInfoWithKeyAndValue方法对键值对进行处理
             for Key,Value in CaseInfoDict.items():
                 self.SetCaseInfoWithKeyAndValue(Key,Value)
 
@@ -596,8 +609,64 @@ class Case():
     
     # 输出案件信息到excel文件
     def OutputCaseInfoToExcel(self,OutputFilePath,DebugMode=False):
-        pass
+        from openpyxl import Workbook
+        wb = Workbook()
+        ws = wb.active
+        # 逐行输出案件信息
+        ws.append(["案件类型",self.GetCaseType()])
+        ws.append(["诉讼标的",self.GetLitigationAmount()])
+        ws.append(["案由",self.GetCauseOfAction()])
+        ws.append(["管辖法院",self.GetJurisdictionDict()])
+        ws.append(["诉讼请求",self.GetClaimText()])
+        ws.append(["事实与理由",self.GetFactAndReasonText()])
+        ws.append(["案件文件所在文件夹路径",self.GetCaseFolderPath()])
+        ws.append(["原告主体列表",self.GetAllPlaintiffNames()])
+        ws.append(["被告主体列表",self.GetAllDefendantNames()])
+        ws.append(["第三人主体列表",self.GetLegalThirdPartyList()])
+        ws.append(["调解意愿",self.GetMediationIntention()])
+        ws.append(["拒绝调解理由",self.GetRejectMediationReasonText()])
+        ws.append(["案件代理的阶段",self.GetCaseAgentStageStr()])
+        if self.GetRiskAgentStatus() == True:
+            ws.append(["风险代理前期费用",self.GetRiskAgentUpfrontFee()])
+            ws.append(["风险代理后期比例",self.GetRiskAgentPostFeeRate()])
+        else:
+            ws.append(["非风险代理的固定费用",self.GetAgentFixedFee()])
+        ws.append(["法院案号",self.GetCaseCourtCode()])
 
-    # 输出案件信息到前端(输出为json格式)
-    def OutputCaseInfoToFrontEnd(self,DebugMode=False):
-        pass
+        # 设定文件名
+        OutputName = self.GetAllPlaintiffNames() + "诉" + self.GetAllDefendantNames() + "案件信息.xlsx"
+        
+        # 保存文件
+        wb.save(OutputFilePath + OutputName)
+
+    # 输出案件信息到前端(输出为json格式的字符串)
+    def OutputCaseInfoToFrontEnd(self,DebugMode=False) -> str:
+        OutputDict = {}
+        # 逐个输出案件信息
+        OutputDict["案件类型"] = self.GetCaseType()
+        OutputDict["诉讼标的"] = self.GetLitigationAmount()
+        OutputDict["案由"] = self.GetCauseOfAction()
+        OutputDict["管辖法院"] = self.GetJurisdictionDict()
+        OutputDict["诉讼请求"] = self.GetClaimText()
+        OutputDict["事实与理由"] = self.GetFactAndReasonText()
+        OutputDict["案件文件所在文件夹路径"] = self.GetCaseFolderPath()
+        OutputDict["原告主体列表"] = self.GetPlaintiffList()
+        OutputDict["被告主体列表"] = self.GetDefendantList()
+        OutputDict["第三人主体列表"] = self.GetLegalThirdPartyList()
+        OutputDict["调解意愿"] = self.GetMediationIntention()
+        OutputDict["拒绝调解理由"] = self.GetRejectMediationReasonText()
+        OutputDict["案件代理的阶段"] = self.GetCaseAgentStageStr()
+        if self.GetRiskAgentStatus() == True:
+            OutputDict["风险代理前期费用"] = self.GetRiskAgentUpfrontFee()
+            OutputDict["风险代理后期比例"] = self.GetRiskAgentPostFeeRate()
+        else:
+            OutputDict["非风险代理的固定费用"] = self.GetAgentFixedFee()
+        OutputDict["法院案号"] = self.GetCaseCourtCode()
+
+        # 将字典转换为json格式
+        import json
+        OutputJson = json.dumps(OutputDict,ensure_ascii=False)
+
+        # 返回json格式的字符串
+        return OutputJson
+    
