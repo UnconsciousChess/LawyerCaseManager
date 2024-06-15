@@ -10,7 +10,7 @@
 *.pyc
 
 
-/interface/*.py
+/interface/
 
 /source/temp/
 
@@ -20,3 +20,4 @@
 
 Pipfile
 Pipfile.lock
+
