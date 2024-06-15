@@ -9,5 +9,13 @@
 # 字节码不提交
 *.pyc
 
-# 用户界面暂不提交
-/Interface
+
+/.VSCodeCounter
+
+# 忽略pipenv生成的文件
+Pipfile
+Pipfile.lock
+
+
+
+

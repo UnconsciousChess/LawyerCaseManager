@@ -13,7 +13,7 @@ class Litigant():
         self._DocumentsPath = ""
         # 6.诉讼地位（原告、被告、第三人）
         self._LitigantPosition = -1
-        # 7.是否为我方当事人
+        # 7.是否为我方当事人，默认为否
         self._OurClient = False
 
 
@@ -72,6 +72,9 @@ class Litigant():
     # 定义外部设置诉讼参与人在诉讼中的地位（原告、被告、第三人）的方法
     def SetLitigantPosition(self,LitigantPosition):
         self._LitigantPosition = LitigantPosition
+    # 定义外部设置是否为我方当事人的方法
+    def SetOurClient(self,OurClient):
+        self._OurClient = OurClient
 
     # 定义外部设置诉讼代理人属性的方法通过BindLawyer方法完成，因此不另外定义一个方法
 
@@ -80,7 +83,7 @@ class Litigant():
     # 定义一个方法，该方法可以直接通过一个txt的方法用于输入诉讼参与人信息。
     # 该方法是一个暂时的方法接口，后续如果没有这个需要的话（比如后期都是通过excel或数据库读取，或者民事起诉状语义识别的话）
     # 该方法在后续如不需要的话，可废弃
-    def UpdateLitigantInfoByTxt(self,InfoFile):
+    def InputLitigantInfoFromTxt(self,InfoFile):
         with open(file=InfoFile,mode="r",encoding="utf-8") as f:
             LitigantInfoFromTxt = f.read()
         LitigantInfoFromTxtList = LitigantInfoFromTxt.split("\n")
@@ -105,7 +108,7 @@ class Litigant():
                 try:
                     self._LitigantPosition = int(information.split("=")[-1])
                 except:
-                    print("UpdateLitigantInfoByTxt函数报错：诉讼参与人在诉讼中的地位输入错误，请输入整数")
+                    print("InputLitigantInfoFromTxt函数报错：诉讼参与人在诉讼中的地位输入错误，请输入整数")
             # 诉讼参与人是否为我方当事人
             if "OurClient" in information:
                 if information.split("=")[-1] == "True":
@@ -113,7 +116,7 @@ class Litigant():
                 elif information.split("=")[-1] == "False":
                     self._OurClient = False
                 else:
-                    print("UpdateLitigantInfoByTxt函数报错：是否为我方当事人输入错误，请输入True或False")
+                    print("InputLitigantInfoFromTxt函数报错：是否为我方当事人输入错误，请输入True或False")
 
 
     # 改变诉讼参与人各项属性的方法
@@ -222,7 +225,6 @@ class PersonLitigant(Litigant):
     def __init__(self):
         # 调用父函数的构造函数
         super().__init__()
-
         # 自身的构造函数,初始化自己的独有特性
         # 自然人性别，默认为-1，即性别不明， 1 = 男性 0 = 女性
         self.__Sex = -1
@@ -255,8 +257,8 @@ class PersonLitigant(Litigant):
             print("该诉讼参与人对象还没有身份证号码，因此无法判断性别")
 
     # 重写该函数，主要是加上自动运行判断性别的方法LitigantGetSex
-    def UpdateLitigantInfoByTxt(self,InfoFile):
-        super().UpdateLitigantInfoByTxt(InfoFile)
+    def InputLitigantInfoFromTxt(self,InfoFile):
+        super().InputLitigantInfoFromTxt(InfoFile)
         # 调取父函数读取完信息以后，自动运行下面的函数
         self.LitigantGenerateSex()
 
@@ -326,8 +328,8 @@ class CompanyLitigant(Litigant):
     # 定义一个方法，该方法可以直接通过一个txt的方法用于输入诉讼参与人信息。
     # 该方法是一个暂时的方法接口，后续如果没有这个需要的话（比如后期都是通过excel或数据库读取，或者民事起诉状语义识别的话）
     # 该方法在后续如不需要的话，可废弃
-    def UpdateLitigantInfoByTxt(self,InfoFile):
-        super().UpdateLitigantInfoByTxt(InfoFile)
+    def InputLitigantInfoFromTxt(self,InfoFile):
+        super().InputLitigantInfoFromTxt(InfoFile)
         # 调取父函数读取完信息以后，自动运行下面的的函数以判断公司类型
         self.GetCompanyLitigantType()
         # 再次读取txt文件，获取法定代表人信息
@@ -370,7 +372,6 @@ class CompanyLitigant(Litigant):
         return 0
     
 
-
 # ==在诉讼参与人（自然人）的类的基础上，定义主办律师的类LeadLawyer==
 class LeadLawyer(PersonLitigant):
 
@@ -399,7 +400,7 @@ class LeadLawyer(PersonLitigant):
         return 
     
     # 重写从txt读入的函数
-    def UpdateLitigantInfoByTxt(self,InfoFile):
+    def InputLitigantInfoFromTxt(self,InfoFile):
         with open(file=InfoFile,mode="r",encoding="utf-8") as f:
             LitigantInfoFromTxt = f.read()
         LitigantInfoFromTxtList = LitigantInfoFromTxt.split("\n")
