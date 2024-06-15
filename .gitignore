@@ -10,12 +10,14 @@
 *.pyc
 
 
-/interface/*.py
+/interface/
 
 /source/temp/
 
 
 /.VSCodeCounter
 
+
 Pipfile
 Pipfile.lock
+

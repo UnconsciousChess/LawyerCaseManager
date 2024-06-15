@@ -9,7 +9,7 @@ sys.path.append(os.getcwd())
 from library.CaseClass import Case
 
 # 导入自写库
-from RenderFile import RenderFileInDocxtpl,RenderFileInDOCX
+from source.RenderFile import RenderFileInDocxtpl,RenderFileInDOCX
 
 # 将当前文件夹加入sys.path
 sys.path.append(os.path.split(sys.path[0])[0])
