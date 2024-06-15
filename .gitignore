@@ -10,14 +10,12 @@
 *.pyc
 
 
-/interface/
-
-/source/temp/
-
-
 /.VSCodeCounter
 
-
+# 忽略pipenv生成的文件
 Pipfile
 Pipfile.lock
+
+
+
 
