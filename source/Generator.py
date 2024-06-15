@@ -2,6 +2,9 @@
 import sys,os
 import shutil
 
+# 将当前工作目录添加到系统路径中
+sys.path.append(os.getcwd())
+
 # 导入案件类
 from library.CaseClass import Case
 
@@ -81,7 +84,7 @@ def FolderCreator(case,OutputDir,TemplateListDir) -> None:
                             continue
                         # 检查该行对应的文件是否存在，不存在则报错并跳过
                         if not os.path.exists(Filedir):
-                            print("ReadTemplateList函数报错：文件不存在或路径错误")
+                            print("ReadTemplateList函数报错：%s文件不存在或路径错误" % Filedir.split("\\")[-1])
                             continue
                         # 将文件路径和FileType组成元组，加入到字典中
                         TemplateFilesDict[CurrentTemplateType].append((Filedir,int(FileType)))

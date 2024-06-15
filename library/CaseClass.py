@@ -55,6 +55,19 @@ class Case():
         # 案号
         self._CaseCourtCode = ""
 
+
+        # 下面通过读取文件得到一些通用列表
+        # 准备所有合法法院名称的列表，方便进行对比，以防止输入的法院名称有误
+        with open(r"Data\PublicInfomationList\CourtNameList.txt","r",encoding="utf-8") as f:
+            StandardJurisdictionList = f.readlines()
+            # 去除每个法院名称的换行符
+            self._StandardJurisdictionList = [i.strip() for i in StandardJurisdictionList]
+        with open(r"Data\PublicInfomationList\CauseOfActionList.txt","r",encoding="utf-8") as f:
+            CaseOfActionList = f.readlines()
+            # 去除每个案由的换行符，并放到列表CauseOf中
+            self._CaseOfActionList = [i.strip() for i in CaseOfActionList]
+
+
     # 下面是案件类的外部方法,包括:
     # a.获取各属性的方法（Get-xxxx)
     # b.设定各属性的方法(Set-xxxx、Append-xxx)
@@ -195,7 +208,7 @@ class Case():
             else:
                 print("参数只能为1 2 3 ")
         else:
-            print("参数必须为整型") 
+            print("SetCaseType报错：参数必须为整型") 
     
     # 诉讼标的额设定方法
     def SetLitigationAmount(self,LitigationAmount):
@@ -203,82 +216,64 @@ class Case():
         try:
             LitigationAmount = float(LitigationAmount)
         except:
-            print("输入值并非浮点数")
+            print("SetLitigationAmount报错：输入值并非浮点数")
             return
         # 诉讼标的额不能小于零
         if LitigationAmount >= 0:
             self._LitigationAmount = LitigationAmount
         else:
-            print("诉讼标的不能小于零")
+            print("SetLitigationAmount报错：诉讼标的不能小于零")
             return
 
     # 案由设定方法
     def SetCauseOfAction(self,CaseOfAction):
-        with open(r"Data\PublicInfomationList\CauseOfActionList.txt","r",encoding="utf-8") as f:
-            CaseOfActionList = f.readlines()
-        # 去除每个案由的换行符
-        CaseOfActionList = [i.strip() for i in CaseOfActionList]
-        if (CaseOfAction in CaseOfActionList):
+
+        if (CaseOfAction in self._CaseOfActionList):
             self._CaseOfAction = CaseOfAction
             print("输入的案由【%s】添加成功" % CaseOfAction)
         else:
-            print("输入的【%s】名称不符合现有民事、行政、执行案由规定,请重新输入" % CaseOfAction)
+            print(" SetCauseOfActionb报错：输入的【%s】名称不符合现有民事、行政、执行案由规定,请重新输入" % CaseOfAction)
     
     # 管辖法院设定方法
     def SetJurisdictionDict(self,InputJurisdictionDict,debugmode=False):
-        # 准备所有合法法院名称的列表，方便进行对比，以防止输入的法院名称有误
-        with open(r"Data\PublicInfomationList\CourtNameList.txt","r",encoding="utf-8") as f:
-            StandardJurisdictionList = f.readlines()
-        # 去除每个法院名称的换行符
-        StandardJurisdictionList = [i.strip() for i in StandardJurisdictionList]
 
         for stage,jurisdictionname in InputJurisdictionDict.items():
              #如果输入的键名（阶段）在现有的字典的键名（阶段）中,则进一步判断输入的键值是否合法  
             if stage in self._JurisdictionDict.keys():      
                     # 判断输入的键名（法院名称）是否在Standard法院列表中，即是否合法  
-                    if (jurisdictionname in StandardJurisdictionList):
+                    if (jurisdictionname in self._StandardJurisdictionList):
                         self._JurisdictionDict[stage] = jurisdictionname
                         if debugmode:
                             print("添加【%s】管辖法院【%s】成功" % (stage,jurisdictionname))
                     else:
                         if debugmode:
-                            print("输入的【%s】名称不符合现有法院名称。" % jurisdictionname)
+                            print("SetJurisdictionDict报错：输入的案由【%s】不符合现有法院名称。" % jurisdictionname)
             else:
                 if debugmode:
-                    print("输入的【%s】键名不符合规范" % stage)
+                    print("SetJurisdictionDict报错：输入的【%s】键名不符合规范" % stage)
 
     # 诉讼请求设定方法
     def SetClaimText(self,ClaimText):
         if isinstance(ClaimText,str):
             self._ClaimText = ClaimText
         else:
-            print("该输入对象的类型与属性不匹配,诉讼请求输入值为字符串")
+            print("SetClaimText报错：该输入对象的类型与属性不匹配,诉讼请求输入值为字符串")
 
     # 事实与理由设定方法
     def SetFactAndReasonText(self,FactAndReasonText):
         if isinstance(FactAndReasonText,str):
             self._FactAndReasonText = FactAndReasonText
         else:
-            print("该输入对象的类型与属性不匹配,事实与理由输入值为字符串")
+            print("SetFactAndReasonText报错：该输入对象的类型与属性不匹配,事实与理由输入值为字符串")
 
     # 案件文件所在文件夹路径设定方法
     def SetCaseFolderPath(self,CaseFolderPath):
         if isinstance(CaseFolderPath,str):
-            print("输入的是字符串无误，进入下一步检测")
             if os.path.exists(CaseFolderPath):
-                print("文件夹存在，进入下一步检测")
-                if os.path.isdir(CaseFolderPath):
-                    print("文件夹路径无误，进入下一步检测")
-                    if os.listdir(CaseFolderPath) != []:
-                        self._CaseFolderPath = CaseFolderPath
-                        print("案件文件所在文件夹路径设定成功")
-                    else:
-                        print("文件夹为空，请重新输入")
-                else:
-                    print("文件夹路径错误，请重新输入")
+                self._CaseFolderPath = CaseFolderPath
+                print("案件文件所在文件夹路径设定成功")
             else:
                 print("文件夹不存在，请重新输入")
-
         else:
             print("该输入对象的类型与属性不匹配,案件文件所在文件夹路径输入值为字符串")
     
@@ -297,7 +292,7 @@ class Case():
         if isinstance(RejectReason,str):
             self._RejectReason = RejectReason
         else:
-            print("该输入对象的类型与属性不匹配,拒绝理由输入值为字符串")
+            print("SetRejectMediationReasonText报错：该输入对象的类型与属性不匹配,拒绝理由输入值为字符串")
 
     # 案件代理阶段设定方法
     def SetCaseAgentStage(self,CaseAgentStage):
@@ -318,7 +313,7 @@ class Case():
             self._RiskAgentStatus = RiskAgentStatus
         else:
             if DebugMode:
-                print("该输入对象的类型与属性不匹配,风险代理情况输入值为布尔值")
+                print("SetRiskAgentStatus报错：该输入对象的类型与属性不匹配,风险代理情况输入值为布尔值")
     
     # 风险代理前期费用设定方法
     def SetRiskAgentUpfrontFee(self,RiskAgentUpfrontFee,DebugMode=False):
@@ -344,14 +339,14 @@ class Case():
             RiskAgentPostFeeRate = float(RiskAgentPostFeeRate)
         except:
             if DebugMode:
-                print("输入值并非浮点数")
+                print("SetRiskAgentPostFeeRate报错：输入值并非浮点数")
             return
         # 诉讼标的额不能小于零
         if RiskAgentPostFeeRate >= 0:
             self._RiskAgentPostFeeRate = RiskAgentPostFeeRate
         else:
             if DebugMode:
-                print("风险代理后期比例不能小于零")
+                print("SetRiskAgentPostFeeRate报错：风险代理后期比例不能小于零")
             return
 
     # 非风险代理的固定费用设定方法（方法一直接输入列表）
@@ -518,15 +513,15 @@ class Case():
 
         # 案件类型
         if Key == 'caseType':
-            self.SetCaseType(int(Value))
+            self.SetCaseType(Value)
 
         # 诉讼标的额
         elif Key == 'litigationAmount':
-            self.SetLitigationAmount(float(Value))
+            self.SetLitigationAmount(Value)
 
         # 案由
         elif Key == 'caurseOfAction':
-            self.SetCauseOfAction(str(Value))
+            self.SetCauseOfAction(Value)
 
         # 管辖法院
         elif Key == 'courtName':
@@ -534,23 +529,60 @@ class Case():
 
         # 诉讼请求
         elif Key == 'claimText':
-            self.SetClaimText(str(Value))
+            self.SetClaimText(Value)
 
         # 事实与理由
         elif Key == 'factAndReasonText':
-            self.SetFactAndReasonText(str(Value))
+            self.SetFactAndReasonText(Value)
 
         # 案件文件所在文件夹路径
-        elif Key == 'caseFolderPath':
+        elif Key == 'caseFolderGeneratedPath':
             self.SetCaseFolderPath(Value)
 
-        # 原告主体列表
+        # 调解意愿
         elif Key == 'mediationIntention':
             self.SetMediationIntention(Value)
 
         # 拒绝调解理由            
         elif Key == 'rejectMediationReasonText':
-            self.SetRejectMediationReasonText(str(Value))
+            self.SetRejectMediationReasonText(Value)
+
+        # 原告信息（目前是测试只有一个人的时候）
+        elif Key == 'plaintiffInfoPath':
+            plaintiff = Litigant()
+            plaintiff.InputLitigantInfoFromTxt(Value)
+            #  如果不是公司
+            if "公司" not in plaintiff.GetName():
+                plaintiff = PersonLitigant()
+            else:
+                plaintiff = CompanyLitigant()
+            
+            # 将该参与人设置为原告
+            plaintiff.SetLitigantPosition(1)
+            # 测试用，将原告选定为我方当事人
+            plaintiff.SetOurClient(True)
+            # 再次读取原告信息并添加到原告列表中 
+            plaintiff.InputLitigantInfoFromTxt(Value)
+            self.AppendLitigant(plaintiff)
+        
+        # 被告信息（目前是测试只有一个人的时候）
+        elif Key == 'defendantInfoPath':
+            defendant = Litigant()
+            defendant.InputLitigantInfoFromTxt(Value)
+            #  如果不是公司
+            if "公司" not in defendant.GetName():
+                defendant = PersonLitigant()
+            else:
+                defendant = CompanyLitigant()
+
+            # 将该参与人设置为被告
+            defendant.SetLitigantPosition(2)
+            # 测试用，将被告选定为对方当事人
+            defendant.SetOurClient(False)
+            # 再次读取被告信息并添加到被告列表中 
+            defendant.InputLitigantInfoFromTxt(Value)
+            self.AppendLitigant(defendant)
+
 
         # 案件代理的阶段
         elif Key == 'caseAgentStage':
@@ -563,11 +595,11 @@ class Case():
 
         # 风险代理前期费用
         elif Key == 'riskAgentUpfrontFee':
-            self.SetRiskAgentUpfrontFee(float(Value))
+            self.SetRiskAgentUpfrontFee(Value)
 
         # 风险代理后期比例
         elif Key == 'riskAgentPostFeeRate':
-            self.SetRiskAgentPostFeeRate(float(Value))
+            self.SetRiskAgentPostFeeRate(Value)
 
         # 非风险代理的固定费用
         elif Key == 'agentFixedFee':
