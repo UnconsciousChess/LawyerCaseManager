@@ -3,6 +3,7 @@ import os,sys
 # 将当前工作目录添加到系统路径中
 sys.path.append(os.getcwd())
 
+# 导入诉讼参与人类
 from library.LitigantClass import *
 
 class Case():
@@ -424,7 +425,7 @@ class Case():
    
     # ===========Input方法：下面定义批量输入案件信息的方法=============
 
-    # 设定一个类的内部方法，对于参数键名和键值，分别进行处理
+    # 设定一个类的内部方法，对于参数键名和键值，分别进行处理（键值为中文，来源于txt和excel文件）
     def SetCaseInfoWithKeyAndValue(self,Key,Value):
         # 根据Key的不同，调用不同的设定方法
         if Key == '案件类型':
@@ -512,6 +513,73 @@ class Case():
         elif Key == '法院案号':
             self.SetCaseCourtCode(Value)
 
+    # 设定一个类的内部方法，针对从前端读回来的信息（字典），逐个键值对进行处理，本方法后期重点维护  
+    def SetCaseInfoFromWebDict(self,Key,Value):
+
+        # 案件类型
+        if Key == 'caseType':
+            self.SetCaseType(int(Value))
+
+        # 诉讼标的额
+        elif Key == 'litigationAmount':
+            self.SetLitigationAmount(float(Value))
+
+        # 案由
+        elif Key == 'caurseOfAction':
+            self.SetCauseOfAction(str(Value))
+
+        # 管辖法院
+        elif Key == 'courtName':
+            pass
+
+        # 诉讼请求
+        elif Key == 'claimText':
+            self.SetClaimText(str(Value))
+
+        # 事实与理由
+        elif Key == 'factAndReasonText':
+            self.SetFactAndReasonText(str(Value))
+
+        # 案件文件所在文件夹路径
+        elif Key == 'caseFolderPath':
+            self.SetCaseFolderPath(Value)
+
+        # 原告主体列表
+        elif Key == 'mediationIntention':
+            self.SetMediationIntention(Value)
+
+        # 拒绝调解理由            
+        elif Key == 'rejectMediationReasonText':
+            self.SetRejectMediationReasonText(str(Value))
+
+        # 案件代理的阶段
+        elif Key == 'caseAgentStage':
+            # 进来的value就是一个列表，因此可以直接调用SetCaseAgentStage方法
+            self.SetCaseAgentStage(Value)
+
+        # 风险代理情况
+        elif Key == 'riskAgentStatus':
+            self.SetRiskAgentStatus(Value)
+
+        # 风险代理前期费用
+        elif Key == 'riskAgentUpfrontFee':
+            self.SetRiskAgentUpfrontFee(float(Value))
+
+        # 风险代理后期比例
+        elif Key == 'riskAgentPostFeeRate':
+            self.SetRiskAgentPostFeeRate(float(Value))
+
+        # 非风险代理的固定费用
+        elif Key == 'agentFixedFee':
+            pass
+            # self.SetAgentFixedFeeByList(FixedFeeList)
+
+        # 法院案号
+        elif Key == 'caseCourtCode':
+            self.SetCaseCourtCode(Value)       
+
+
+
     # 读取一个txt文档的路径来输入上述案件信息
     def InputCaseInfoFromTxt(self,CaseInfoFilePath,DebugMode=False):
         # 判断路径是否存在
@@ -558,12 +626,13 @@ class Case():
                 # 对上述分割出来的键值对进行处理
                 self.SetCaseInfoWithKeyAndValue(Key,Value)
 
-    # 从应用前端中输入案件信息
+    # 从应用的前端中输入案件信息
     def InputCaseInfoFromFrontEnd(self,CaseInfoDict,DebugMode=False):
+        # 判断传入的参数是否为字典
         if isinstance(CaseInfoDict,dict):
             # 对于字典中的逐个键值对读取，并调用SetCaseInfoWithKeyAndValue方法对键值对进行处理
             for Key,Value in CaseInfoDict.items():
-                self.SetCaseInfoWithKeyAndValue(Key,Value)
+                self.SetCaseInfoFromWebDict(Key,Value)
 
 
     # ===========Output方法：下面定义输出案件信息的方法=============
