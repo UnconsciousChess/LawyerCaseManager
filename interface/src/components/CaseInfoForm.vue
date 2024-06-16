@@ -1,10 +1,12 @@
 <!-- 组合式Vue -->
 <script setup>
 import { ref, onMounted , reactive} from 'vue'
-// import { FormInstance } from 'element-plus'
 
-// 导入自写部分
+
+// 局部注册LitigantForm组件
 import LitigantForm from './LitigantForm.vue'
+
+
 
 // 定义表单数据
 const caseForm = ref({
@@ -18,19 +20,18 @@ const caseForm = ref({
 	caseType: 0,
 	courtName: "",
 	mediationIntention: false,
-	plaintiffInfoPath: "",
-	defendantInfoPath: "",
 	factAndReason: "",
 	caseFolderGeneratedPath: "",
 	claimText: "",
 	rejectMediationReasonText: "",
+    plaintiffs: [],
+    defendants: [],
 });
 
 
 
 const caseFormRef = ref(null);
-
-
+ 
 
 // 设定表单的校验规则
 const caseFormRules = ref({
@@ -42,6 +43,8 @@ const caseFormRules = ref({
 	],
 	litigationAmount: [
 		{ required: true, message: "请输入标的额", trigger: "blur" },
+        { type: "number", message: "请输入数字", trigger: "blur"},
+   
 	],
 	riskAgentUpfrontFee: [
 		{ required: true, message: "请输入前期风险收费金额", trigger: "blur" },
@@ -57,12 +60,6 @@ const caseFormRules = ref({
 	],
 	courtName: [
 		{ required: true, message: "请输入管辖法院", trigger: "blur" },
-	],
-	plaintiffInfoPath: [
-		{ required: true, message: "请输入原告信息txt路径", trigger: "blur" },
-	],
-	defendantInfoPath: [
-		{ required: true, message: "请输入被告信息txt路径", trigger: "blur" },
 	],
 	claimText: [
 		{ required: true, message: "请输入诉讼请求", trigger: "blur" },
@@ -80,10 +77,8 @@ const caseFormRules = ref({
 
 
 
-
 // 提交函数方法
 function onSubmit() {
-    // if(!caseForm.value) return
     caseFormRef.value.validate((valid) => {
         if (valid) {
             console.log("表单校验通过");
@@ -98,14 +93,30 @@ function onSubmit() {
 }
 
 // 新增原告方法
-function onAddPlaintiff() {
-	console.log("新增一个原告");
+const onAddPlaintiff = () => {
+    caseForm.value.plaintiffs.push({
+        litigantName: "",
+        litigantIdNumber: "",
+        litigantPhoneNumber: "",
+        litigantInfoPath: "",
+        litigantPosition: "plaintiff",
+
+    });
+	console.log("新增了一个原告");
 }
 
 // 新增被告方法
 function onAddDefendant() {
-	console.log("新增一个被告");
+    caseForm.value.defendants.push({
+        litigantName: "",
+        litigantIdNumber: "",
+        litigantPhoneNumber: "",
+        litigantInfoPath: "",
+        litigantPosition: "defendant",
+    });
+	console.log("新增了一个被告");
 }
+
 
 </script>
 
@@ -182,16 +193,6 @@ function onAddDefendant() {
             <el-input v-model="caseForm.courtName" />
         </el-form-item>
 
-        <hr />
-
-        <el-form-item label="原告信息txt路径" prop="plaintiffInfoPath">
-            <el-input v-model="caseForm.plaintiffInfoPath" />
-        </el-form-item>
-
-        <el-form-item label="被告信息txt路径" prop="defendantInfoPath">
-            <el-input v-model="caseForm.defendantInfoPath" />
-        </el-form-item>
-
         <el-form-item label="诉讼请求" prop="claimText">
             <el-input v-model="caseForm.claimText" type="textarea" />
         </el-form-item>
@@ -220,15 +221,14 @@ function onAddDefendant() {
 
         <el-form-item>
             <el-button type="primary" plain @click="onAddPlaintiff">新增原告</el-button>
-            <el-button type="info" plain @click="onAddDefendant"
-                >新增被告</el-button
-            >
+            <el-button type="info" plain @click="onAddDefendant">新增被告</el-button>
         </el-form-item>
 
     </el-form>
 
     <!-- 导入当事人表格部件 -->
-    <LitigantForm />
+    <LitigantForm litigantPosition="plaintiff" v-for="(item,index) in caseForm.plaintiffs"/>
+    <LitigantForm litigantPosition="defendant" v-for="(item,index) in caseForm.defendants"/>
 
     <hr />
     <ul>
