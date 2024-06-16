@@ -3,6 +3,8 @@
 import { ref, onMounted , reactive} from 'vue'
 // import { FormInstance } from 'element-plus'
 
+// 导入自写部分
+import LitigantForm from './LitigantForm.vue'
 
 // 定义表单数据
 const caseForm = ref({
@@ -24,11 +26,11 @@ const caseForm = ref({
 	rejectMediationReasonText: "",
 });
 
-const litigantForm = ref({
-	plaintiffName: "",
-	plaintiffIdNumber: "",
-	plaintiffPhoneNumber: "",
-});
+
+
+const caseFormRef = ref(null);
+
+
 
 // 设定表单的校验规则
 const caseFormRules = ref({
@@ -81,8 +83,18 @@ const caseFormRules = ref({
 
 // 提交函数方法
 function onSubmit() {
-	console.log(caseForm.value);
-	// pywebview.api.generateCaseFolder(caseForm.value);   #关于pywebview的部分在组合前后端的时候再使用
+    // if(!caseForm.value) return
+    caseFormRef.value.validate((valid) => {
+        if (valid) {
+            console.log("表单校验通过");
+	        console.log(caseForm.value);
+	        // pywebview.api.generateCaseFolder(caseForm.value);   #关于pywebview的部分在组合前后端的时候再使用
+        } 
+        else {
+            console.log("表单校验失败");
+            return false;
+        }
+    })
 }
 
 // 新增原告方法
@@ -103,6 +115,7 @@ function onAddDefendant() {
         v-bind:rules="caseFormRules"
         label-width="auto"
         style="max-width: 500px"
+        ref="caseFormRef"
     >
         <el-form-item label="法院案号" prop="caseCourtCode">
             <el-input v-model.trim="caseForm.caseCourtCode" />
@@ -112,7 +125,7 @@ function onAddDefendant() {
             <el-input v-model.trim="caseForm.causeOfAction" />
         </el-form-item>
 
-        <el-form-item label="标的额">
+        <el-form-item label="标的额" prop="litigationAmount">
             <el-input v-model.number="caseForm.litigationAmount" />
         </el-form-item>
 
@@ -131,18 +144,18 @@ function onAddDefendant() {
 
         <el-row>
             <el-col :span="12">
-                <el-form-item label="前期风险收费金额">
+                <el-form-item label="前期风险收费金额" prop="riskAgentUpfrontFee">
                     <el-input v-model.number="caseForm.riskAgentUpfrontFee" />
                 </el-form-item>
             </el-col>
             <el-col :span="12">
-                <el-form-item label="后期风险收费比例">
+                <el-form-item label="后期风险收费比例" prop="riskAgentPostFeeRate">
                     <el-input v-model.number="caseForm.riskAgentPostFeeRate" />
                 </el-form-item>
             </el-col>
         </el-row>
 
-        <el-form-item for="caseAgentStage">
+        <el-form-item>
             委托阶段：
             <el-checkbox-group
                 v-model="caseForm.caseAgentStage"
@@ -156,7 +169,7 @@ function onAddDefendant() {
             </el-checkbox-group>
         </el-form-item>
 
-        <el-form-item for="caseType">
+        <el-form-item>
             案件类型：
             <el-radio-group v-model="caseForm.caseType" id="caseType">
                 <el-radio value=1>民事案件</el-radio>
@@ -165,25 +178,25 @@ function onAddDefendant() {
             </el-radio-group>
         </el-form-item>
 
-        <el-form-item label="管辖法院">
+        <el-form-item label="管辖法院" prop="courtName">
             <el-input v-model="caseForm.courtName" />
         </el-form-item>
 
         <hr />
 
-        <el-form-item label="原告信息txt路径">
+        <el-form-item label="原告信息txt路径" prop="plaintiffInfoPath">
             <el-input v-model="caseForm.plaintiffInfoPath" />
         </el-form-item>
 
-        <el-form-item label="被告信息txt路径">
+        <el-form-item label="被告信息txt路径" prop="defendantInfoPath">
             <el-input v-model="caseForm.defendantInfoPath" />
         </el-form-item>
 
-        <el-form-item label="诉讼请求">
+        <el-form-item label="诉讼请求" prop="claimText">
             <el-input v-model="caseForm.claimText" type="textarea" />
         </el-form-item>
 
-        <el-form-item label="事实与理由">
+        <el-form-item label="事实与理由" prop="factAndReason">
             <el-input v-model="caseForm.factAndReason" type="textarea" />
         </el-form-item>
 
@@ -194,12 +207,12 @@ function onAddDefendant() {
             />
         </el-form-item>
 
-        <el-form-item label="案件文件夹生成路径">
+        <el-form-item label="案件文件夹生成路径" prop="caseFolderGeneratedPath">
             <el-input v-model="caseForm.caseFolderGeneratedPath" />
         </el-form-item>
 
         <el-form-item>
-            <el-button type="danger" @click="onSubmit">一键生成</el-button>
+            <el-button type="danger" @click="onSubmit(ruleFormRef)">一键生成</el-button>
             <el-button type="warning" disabled> 一键上传（功能开发中）</el-button>
         </el-form-item>
 
@@ -212,20 +225,10 @@ function onAddDefendant() {
             >
         </el-form-item>
 
-        <hr />
-        <el-form>
-            <el-form-item label="原告名字">
-                <el-input v-model="litigantForm.plaintiffName" />
-            </el-form-item>
-            <el-form-item label="原告身份证号">
-                <el-input v-model="litigantForm.plaintiffIdNumber" />
-            </el-form-item>
-            <el-form-item label="原告电话号码">
-                <el-input v-model="litigantForm.plaintiffPhoneNumber" />
-            </el-form-item>
-        </el-form>
-
     </el-form>
+
+    <!-- 导入当事人表格部件 -->
+    <LitigantForm />
 
     <hr />
     <ul>
