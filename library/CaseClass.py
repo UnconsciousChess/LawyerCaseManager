@@ -4,7 +4,7 @@ import os,sys
 sys.path.append(os.getcwd())
 
 # 导入诉讼参与人类
-from library.LitigantClass import *
+from .LitigantClass import *
 
 class Case():
 
@@ -129,7 +129,7 @@ class Case():
         return self._RiskAgentPostFeeRate
     # 非风险代理的固定费用数组
     def GetAgentFixedFee(self):
-        return self._AgentFixedFee
+        return self._AgentFixedFeeList
     # 法院案号
     def GetCaseCourtCode(self):
         return self._CaseCourtCode
@@ -525,7 +525,21 @@ class Case():
 
         # 管辖法院
         elif Key == 'courtName':
-            pass
+            # 以逗号分割字符串,分割出Stage:Court的字符串列表（这是暂时的，假设输入的是一个字符串）
+            # 后期要在前端做好多选框，这里的Value应该是一个字典或者字典
+            StageAndCourtList = Value.split(",")
+            for stageandcourt in StageAndCourtList: 
+                # 去掉阶段和法院名称的空格
+                stageandcourt = stageandcourt.strip()
+                # 去掉“阶段”两个字
+                stageandcourt = stageandcourt.replace("阶段","")
+                # 以冒号分割字符串,中文冒号或英文冒号
+                if "：" in stageandcourt:
+                    Stage,Court = stageandcourt.split("：")
+                elif ":" in stageandcourt:
+                    Stage,Court = stageandcourt.split(":")
+                # 调用设定管辖法院的方法
+                self.SetJurisdictionDict({Stage:Court})
 
         # 诉讼请求
         elif Key == 'claimText':
@@ -549,17 +563,13 @@ class Case():
 
         # 原告信息（目前是测试只有一个人的时候）
         elif Key == 'plaintiffInfoPath':
+
             plaintiff = Litigant()
             plaintiff.InputLitigantInfoFromTxt(Value)
-            #  如果不是公司
-            if "公司" not in plaintiff.GetName():
-                plaintiff = PersonLitigant()
-            else:
-                plaintiff = CompanyLitigant()
             
             # 将该参与人设置为原告
             plaintiff.SetLitigantPosition(1)
-            # 测试用，将原告选定为我方当事人
+            # 测试用，将原告选定为我方当事人(应当删除)
             plaintiff.SetOurClient(True)
             # 再次读取原告信息并添加到原告列表中 
             plaintiff.InputLitigantInfoFromTxt(Value)
@@ -567,17 +577,13 @@ class Case():
         
         # 被告信息（目前是测试只有一个人的时候）
         elif Key == 'defendantInfoPath':
+
             defendant = Litigant()
             defendant.InputLitigantInfoFromTxt(Value)
-            #  如果不是公司
-            if "公司" not in defendant.GetName():
-                defendant = PersonLitigant()
-            else:
-                defendant = CompanyLitigant()
 
             # 将该参与人设置为被告
             defendant.SetLitigantPosition(2)
-            # 测试用，将被告选定为对方当事人
+            # 测试用，将被告选定为对方当事人（应当删除）
             defendant.SetOurClient(False)
             # 再次读取被告信息并添加到被告列表中 
             defendant.InputLitigantInfoFromTxt(Value)
@@ -658,7 +664,7 @@ class Case():
                 # 对上述分割出来的键值对进行处理
                 self.SetCaseInfoWithKeyAndValue(Key,Value)
 
-    # 从应用的前端中输入案件信息
+    # 从应用的前端中输入案件信息,重点维护
     def InputCaseInfoFromFrontEnd(self,CaseInfoDict,DebugMode=False):
         # 判断传入的参数是否为字典
         if isinstance(CaseInfoDict,dict):
@@ -704,8 +710,11 @@ class Case():
                 f.write("风险代理后期比例=%s\n" % self.GetRiskAgentPostFeeRate())
             else:
                 f.write("非风险代理的固定费用=")
-                for fee in self.GetAgentFixedFee():
-                    f.write("%s," % fee)
+                if self.GetAgentFixedFee() == []:
+                    f.write("无\n")
+                else:
+                    for fee in self.GetAgentFixedFee():
+                        f.write("%s," % fee)
             f.write("法院案号是：%s\n" % self.GetCaseCourtCode())
     
     # 输出案件信息到excel文件
