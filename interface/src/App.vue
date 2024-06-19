@@ -1,18 +1,16 @@
 <!-- 组合式Vue -->
 <script setup>
-import CaseInfoForm from './components/CaseInfoForm.vue'
-import Menu from './components/Menu.vue'
+import AppMenu from "./components/Menu.vue";
 </script>
-
 
 <template>
 	<el-container>
 		<el-header>
-			<Menu/>
+			<!-- 调用组件AppMenu，插入到el-header里面 -->
+			<AppMenu />
 		</el-header>
 		<el-main>
-			<!-- 调用案件表单组件CaseInfoForm，插入到el-main里面 -->
-			<CaseInfoForm/>
+			<RouterView />
 		</el-main>
 	</el-container>
 </template>
