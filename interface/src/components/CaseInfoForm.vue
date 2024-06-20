@@ -1,11 +1,10 @@
 <!-- 组合式Vue -->
 <script setup>
-import { ref, onMounted , reactive} from 'vue'
+import { ref, onMounted , reactive, onUpdated,onBeforeUpdate,nextTick} from 'vue'
 
 
 // 局部注册LitigantForm组件
 import LitigantForm from './LitigantForm.vue'
-
 
 
 // 定义表单数据
@@ -26,12 +25,18 @@ const caseForm = ref({
 	rejectMediationReasonText: "",
     plaintiffs: [],
     defendants: [],
+    inputInfoByTxt: false,
+    inputCaseInfoByTxtPath: "",
 });
 
-
-
+// ===下面是定义的变量 ===
+// 表单引用
 const caseFormRef = ref(null);
- 
+//  通过txt文件导入案件信息的输入框是否禁用的状态
+const inputInfoByTxtDisableStatus = ref(true);
+// 通过前端输入案件信息的输入框是否禁用的状态（和通过txt文件导入的状态相反）
+const inputInfoByFrontEndStatus = ref(false);
+
 
 // 设定表单的校验规则
 const caseFormRules = ref({
@@ -77,19 +82,53 @@ const caseFormRules = ref({
 
 
 
-// 提交函数方法
-function onSubmit() {
-    caseFormRef.value.validate((valid) => {
-        if (valid) {
-            console.log("表单校验通过");
-	        console.log(caseForm.value);
-	        // pywebview.api.generateCaseFolder(caseForm.value);   #关于pywebview的部分在组合前后端的时候再使用
-        } 
-        else {
-            console.log("表单校验失败");
-            return false;
+onUpdated(
+
+    // 监听案件信息的输入方式是否发生变化
+    function ChangeInputStatus()  {
+        if (caseForm.value.inputInfoByTxt == true) {
+            inputInfoByTxtDisableStatus.value = false;
+            inputInfoByFrontEndStatus.value = true;
+            console.log("启用了输入框")
         }
-    })
+        else {
+            // 将txt输入框禁用，其他输入框启用
+            inputInfoByTxtDisableStatus.value = true;
+            inputInfoByFrontEndStatus.value = false;
+            console.log("禁用了输入框")
+        }
+    }
+)
+
+
+
+// 提交案件信息函数
+function onSubmit() {
+    // 先判断目前是采取何种形式上传
+
+    // 如果采取的是txt文件上传
+    if (caseForm.value.inputInfoByTxt == true) {
+        console.log("从txt文件中导入案件信息");
+        // console.log(caseForm.value.inputCaseInfoByTxtPath);
+        // 将txt文件的路径以及文件夹生成路径传递给后端
+        pywebview.api.inputFromTxt(caseForm.value.inputCaseInfoByTxtPath);   //关于pywebview的部分在组合前后端的时候再使用 
+        return
+    }
+    // 如果采取的是前端输入
+    else {
+        // 则先校验表单
+        caseFormRef.value.validate((valid) => {
+            if (valid) {
+                console.log("表单校验通过");
+                // 将案件信息的字典传递给后端
+                pywebview.api.inputFromFrontEndForm(caseForm.value);   //关于pywebview的部分在组合前后端的时候再使用
+            } 
+            else {
+                console.log("表单校验失败");
+                return false;
+            }
+        })
+    }
 }
 
 // 新增原告方法
@@ -117,6 +156,17 @@ function onAddDefendant() {
 	console.log("新增了一个被告");
 }
 
+// 输出案件信息到excel的方法
+function outputToExcel() {
+    console.log("输出案件信息到excel");
+    pywebview.api.OutputCaseInfoToExcel(caseForm.value.caseFolderGeneratedPath);   
+}
+
+// 输出案件信息到txt文本的方法
+function outputToTxt() {
+    console.log("输出案件信息到txt文本");
+    pywebview.api.OutputCaseInfoToTxt(caseForm.value.caseFolderGeneratedPath);   
+}
 
 </script>
 
@@ -125,25 +175,25 @@ function onAddDefendant() {
         v-bind:model="caseForm"
         v-bind:rules="caseFormRules"
         label-width="auto"
-        style="max-width: 500px"
+        style="max-width: 700px"
         ref="caseFormRef"
     >
         <el-form-item label="法院案号" prop="caseCourtCode">
-            <el-input v-model.trim="caseForm.caseCourtCode" />
+            <el-input :disabled="inputInfoByFrontEndStatus" v-model.trim="caseForm.caseCourtCode" />
         </el-form-item>
 
         <el-form-item label="案由" prop="causeOfAction">
-            <el-input v-model.trim="caseForm.causeOfAction" />
+            <el-input :disabled="inputInfoByFrontEndStatus" v-model.trim="caseForm.causeOfAction" />
         </el-form-item>
 
         <el-form-item label="标的额" prop="litigationAmount">
-            <el-input v-model.number="caseForm.litigationAmount" />
+            <el-input :disabled="inputInfoByFrontEndStatus" v-model.number="caseForm.litigationAmount" />
         </el-form-item>
 
         <el-row>
             <el-col :span="12">
                 <el-form-item label="风险收费" >
-                    <el-switch v-model="caseForm.riskAgentStatus" />
+                    <el-switch :disabled="inputInfoByFrontEndStatus" v-model="caseForm.riskAgentStatus" />
                 </el-form-item>
             </el-col>
             <el-col :span="12">
@@ -156,12 +206,12 @@ function onAddDefendant() {
         <el-row>
             <el-col :span="12">
                 <el-form-item label="前期风险收费金额" prop="riskAgentUpfrontFee">
-                    <el-input v-model.number="caseForm.riskAgentUpfrontFee" />
+                    <el-input :disabled="inputInfoByFrontEndStatus" v-model.number="caseForm.riskAgentUpfrontFee" />
                 </el-form-item>
             </el-col>
             <el-col :span="12">
                 <el-form-item label="后期风险收费比例" prop="riskAgentPostFeeRate">
-                    <el-input v-model.number="caseForm.riskAgentPostFeeRate" />
+                    <el-input :disabled="inputInfoByFrontEndStatus" v-model.number="caseForm.riskAgentPostFeeRate" />
                 </el-form-item>
             </el-col>
         </el-row>
@@ -171,6 +221,7 @@ function onAddDefendant() {
             <el-checkbox-group
                 v-model="caseForm.caseAgentStage"
                 id="caseAgentStage"
+                :disabled="inputInfoByFrontEndStatus"
             >
                 <el-checkbox value=1 name="type"> 一审立案阶段 </el-checkbox>
                 <el-checkbox value=2 name="type"> 一审开庭阶段 </el-checkbox>
@@ -182,7 +233,11 @@ function onAddDefendant() {
 
         <el-form-item>
             案件类型：
-            <el-radio-group v-model="caseForm.caseType" id="caseType">
+            <el-radio-group 
+                v-model="caseForm.caseType" 
+                id="caseType"
+                :disabled="inputInfoByFrontEndStatus"
+            >
                 <el-radio value=1>民事案件</el-radio>
                 <el-radio value=2>行政案件</el-radio>
                 <el-radio value=3>执行案件</el-radio>
@@ -190,22 +245,31 @@ function onAddDefendant() {
         </el-form-item>
 
         <el-form-item label="管辖法院" prop="courtName">
-            <el-input v-model="caseForm.courtName" />
+            <el-input :disabled="inputInfoByFrontEndStatus" v-model="caseForm.courtName" />
         </el-form-item>
 
         <el-form-item label="诉讼请求" prop="claimText">
-            <el-input v-model="caseForm.claimText" type="textarea" />
+            <el-input :disabled="inputInfoByFrontEndStatus" v-model="caseForm.claimText" type="textarea" />
         </el-form-item>
 
         <el-form-item label="事实与理由" prop="factAndReason">
-            <el-input v-model="caseForm.factAndReason" type="textarea" />
+            <el-input :disabled="inputInfoByFrontEndStatus" v-model="caseForm.factAndReason" type="textarea" />
         </el-form-item>
 
         <el-form-item label="拒绝调解理由">
             <el-input
+                :disabled="inputInfoByFrontEndStatus"
                 v-model="caseForm.rejectMediationReasonText"
                 type="textarea"
             />
+        </el-form-item>
+
+        <el-form-item label="从文件中导入案件信息">
+                    <el-switch v-model="caseForm.inputInfoByTxt" />
+        </el-form-item>
+        
+        <el-form-item  label="案件信息TXT文件路径" >
+            <el-input ref="inputCaseInfoByTxtPathInput" :disabled="inputInfoByTxtDisableStatus" v-model="caseForm.inputCaseInfoByTxtPath" />
         </el-form-item>
 
         <el-form-item label="案件文件夹生成路径" prop="caseFolderGeneratedPath">
@@ -213,8 +277,10 @@ function onAddDefendant() {
         </el-form-item>
 
         <el-form-item>
-            <el-button type="danger" @click="onSubmit(ruleFormRef)">一键生成</el-button>
+            <el-button type="danger" @click="onSubmit(ruleFormRef)">提交案件信息</el-button>
             <el-button type="warning" disabled> 一键上传（功能开发中）</el-button>
+            <el-button type="primary" @click="outputToExcel()">输出案件信息到excel</el-button>
+            <el-button type="success" @click="outputToTxt()">输出案件信息到Txt文本</el-button>
         </el-form-item>
 
         <hr />
@@ -231,10 +297,11 @@ function onAddDefendant() {
     <LitigantForm litigantPosition="defendant" v-for="(item,index) in caseForm.defendants"/>
 
     <hr />
+    <!-- 下面的是用于测试，直接展示从表格中输入的数据 -->
     <ul>
         <p>案件信息</p>
         <li v-for="(item, key) in caseForm" >
-            {{ key }}  - {{ item }} 
+            {{ key }}  -   {{ item }} 
         </li>
     </ul>
 </template>
