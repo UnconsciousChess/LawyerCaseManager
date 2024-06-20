@@ -1,5 +1,17 @@
+import os,sys
+
+# 导入第三方库，用于验证身份证号码的合法性
+from id_validator import validator
+
+# 导入银行账户类
+from .Property import BankAccount
+
+# 不要生成字节码
+sys.dont_write_bytecode = True
+
+# 设定诉讼参与人类
 class Litigant():
-    # 构造函数，在构造函数里面，先初始化各类属性，后面的添加通过后续添加函数来完成
+    # 构造函数，在构造函数里面，先初始化各类属性
     def __init__(self):
         # 1.姓名
         self._Name = ""
@@ -15,7 +27,18 @@ class Litigant():
         self._LitigantPosition = -1
         # 7.是否为我方当事人，默认为否
         self._OurClient = False
+        # 8.性别，默认为-1，即无性别，当litigant为自然人时， 1 = 男性 0 = 女性
+        self._Sex = -1
+        # 9.标识诉讼参与人类型 1=自然人 2=法人 3=非法人组织
+        self._LitigantType = 1
+        # 10.法定代表人名称（专属于公司或非法人组织）
+        self._LegalRepresentative = None
+        # 11.法定代表人的身份证号码（专属于公司或非法人组织）
+        self._LegalRepresentativeIDCode = None
+        # 12.诉讼代理人属性（一个列表）
+        self._LawsuitRepresentative = []
 
+    # ===========下面是Get方法 ===========
 
     # 定义外部获取诉讼参与人姓名的方法
     def GetName(self):
@@ -52,133 +75,245 @@ class Litigant():
     # 定义外部获取是否为我方当事人的方法
     def IsOurClient(self):
         return self._OurClient
-
+    # 定义外部获取诉讼参与人类型的方法
+    def GetLitigantType(self):
+        return self.__LitigantType
+    # 定义外部获取诉讼参与人性别的方法
+    def GetSex(self):
+        return self._Sex
+    # 定义外部获取法定代表人名称的方法
+    def GetLegalRepresentative(self):
+        return self._LegalRepresentative
+    # 定义外部获取法定代表人身份证号码的方法
+    def GetLegalRepresentativeIDCode(self):
+        return self._LegalRepresentativeIDCode
     
+
+    # =========== 下面是Set方法 ===========
     # 定义外部设置诉讼参与人姓名的方法
-    def SetName(self,Name):
-        self._Name = Name
+    def SetName(self,Name,debug=False):
+        if Name is str:
+            if Name == "":
+                if debug:
+                    print("SetName方法报错：诉讼参与人姓名不能为空")
+                return
+            else:
+                self._Name = Name
+
     # 定义外部设置诉讼参与人身份证/统一社会信用代码的方法
-    def SetIDCode(self,IDCode):
-        self._IDCode = IDCode
+    def SetIDCode(self,IDCode,debug=False):
+        if IDCode is str:
+            if IDCode == "":
+                if debug:
+                    print("SetIDCode方法报错：诉讼参与人身份证号码不能为空")
+                return
+            # 调用id_validator库的验证方法，判断身份证号码是否合法
+            if not validator.is_valid(IDCode):
+                if debug:
+                    print("SetIDCode方法报错：身份证号码有误")
+                return
+            else:
+                self._IDCode = IDCode
+
     # 定义外部设置诉讼参与人地址的方法
     def SetLocation(self,Location):
-        self._Location = Location
+        if Location is str:
+            self._Location = Location
+
     # 定义外部设置诉讼参与人联系方式的方法
     def SetContactNumber(self,ContactNumber):
         self._ContactNumber = ContactNumber
-    # 定义外部设置诉讼参与人身份证照片/营业执照上传路径的方法
+
+    # 定义外部设置诉讼参与人身份证扫描件/营业执照扫描件上传路径的方法
     def SetDocumentsPath(self,DocumentsPath):
-        self._DocumentsPath = DocumentsPath
+        if os.path.exists(DocumentsPath):
+            self._DocumentsPath = DocumentsPath
+
     # 定义外部设置诉讼参与人在诉讼中的地位（原告、被告、第三人）的方法
     def SetLitigantPosition(self,LitigantPosition):
-        self._LitigantPosition = LitigantPosition
+        if LitigantPosition in [1,2,3]:
+            self._LitigantPosition = LitigantPosition
+        
     # 定义外部设置是否为我方当事人的方法
     def SetOurClient(self,OurClient):
-        self._OurClient = OurClient
+        if OurClient is bool:
+            self._OurClient = OurClient
+        if OurClient is str:
+            if OurClient == "是" or OurClient == "True" or OurClient == "true" or OurClient == "TRUE" or OurClient == "Yes" or OurClient == "yes" or OurClient == "YES" :
+                self._OurClient = True
+            if OurClient == "否" or OurClient == "False" or OurClient == "false" or OurClient == "FALSE" or OurClient == "No" or OurClient == "no" or OurClient == "NO":
+                self._OurClient = False
 
-    # 定义外部设置诉讼代理人属性的方法通过BindLawyer方法完成，因此不另外定义一个方法
+    # 定义外部设置诉讼参与人类型的方法
+    def SetLitigantType(self,LitigantType):
+        if LitigantType in [1,2,3]:
+            self._LitigantType = LitigantType
+
+    # 定义外部设置诉讼参与人性别的方法
+    def SetSex(self,SexIndex):
+        if SexIndex in [-1,0,1]:
+            self._Sex = SexIndex
+
+    # 定义外部设置法定代表人名称的方法
+    def SetLegalRepresentative(self,LegalRepresentative):
+        if LegalRepresentative is str:
+            self._LegalRepresentative = LegalRepresentative
+
+    # 定义外部设置法定代表人身份证号码的方法
+    def SetLegalRepresentativeIDCode(self,LegalRepresentativeIDCode):
+        if LegalRepresentativeIDCode is str:
+            self._LegalRepresentativeIDCode = LegalRepresentativeIDCode
+
+    # 定义内部根据规则设置诉讼参与人性别的方法
+    def SetSexByRule(self,debug=False):
+        # 先看诉讼参与人的属性是什么，如果是自然人，就可以设置性别属性
+        if self._LitigantType == 1:
+            # 如果有身份证号码，就可以判断性别
+            if hasattr(self,"_IDCode"):
+                # 判断男女, 1 = 男性 0 = 女性
+                if len(self._IDCode) == 18:
+                    if int(self._IDCode[16]) % 2 == 1:
+                        self._Sex = 1
+                        return
+                    else:
+                        self._Sex = 0
+                        return
+                else:
+                    if debug:
+                        print("SetSexByRule报错：身份证长度有误，因此无法自动设置性别")
+            else:
+                if debug:
+                    print("SetSexByRule报错：该诉讼参与人对象还没有身份证号码，因此无法自动设置性别")
+
+    def SetLitigantTypeByRule(self,debug=False):
+        # 先判断身份证号码的长度，如果是18位，就是自然人，否则就继续判断是否包含公司
+        if hasattr(self,"_IDCode"):
+            if len(self._IDCode) == 18:
+                self._LitigantType = 1
+                return
+            else:
+                # 如果名称里面包括公司就是法人，否则就视为非法人组织
+                if "公司" in self._Name:
+                    self._LitigantType = 2
+                    return 
+                else:
+                    self._LitigantType = 3
+                    return
 
 
+    # ===========下面是Bind方法，用于绑定其他类的主体（共计2个）============
 
-    # 定义一个方法，该方法可以直接通过一个txt的方法用于输入诉讼参与人信息。
-    # 该方法是一个暂时的方法接口，后续如果没有这个需要的话（比如后期都是通过excel或数据库读取，或者民事起诉状语义识别的话）
+    # 绑定代理律师的方法
+    def BindLawyer(self,LawsuitRepresentative,debug=False):
+        # 随后判断传进来的参数是不是Lawyer对象，如果是就可以绑定LawsuitRepresentative（诉讼代理人）属性
+        if isinstance(LawsuitRepresentative,Lawyer):
+            # 判断是否有2个代理人，如果有就不再绑定
+            if len(self._LawsuitRepresentative) == 2:
+                print("BindLawyer方法报错：%s已经有2个代理律师，无法再绑定" % self._Name)
+                return
+            # 如果当前诉讼参与人没有代理人，则绑定的律师不能是实习律师，必须先绑定一个非实习律师
+            if len(self._LawsuitRepresentative) == 0:
+                if LawsuitRepresentative.IsInternLawyer():
+                    print("BindLawyer方法报错：%s不能仅绑定实习律师" % self._Name)
+                    return
+            # 经过前面的条件过滤后，将传进来的代理人对象绑定到诉讼参与人的属性上
+            self._LawsuitRepresentative.append(LawsuitRepresentative)
+            print("BindLawyer方法信息：诉讼参与人%s已增加一个代理律师：%s" % (self._Name,self._LawsuitRepresentative._Name))
+            return
+
+    # 绑定银行账户的方法
+    def BindBankAccount(self,ABankAccount,debug=False):
+        # 随后判断传进来的参数是不是BankAccount对象，如果是就可以绑定BankAccount（银行账户）属性
+        if isinstance(ABankAccount,BankAccount):
+            self._BankAccount = ABankAccount
+            if debug:
+                print("BindBankAccount方法信息：诉讼参与人%s已绑定银行账户%s" % (self._Name,self._BankAccount._AccountNumber))
+            return
+        
+        else:
+            if debug:
+                print("传入的参数并非银行账户对象，无法绑定")
+            return
+
+
+    # =============== 下面是Input方法 ===============
+
+    # 定义通过一个txt的方法用于输入诉讼参与人信息
     # 该方法在后续如不需要的话，可废弃
     def InputLitigantInfoFromTxt(self,InfoFile):
+        # 判断路径是否存在
+        if not os.path.exists(InfoFile):
+            print("InputLitigantInfoFromTxt函数报错：输入的文件路径不存在")
+            return
+        # 读取文件到LitigantInfoLines列表中
         with open(file=InfoFile,mode="r",encoding="utf-8") as f:
-            LitigantInfoFromTxt = f.read()
-        LitigantInfoFromTxtList = LitigantInfoFromTxt.split("\n")
-        for information in LitigantInfoFromTxtList:
+            LitigantInfoLines = f.readlines()
+        # 去除换行符
+        LitigantInfoLines = [line.strip() for line in LitigantInfoLines]
+        # 遍历每一行信息
+        for line in LitigantInfoLines:
+            # 判断是否为空行
+            if line == "":
+                continue
+            # 判断是否为注释行
+            if line[0] == "#":
+                continue
+            # 判断是否为赋值行
+            if "=" not in line:
+                continue
+            # 将赋值行按照等号分割
+            key,information = line.split("=")
             # 诉讼参与人的姓名属性
-            if "Name" in information:
-                self._Name = information.split("=")[-1]
-            # 诉讼参与人的身份证号码或统一社会信用代码属性    
-            if "IDCode" in information:
-                self._IDCode = information.split("=")[-1]
+            if key == "Name":
+                self.SetName(information)
+            # 诉讼参与人的身份证号码属性
+            if key == "IDCode":
+                self.SetIDCode(information)
             # 诉讼参与人的地址属性
-            if "Location" in information:
-                self._Location = information.split("=")[-1]
-            # 诉讼参与人的联系方式属性
-            if "ContactNumber" in information:
-                self._ContactNumber = information.split("=")[-1]
-            # 诉讼参与人的身份证明文件（身份证照片/营业执照）上传属性
-            if "DocumentsPath" in information:
-                self._DocumentsPath = information.split("=")[-1]
-            # 诉讼参与人在诉讼中的地位（原告、被告、第三人）
-            if "LitigantPosition" in information:
-                try:
-                    self._LitigantPosition = int(information.split("=")[-1])
-                except:
-                    print("InputLitigantInfoFromTxt函数报错：诉讼参与人在诉讼中的地位输入错误，请输入整数")
+            if key == "Location":
+                self.SetLocation(information)
+            # 诉讼参与人在诉讼中的地位属性
+            if key == "LitigantPosition":
+                self.SetLitigantPosition(information)
             # 诉讼参与人是否为我方当事人
-            if "OurClient" in information:
-                if information.split("=")[-1] == "True":
-                    self._OurClient = True
-                elif information.split("=")[-1] == "False":
-                    self._OurClient = False
-                else:
-                    print("InputLitigantInfoFromTxt函数报错：是否为我方当事人输入错误，请输入True或False")
+            if key == "OurClient":
+                self.SetOurClient(information)
+            # 法定代表人名称
+            if key == "LegalRepresentative":
+                self.SetLegalRepresentative(information)
+            # 法定代表人身份证号码  
+            if key == "LegalRepresentativeIDCode":
+                self.SetLegalRepresentativeIDCode(information)
 
+    # 定义通过前端输入的方法用于输入诉讼参与人信息
+    def InputLitigantInfoFromFrontEnd(self,LitigantInfoDict):
+        if LitigantInfoDict is dict:
+            for key in LitigantInfoDict.keys():
+                if key == "name":
+                    self.SetName(LitigantInfoDict[key])
+                if key == "idCode":
+                    self.SetIDCode(LitigantInfoDict[key])
+                if key == "location":
+                    self.SetLocation(LitigantInfoDict[key])
+                if key == "contactNumber":
+                    self.SetContactNumber(LitigantInfoDict[key])
+                if key == "documentsPath":
+                    self.SetDocumentsPath(LitigantInfoDict[key])
+                if key == "litigantPosition":
+                    self.SetLitigantPosition(LitigantInfoDict[key])
+                if key == "ourClient":
+                    self.SetOurClient(LitigantInfoDict[key])
+                if key == "legalRepresentative":
+                    self.SetLegalRepresentative(LitigantInfoDict[key])
+                if key == "legalRepresentativeIDCode":
+                    self.SetLegalRepresentativeIDCode(LitigantInfoDict[key])
 
-    # 改变诉讼参与人各项属性的方法
-    def UpdateInfo(self,**Attributes):
-        for k,v in Attributes.items():
-            # 改变姓名属性
-            if k == "Name":
-                if v is int:
-                    print("姓名输入错误,不应当输入整数")
-                elif v is float:
-                    print("姓名输入错误,不应当输入浮点数")
-                else:
-                    # 赋值
-                    self.Name = v
-                    print("%s的姓名已更新" %(self.Name))
-                    continue
-            # 改变诉讼参与人身份证、统一社会信用代码的方法
-            if k == "IDCode":
-                if v is int:
-                    print("输入错误,不应当输入整数")
-                elif v is float:
-                    print("输入错误,不应当输入浮点数")
-                else:
-                    # 赋值
-                    self.IDCode = v
-                    print("%s的身份证号码已更新为%s" %(self.Name,self.IDCode))
-                    continue
-            # 改变诉讼参与人地址的方法    
-            if k == "Location":
-                if v is int:
-                    print("输入错误,不应当输入整数")
-                elif v is float:
-                    print("输入错误,不应当输入浮点数")
-                else:
-                    # 赋值
-                    self.Location = v
-                    print("%s的联系地址已更新为%s" %(self.Name,self.Location))
-                    continue
-            # 改变诉讼参与人联系方式的方法    
-            if k == "ContactNumber":
-                if v is float:
-                    print("输入错误,不应当输入浮点数")
-                else:
-                    # 赋值
-                    self.ContactNumber = v
-                    print("%s的联系方式已更新为%s" %(self.Name,self.ContactNumber))
-                    continue
-            # 改变身份证明文件上传路径的方法 
-            if k == "DocumentsPath":        
-                if v is float:
-                    print("输入错误,不应当输入浮点数")
-                else:
-                # 赋值
-                    self.DocumentsPath = v 
-                    print("%s的身份证明文件上传路径已更新为%s" %(self.Name,self.DocumentsPath))
-                    continue
+    # ========== 下面是Output方法 ========== 
 
-            
-    # 定义打印当前诉讼参与人各项信息的方法,属于方便测试用的方法，实际上并无作用
-    def PrintInfo(self):
+    # 定义将当前诉讼参与人各项信息输出到屏幕的方法,属于方便测试用的方法，实际上并无作用
+    def OutputLitigantInfoToScreen(self):
         if self._Name is None:
-            print("姓名为空，该主体根本不存在，拒绝打印")
+            print("姓名为空，该主体不存在\n")
             return
         else:
             print("该诉讼主体名称="+str(self._Name)+"\n")
@@ -198,211 +333,99 @@ class Litigant():
                 print("该诉讼主体身份证明文件上传路径为空\n")
             else:    
                 print(str(self._Name)+"的身份证明文件上传路径="+str(self._DocumentsPath)+"\n")
-            return 0
-
-    # 绑定代理律师的方法
-    def BindLawyer(self,ALawyer):
-        # 随后判断传进来的参数是不是LeadLawyer对象，如果是就可以绑定LawsuitRepresentative（诉讼代理人）属性
-        if isinstance(ALawyer,LeadLawyer):
-            self._LawsuitRepresentative = ALawyer
-            print("%s的代理律师已绑定为%s" % (self._Name,self._LawsuitRepresentative._Name))
-        else:
-            print("传入的参数并非律师对象，无法绑定")
-    
-    # 绑定银行账户的方法
-    def BindBankAccount(self,ABankAccount):
-        # 随后判断传进来的参数是不是BankAccount对象，如果是就可以绑定BankAccount（银行账户）属性
-        if isinstance(ABankAccount,BankAccount):
-            self._BankAccount = ABankAccount
-            # print("%s的银行账户已绑定为%s" % (self._Name,self._BankAccount._AccountNumber))
-        else:
-            print("传入的参数并非银行账户对象，无法绑定")
-        return
-
-# ==在诉讼参与人的类的基础上，定义诉讼参与人（自然人）==
-class PersonLitigant(Litigant):
-    
-    def __init__(self):
-        # 调用父函数的构造函数
-        super().__init__()
-        # 自身的构造函数,初始化自己的独有特性
-        # 自然人性别，默认为-1，即性别不明， 1 = 男性 0 = 女性
-        self.__Sex = -1
-        # 标识诉讼参与人的类型 1=自然人 2=法人 3=非法人组织
-        self.__LitigantType = 1
-    
-    #  定义外部获取诉讼参与人性别的方法
-    def GetSex(self):
-        if self.__Sex == -1:
-            print("该诉讼参与人性别不明")
-            return
-        else:
-            return self.__Sex
-    #  定义外部获取诉讼参与人类型的方法
-    def GetLitigantType(self):
-        return self.__LitigantType
-
-    # 根据身份证性别并填入属性的方法
-    def LitigantGenerateSex(self):
-        if hasattr(self,"_IDCode"):
-            # 判断男女, 1 = 男性 0 = 女性
-            if len(self._IDCode) == 18:
-                if int(self._IDCode[16]) % 2 == 1:
-                    self.__Sex = 1
-                else:
-                    self.__Sex = 0
-            else:
-                print("身份证长度有误")
-        else:
-            print("该诉讼参与人对象还没有身份证号码，因此无法判断性别")
-
-    # 重写该函数，主要是加上自动运行判断性别的方法LitigantGetSex
-    def InputLitigantInfoFromTxt(self,InfoFile):
-        super().InputLitigantInfoFromTxt(InfoFile)
-        # 调取父函数读取完信息以后，自动运行下面的函数
-        self.LitigantGenerateSex()
-
-    # 打印当前诉讼参与人各项信息的方法
-    def  PrintInfo(self):
-        # 先调用继承的父类
-        super().PrintInfo()
-        # 加入自身的情况
-        if hasattr(self,"Sex"):
             if self.__Sex == 1:
                 print(str(self._Name)+"的性别为男")
-            if self.Sex == 0:
+            elif self.__Sex == 0:
                 print(str(self._Name)+"的性别为女")
-        else:
-            print("该实例无性别属性")
-        return 0
+            elif self._Sex == -1:
+                print("该诉讼参与人并非自然人，无性别属性")
+
+            return 
 
 
-         
 
-# ==在诉讼参与人的类的基础上，定义诉讼参与人（公司或非法人组织）==
-class CompanyLitigant(Litigant):
-    
+# 设定律师类
+class Lawyer():
     def __init__(self):
-        # 调用父函数的构造函数
-        super().__init__()
-
-        # 自身的构造函数
-        # 法定代表人名称
-        self.__LegalRepresentative = ""
-        # 法定代表人的身份证号码
-        self.__LegalRepresentativeIDCode = ""
-    
-    # 定义外部获取法定代表人名称的方法
-    def GetLegalRepresentative(self):
-        return self.__LegalRepresentative
-    # 定义外部获取法定代表人身份证号码的方法
-    def GetLegalRepresentativeIDCode(self):
-        return self.__LegalRepresentativeIDCode
-    #  定义外部获取诉讼参与人类型的方法
-    def GetLitigantType(self):
-        return self.__LitigantType
-
-    # 定义外部设置法定代表人名称的方法
-    def SetLegalRepresentative(self,LegalRepresentative):
-        self.__LegalRepresentative = LegalRepresentative
-    # 定义外部设置法定代表人身份证号码的方法
-    def SetLegalRepresentativeIDCode(self,LegalRepresentativeIDCode):
-        # 后续可能要在这里加上判断身份证号码合法性的代码，暂时先跳过，加快开发速度
-        self.__LegalRepresentativeIDCode = LegalRepresentativeIDCode
-
-
-
-    #定义一个方法，判断该诉讼参与人是法人还是非法人组织 2=法人 3=非法人组织
-    def GetCompanyLitigantType(self):
-        # 标识诉讼参与人的类型 1=自然人 2=法人 3=非法人组织
-        # 如果名称里面包括公司就是法人，否则就视为非法人组织
-        if "公司" in self._Name:
-            self.__LitigantType = 2
-            # print("该诉讼参与人为法人")
-        else:
-            self.__LitigantType = 3
-            # print("该诉讼参与人为非法人组织")
-        return 
-
-
-    # 定义一个方法，该方法可以直接通过一个txt的方法用于输入诉讼参与人信息。
-    # 该方法是一个暂时的方法接口，后续如果没有这个需要的话（比如后期都是通过excel或数据库读取，或者民事起诉状语义识别的话）
-    # 该方法在后续如不需要的话，可废弃
-    def InputLitigantInfoFromTxt(self,InfoFile):
-        super().InputLitigantInfoFromTxt(InfoFile)
-        # 调取父函数读取完信息以后，自动运行下面的的函数以判断公司类型
-        self.GetCompanyLitigantType()
-        # 再次读取txt文件，获取法定代表人信息
-        with open(file=InfoFile,mode="r",encoding="utf-8") as f:
-            LitigantInfoFromTxt = f.read()
-        LitigantInfoFromTxtList = LitigantInfoFromTxt.split("\n")
-        for information in LitigantInfoFromTxtList:
-            # 法定代表人名称
-            if "LegalRepresentative" in information:
-                self.__LegalRepresentative = information.split("=")[-1]
-            # 法定代表人身份证号码
-            if "RepresentativeID" in information:
-                self.__LegalRepresentativeIDCode = information.split("=")[-1]
-
-    def UpdateInfo(self, **Attributes):
-        # 执行一次父函数
-        super().UpdateInfo(**Attributes)
-        # 下面是当对象类型为公司时增加检测的部分
-        for k,v in Attributes.items():
-            # 改变法定代表人名称
-            if k == "LegalRepresentative":
-                if isinstance(v,str):
-                    # 赋值
-                    self.LawsuitRepresentative = v
-                    print("%s的法定代表人已更新为%s" %(self.Name,self.LawsuitRepresentative))
-            # 改变法定代表人身份证号码
-            if k == "LegalRepresentativeIDCode":
-                if isinstance(v,str):
-                    # 赋值
-                    self.LegalRepresentativeIDCode = v
-                    print("%s的法定代表人身份证号码已更新为%s" %(self.Name,self.LegalRepresentativeIDCode))
-        return 
-
-    def PrintInfo(self):
-        super().PrintInfo()
-        if hasattr(self,"_LegalRepresentative"):
-            print(str(self._Name)+"的法定代表人="+str(self._LegalRepresentative)+"\n")
-        else:
-            print("该实例缺少法定代表人属性")
-        return 0
-    
-
-# ==在诉讼参与人（自然人）的类的基础上，定义主办律师的类LeadLawyer==
-class LeadLawyer(PersonLitigant):
-
-    def __init__(self):
-        super().__init__()
-        # 加入律师自身的属性初始化
+        # 1.姓名
+        self._Name = ""
+        # 2.身份证号码
+        self._IDCode = ""
+        # 3.联系地址
+        self._Location = ""
+        # 4.联系方式
+        self._ContactNumber = ""
+        # 5.律师执业证号
         self._LawyerLicense = ""
-        self.LawsuitPartner = None
+        # 6.律师证上传路径数组
         self._DeligationFiles = []
-        return
+        # 7.是否为实习律师
+        self._InternLawyer = False
+
+    # ========== 下面是Get方法 ==========
+    # 定义外部获取律师姓名的方法
+    def GetName(self):
+        return self._Name
+    
+    # 定义外部获取律师身份证号的方法
+    def GetIDCode(self):
+        return self._IDCode
+    
+    # 定义外部获取律师地址的方法
+    def GetLocation(self):
+        return self._Location
+    
+    # 定义外部获取律师联系方式的方法
+    def GetContactNumber(self):
+        return self._ContactNumber
 
     # 定义外部获取律师执业证号的方法
     def GetLawyerLicense(self):
         return self._LawyerLicense
-    # 定义外部获取委托代理材料的方法
+    
+    # 定义外部获取委托代理材料路径数组的方法
     def GetDeligationFiles(self):
         return self._DeligationFiles
-
-    # 重写律师的printinfo函数
-    def PrintInfo(self):
-        print(self._Name+"律师的执业证号="+self._LawyerLicense)
-        print(self._Name+"律师的身份证号="+self._IDCode)
-        print(self._Name+"律师的联系方式="+self._ContactNumber)
-        print(self._Name+"律师的收件地址="+self._Location)
-        print(self._Name+"律师的律师证上传路径="+self._DocumentsPath)
-        return 
     
-    # 重写从txt读入的函数
-    def InputLitigantInfoFromTxt(self,InfoFile):
+    # 定义外部获取是否为实习律师的方法
+    def IsInternLawyer(self):
+        return self._InternLawyer
+
+
+    # ========== 下面是Set方法 ==========
+    # 定义外部设置律师姓名的方法
+    def SetName(self,Name):
+        self._Name = Name
+    
+    # 定义外部设置律师身份证号的方法
+    def SetIDCode(self,IDCode):
+        self._IDCode = IDCode
+
+    # 定义外部设置律师地址的方法
+    def SetLocation(self,Location):
+        self._Location = Location
+    
+    # 定义外部设置律师联系方式的方法
+    def SetContactNumber(self,ContactNumber):
+        self._ContactNumber = ContactNumber
+    
+    # 定义外部设置律师执业证号的方法
+    def SetLawyerLicense(self,LawyerLicense):
+        self._LawyerLicense = LawyerLicense
+    
+    # 定义外部设置委托代理材料路径数组的方法
+    def SetDeligationFiles(self,DeligationFiles):
+        self._DeligationFiles = DeligationFiles
+
+    # 定义外部设置是否为实习律师的方法
+    def SetInternLawyer(self,InternLawyer):
+        self._InternLawyer = InternLawyer
+
+    # ========== 下面是Input方法 ==========
+    # 从txt读入的函数
+    def InputLawyerInfoFromTxt(self,InfoFile):
         with open(file=InfoFile,mode="r",encoding="utf-8") as f:
-            LitigantInfoFromTxt = f.read()
+            LitigantInfoFromTxt = f.readlines()
         LitigantInfoFromTxtList = LitigantInfoFromTxt.split("\n")
         for information in LitigantInfoFromTxtList:
             if "Name" in information:
@@ -417,101 +440,24 @@ class LeadLawyer(PersonLitigant):
                 self._DocumentsPath = information.split("=")[-1]
             if "LawyerLicense" in information:
                 self._LawyerLicense = information.split("=")[-1]
+            if "InternLawyer" in information:
+                if information.split("=")[-1] == "True":
+                    self._InternLawyer = True
+                elif information.split("=")[-1] == "False":
+                    self._InternLawyer = False
 
-
-    # 重写UpdateInfo函数
-    def UpdateInfo(self, **Attributes):
-        # 执行一次父函数
-        super().UpdateInfo(**Attributes)
-        # 下面是当对象类型为主办律师时增加检测的部分
-        for k, v  in Attributes.items():
-            # 改变律师执业证号
-            if k == "LawyerLicense":
-                if isinstance(v,str):
-                    # 赋值
-                    self.LawyerLicense = v
-                    print("%s律师的律师执业证号已更新为%s" %(self.Name,self.LawyerLicense))  
-            # 改变委托授权材料的上传列表
-            if k == "DeligationFiles":
-                if isinstance(v,list):
-                    # 赋值
-                    self.DeligationFiles = v
-                    print("%s律师的委托授权材料列表已更新" %(self.Name)) 
-            # 禁止通过该方法进行协办律师的绑定，特别写这一段提醒自己
-            if k == "LawsuitPartner":
-                print("禁止通过该方法进行协办律师的绑定,r如需要绑定协办律师应当使用BindLawyer方法")
-
-
-    # 将bindlawyer方法重写为绑定协办律师的方法(但禁止主办律师再绑定主办律师)
-    def BindLawyer(self,ALawyer):
-        # 随后判断传进来的参数是不是辅办律师AssistLawyer对象，如果是就可以绑定LawsuitPartner（协办律师）属性
-        if isinstance(ALawyer,AssistLawyer):
-            self.LawsuitPartner = ALawyer
-            print("%s的协办律师已绑定为%s" % (self.Name,self.LawsuitPartner.Name))
+    # ========== 下面是Output方法 ==========
+    # 输出律师信息到屏幕
+    def OutputLawyerInfoToScreen(self):
+        print(self._Name+"律师的执业证号="+self._LawyerLicense)
+        print(self._Name+"律师的身份证号="+self._IDCode)
+        print(self._Name+"律师的联系方式="+self._ContactNumber)
+        print(self._Name+"律师的收件地址="+self._Location)
+        print(self._Name+"律师的律师证上传路径="+self._DocumentsPath)
+        if self._InternLawyer:
+            print(self._Name+"律师是实习律师")
         else:
-            if isinstance(ALawyer,LeadLawyer):
-                print("禁止主办律师再绑定主办律师")
-                return
-            else:
-                print("传入的参数并非协办律师对象，无法绑定")
-        return
+            print(self._Name+"律师不是实习律师")
+        return 
 
 
-# ==在主办律师类的基础上，定义协办律师（实习人员）的类AssistLawyer==
-class AssistLawyer(LeadLawyer):
-    
-    def __init__(self):
-        super().__init__()
-        # 删除AssistLawyer的Lawsuitpartner属性,因为协办律师不能再绑定其他协办律师了
-        delattr(self,"LawsuitPartner")
-        return
-
-    # 协办律师重写BindLawyer方法，禁止再绑定
-    def BindLawyer(self, ALawyer):
-        print("禁止协办律师再绑定其他对象")
-        return
-
-class BankAccount():
-
-    def __init__(self) -> None:
-        self._AccountName = ""
-        self._AccountNumber = ""
-        self._BankName = ""
-
-    # 定义外部获取银行账户名的方法
-    def GetAccountName(self):
-        return self._AccountName
-    # 定义外部获取银行账户号码的方法
-    def GetAccountNumber(self):
-        return self._AccountNumber
-    # 定义外部获取开户行的方法
-    def GetBankName(self):
-        return self._BankName
-    
-    # 定义外部设置银行账户名的方法
-    def SetAccountName(self,AccountName):
-        self._AccountName = AccountName
-    # 定义外部设置银行账户号码的方法
-    def SetAccountNumber(self,AccountNumber):
-        self._AccountNumber = AccountNumber
-    # 定义外部设置开户行的方法 
-    def SetBankName(self,BankName):
-        self._BankName = BankName
-
-
-    # 定义一个方法，该方法可以直接通过一个txt的方法用于输入银行账户信息。
-    def UpdateBankAccountInfoByTxt(self,InfoFile):
-        with open(file=InfoFile,mode="r",encoding="utf-8") as f:
-            BankAccountInfoFromTxt = f.read()
-        BankAccountInfoFromTxtList = BankAccountInfoFromTxt.split("\n")
-        for information in BankAccountInfoFromTxtList:
-            # 银行账户名
-            if "AccountName" in information:
-                self._AccountName = information.split("=")[-1]
-            # 银行账户号码
-            if "AccountNumber" in information:
-                self._AccountNumber = information.split("=")[-1]
-            # 开户行
-            if "BankName" in information:
-                self._BankName = information.split("=")[-1]
-        return
