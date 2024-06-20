@@ -9,6 +9,8 @@ import ElementPlus from 'element-plus'
 // 导入Element样式
 import 'element-plus/dist/index.css'
 
+
+// 导入组件
 import CaseInfoForm from './components/CaseInfoForm.vue'
 import Caculator from './components/Caculator.vue'
 import Blank from './components/Blank.vue'
@@ -16,7 +18,7 @@ import Blank from './components/Blank.vue'
 // 设置路由
 const routes = [
   {path: '/', component: Blank },
-  {path: '/caseinfoform', component: CaseInfoForm},
+  {path: '/case-info-form', component: CaseInfoForm},
   {path: '/caculator', component:Caculator}
 ]
 
