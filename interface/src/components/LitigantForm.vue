@@ -25,6 +25,19 @@
             <el-input v-model="litigantForm.litigantPhoneNumber" />
         </el-form-item>
 
+        
+		<el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告地址">
+			<el-input v-model="litigantForm.litigantAddress" />
+		</el-form-item>
+
+        <el-form-item v-else label="被告地址">
+            <el-input v-model="litigantForm.litigantAddress" />
+        </el-form-item>
+
+        <el-form-item label="是否采取txt导入信息" prop="litigantInfoPath">
+            <el-switch v-model="litigantForm.litigantInfoByPath" active-text="是" inactive-text="否" />
+        </el-form-item>
+
         <el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告信息txt路径" prop="litigantInfoPath">
             <el-input v-model="litigantForm.litigantInfoPath" />
         </el-form-item>
@@ -34,21 +47,27 @@
         </el-form-item>
 
         <el-form-item>
-            <el-row v-if="litigantForm.litigantPosition === 'plaintiff'">
-                <el-col :span="18">
-                    <el-button  type="primary" plain @click="sumbitCurrentlitigantInfo">提交该原告信息</el-button>
+            <el-row :gutter="60" v-if="litigantForm.litigantPosition === 'plaintiff'">
+                <el-col :span="6">
+                    <el-button  type="success" plain @click="sumbitCurrentlitigantInfo">提交该原告</el-button>
                 </el-col>
                 <el-col :span="6">
-                    <el-button  type="info" plain @click="deleteCurrentlitigantInfo">删除该原告</el-button>
+                    <el-button  type="danger" plain @click="deleteCurrentlitigantInfo">删除该原告</el-button>
+                </el-col>
+                <el-col :span="6">
+                    <el-button  type="info" plain  @click="checkInfo">检验信息</el-button>
                 </el-col>
             </el-row>
             
-            <el-row v-else>
-                <el-col :span="18">
-                    <el-button  type="danger" plain @click="sumbitCurrentlitigantInfo">提交该被告信息</el-button>
+            <el-row :gutter="60" v-else>
+                <el-col :span="6">
+                    <el-button  type="success"  @click="sumbitCurrentlitigantInfo">提交该被告</el-button>
                 </el-col>
                 <el-col :span="6">
-                    <el-button  type="info"  @click="deleteCurrentlitigantInfo">删除该被告</el-button>
+                    <el-button  type="danger"  @click="deleteCurrentlitigantInfo">删除该被告</el-button>
+                </el-col>
+                <el-col :span="6">
+                    <el-button  type="info"  @click="checkInfo">检验信息</el-button>
                 </el-col>
             </el-row>
         </el-form-item>
@@ -60,18 +79,22 @@
 
 <script setup>
 
-import { ref, onMounted} from 'vue'
+import { ref, onMounted,onBeforeUpdate} from 'vue'
 
 const props = defineProps({
     litigantPosition: String,
+    litigantIndex: Number,
 })
 
 const litigantForm = ref({
 	litigantName: "",
 	litigantIdNumber: "",
 	litigantPhoneNumber: "",
+    litigantAddress: "",
     litigantInfoPath: "",
     litigantPosition: "",
+    litigantIndex: 0,
+    litigantInfoByPath: false,
 });
 
 
@@ -80,6 +103,11 @@ const litigantFormRef = ref(null);
 
 
 function sumbitCurrentlitigantInfo() {
+    if (litigantForm.value.litigantPosition === 'plaintiff') {
+        console.log("提交了一个原告");
+    } else {
+        console.log("提交了一个被告");
+    }
     console.log(litigantForm.value);
 }
 
@@ -93,9 +121,18 @@ function deleteCurrentlitigantInfo() {
 
 }
 
+function checkInfo() {
+    console.log("检验信息");
+}
+
 onMounted(() => {
     // 在这里赋值
     litigantForm.value.litigantPosition = props.litigantPosition;
+    // litigantForm.value.litigantIndex = props.litigantIndex;
 })
 
+
+onBeforeUpdate(() => {
+
+})
 </script>
