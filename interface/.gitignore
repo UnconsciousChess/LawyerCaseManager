@@ -32,10 +32,6 @@ coverage
 *.tsbuildinfo
 
 
-# 忽略vite的一些文件
-package-lock.json
-package.json
-
 /src/assets
 
 /temp
