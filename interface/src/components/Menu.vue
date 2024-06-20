@@ -5,7 +5,10 @@ import {ref, computed} from "vue";
 // import {useRoute,useRouter} from "vue-router";
 
 const activeIndex = ref('1')
-const dialogVisible = ref(false)
+// 默认不显示About的dialog
+const aboutDialog= ref({
+	visible:false
+})
 
 </script>
 
@@ -19,9 +22,11 @@ const dialogVisible = ref(false)
 		<el-menu-item index="/">文书生成器</el-menu-item>
 		<el-sub-menu index="2">
 			<template #title>杂项文书生成</template>
-			<el-menu-item index="/caseInfoForm">案件信息录入</el-menu-item>
-			<el-menu-item >文件选择</el-menu-item>
-			<el-menu-item >生成结构</el-menu-item>
+			<el-menu-item index="/case-info-form">案件信息录入</el-menu-item>
+			<el-menu-item disabled>模板文件选择</el-menu-item>
+			<el-menu-item disabled>归档材料生成</el-menu-item>
+			<el-menu-item disabled>还没有想好的功能1</el-menu-item>
+			<el-menu-item disabled>还没有想好的功能2</el-menu-item>
 		</el-sub-menu>
         <el-sub-menu index="3">
             <template #title>其他工具</template>
@@ -31,16 +36,17 @@ const dialogVisible = ref(false)
                 <el-menu-item index="" disabled>人身损害计算器</el-menu-item>
                 
             </el-sub-menu>
-            <el-menu-item index="" disabled>还没有想好的功能</el-menu-item>
+            <el-menu-item index="" disabled>还没有想好的功能3</el-menu-item>
         </el-sub-menu>
-        <el-menu-item @click="dialogVisible=true" >关于</el-menu-item>
+        <el-menu-item @click="aboutDialog.visible=true" >关于</el-menu-item>
 	</el-menu>
 
 
 	<el-dialog
-		v-model="dialogVisible"
+		v-model="aboutDialog.visible"
 		title="关于本程序"
 		width="300"
+		draggable
   	>
     <span>一只肥猫开发ing.....ZZzzzz</span>
   	</el-dialog>
