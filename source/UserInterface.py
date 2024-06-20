@@ -1,5 +1,8 @@
 import os,sys
 
+# 不要生成字节码
+sys.dont_write_bytecode = True
+
 # 导入第三方webview模块
 import webview
 

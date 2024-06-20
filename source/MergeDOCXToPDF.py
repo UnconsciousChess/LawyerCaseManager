@@ -1,6 +1,9 @@
 import time
 import os,sys
 
+# 不要生成字节码
+sys.dont_write_bytecode = True
+
 # 从txt中逐行读取文本生成MergeList
 def ReadTxtToMergeList(txtPath) -> list:
     MergeList = []

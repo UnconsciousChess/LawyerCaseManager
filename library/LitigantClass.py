@@ -6,6 +6,9 @@ from id_validator import validator
 # 导入银行账户类
 from .Property import BankAccount
 
+# 不要生成字节码
+sys.dont_write_bytecode = True
+
 # 设定诉讼参与人类
 class Litigant():
     # 构造函数，在构造函数里面，先初始化各类属性

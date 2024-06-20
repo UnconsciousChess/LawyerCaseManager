@@ -1,3 +1,8 @@
+import sys
+
+# 不要生成字节码
+sys.dont_write_bytecode = True
+
 # 设定银行账户类
 class BankAccount():
 
