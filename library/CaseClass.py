@@ -680,9 +680,26 @@ class Case():
 
     # 输出案件信息到txt文件
     def OutputCaseInfoToTxt(self,OutputFilePath,DebugMode=False):
+        # 判断路径是否存在
+        if not os.path.exists(OutputFilePath):
+            if DebugMode:
+                print("文件路径不存在")
+
+        # 判断路径是否以\结尾,如果不是则加上\
+        if not OutputFilePath.endswith("\\"):
+            OutputFilePath += "\\output.txt"
+        else:
+            OutputFilePath += "output.txt"
+
+        # 写入文件
         with open(file=OutputFilePath,mode="w",encoding="utf-8") as f:
             # 逐个输出案件信息
-            f.write("案件类型=%s\n" % self.GetCaseType())
+            if self.GetCaseType() == 1:
+                f.write("案件类型=民事案件\n")
+            elif self.GetCaseType() == 2:
+                f.write("案件类型=行政案件\n")
+            elif self.GetCaseType() == 3:
+                f.write("案件类型=执行案件\n")
             f.write("诉讼标的=%s元\n" % self.GetLitigationAmount())
             f.write("案由=%s\n" % self.GetCauseOfAction())
             f.write("管辖法院=")
@@ -709,8 +726,8 @@ class Case():
             f.write("案件代理的阶段:%s\n" % self.GetCaseAgentStageStr())
             if self.GetRiskAgentStatus() == True:
                 f.write("本案为风险代理。\n")
-                f.write("风险代理前期费用=%s\n" % self.GetRiskAgentUpfrontFee())
-                f.write("风险代理后期比例=%s\n" % self.GetRiskAgentPostFeeRate())
+                f.write("风险代理前期费用=%s元\n" % self.GetRiskAgentUpfrontFee())
+                f.write("风险代理后期比例=%s%%\n" % self.GetRiskAgentPostFeeRate())
             else:
                 f.write("非风险代理的固定费用=")
                 if self.GetAgentFixedFee() == []:
@@ -747,8 +764,8 @@ class Case():
         ws.append(["法院案号",self.GetCaseCourtCode()])
 
         # 设定文件名
-        OutputName = self.GetAllPlaintiffNames() + "诉" + self.GetAllDefendantNames() + "案件信息.xlsx"
-        
+        # OutputName = self.GetAllPlaintiffNames() + "诉" + self.GetAllDefendantNames() + "案件信息.xlsx"
+        OutputName = "案件信息.xlsx"
         # 保存文件
         wb.save(OutputFilePath + OutputName)
 
