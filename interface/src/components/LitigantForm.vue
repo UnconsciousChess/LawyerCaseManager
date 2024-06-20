@@ -1,5 +1,9 @@
 <template>
-	<el-form>
+	<el-form
+        :model="litigantForm"
+        label-width="auto"
+        style="max-width: 700px"
+    >
 		<el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告名字">
 			<el-input v-model="litigantForm.litigantName" />
 		</el-form-item>
