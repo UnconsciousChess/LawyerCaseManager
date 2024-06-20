@@ -4,8 +4,10 @@ import shutil
 
 # 将当前工作目录添加到系统路径中
 sys.path.append(os.getcwd())
+
 # 不要生成字节码
 sys.dont_write_bytecode = True
+
 
 # 导入案件类
 from library.CaseClass import Case

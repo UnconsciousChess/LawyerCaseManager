@@ -2,6 +2,7 @@ import os,sys
 
 # 将当前工作目录添加到系统路径中
 sys.path.append(os.getcwd())
+
 # 不要生成字节码
 sys.dont_write_bytecode = True
 
@@ -543,6 +544,7 @@ class Case():
                 # 调用设定管辖法院的方法
                 self.SetJurisdictionDict({Stage:Court})
 
+
         # 诉讼请求
         elif Key == 'claimText':
             self.SetClaimText(Value)
@@ -565,13 +567,13 @@ class Case():
 
         # 原告信息（目前是测试只有一个人的时候）
         elif Key == 'plaintiffInfoPath':
-
             plaintiff = Litigant()
             plaintiff.InputLitigantInfoFromTxt(Value)
             
             # 将该参与人设置为原告
             plaintiff.SetLitigantPosition(1)
             # 测试用，将原告选定为我方当事人(应当删除)
+
             plaintiff.SetOurClient(True)
             # 再次读取原告信息并添加到原告列表中 
             plaintiff.InputLitigantInfoFromTxt(Value)
@@ -579,7 +581,6 @@ class Case():
         
         # 被告信息（目前是测试只有一个人的时候）
         elif Key == 'defendantInfoPath':
-
             defendant = Litigant()
             defendant.InputLitigantInfoFromTxt(Value)
 

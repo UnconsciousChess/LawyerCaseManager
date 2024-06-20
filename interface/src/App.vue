@@ -1,3 +1,4 @@
+
 <!-- 组合式Vue -->
 <script setup>
 import AppMenu from "./components/Menu.vue";
@@ -14,3 +15,4 @@ import AppMenu from "./components/Menu.vue";
 		</el-main>
 	</el-container>
 </template>
+
