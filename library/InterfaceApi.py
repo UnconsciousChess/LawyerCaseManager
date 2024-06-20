@@ -60,14 +60,19 @@ class Api:
         from library.CaseClass import Case
         # 判断案件列表是否为空
         if len(self._case) == 0:
+            # print("Error: The case is empty!")
             return 1
         # 判断输出路径是否存在
         if not os.path.exists(OutputFilePath):
+            # print("Error: The path is not exist!")
             return 2
         # 判断输出路径是否是文件
-        if os.path.isdir(OutputFilePath):
+        if os.path.isfile(OutputFilePath):
             return 3
-        
+        # 判断该路径是否以'/'结尾，如果不是则加上
+        if not OutputFilePath.endswith("\\"):
+            OutputFilePath += "\\"        
+
         self._case[0].OutputCaseInfoToExcel(OutputFilePath=OutputFilePath)
 
     

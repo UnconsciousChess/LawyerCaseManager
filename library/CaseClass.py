@@ -740,20 +740,60 @@ class Case():
     # 输出案件信息到excel文件
     def OutputCaseInfoToExcel(self,OutputFilePath,DebugMode=False):
         from openpyxl import Workbook
+        from openpyxl.styles import Font,Alignment
+
         wb = Workbook()
         ws = wb.active
+        # 表头
+        ws.append(["案件具体属性","对应值"])
+        # 调整表头格式，方便看
+        for cell in ws[1]:
+            # 将表头的字体加粗
+            cell.font = Font(bold=True)
+            # 居中
+            cell.alignment = Alignment(horizontal='center',vertical='center')
         # 逐行输出案件信息
-        ws.append(["案件类型",self.GetCaseType()])
+        # 根据案件类型的数字，输出对应的字符串
+
+        if self.GetCaseType() == 1:
+            ws.append(["案件类型","民事案件"])
+        elif self.GetCaseType() == 2:
+            ws.append(["案件类型","行政案件"])
+        elif self.GetCaseType() == 3:
+            ws.append(["案件类型","执行案件"])
+
         ws.append(["诉讼标的",self.GetLitigationAmount()])
         ws.append(["案由",self.GetCauseOfAction()])
-        ws.append(["管辖法院",self.GetJurisdictionDict()])
+        # 管辖法院变成字符串
+        JurisdictionStr = ""
+        for stage,court in self.GetJurisdictionDict().items():
+            JurisdictionStr += stage + ":" + court + ","
+        ws.append(["管辖法院",JurisdictionStr])
         ws.append(["诉讼请求",self.GetClaimText()])
         ws.append(["事实与理由",self.GetFactAndReasonText()])
         ws.append(["案件文件所在文件夹路径",self.GetCaseFolderPath()])
-        ws.append(["原告主体列表",self.GetAllPlaintiffNames()])
-        ws.append(["被告主体列表",self.GetAllDefendantNames()])
-        ws.append(["第三人主体列表",self.GetLegalThirdPartyList()])
-        ws.append(["调解意愿",self.GetMediationIntention()])
+        # 先判断原告主体列表是否为空
+        if self.GetPlaintiffList() == []:
+            ws.append(["原告主体列表","无"])
+        else:
+            ws.append(["原告主体列表",self.GetAllPlaintiffNames()])
+        # 先判断被告主体列表是否为空
+        if self.GetDefendantList() == []:
+            ws.append(["被告主体列表","无"])
+        else:
+            ws.append(["被告主体列表",self.GetAllDefendantNames()])
+        # 先判断第三人主体列表是否为空
+        if self.GetLegalThirdPartyList() == []:
+            ws.append(["第三人主体列表","无"])
+        else:
+            ws.append(["第三人主体列表",self.GetLegalThirdPartyList()])
+
+        # 根据调解意愿的布尔值，输出对应的字符串
+        if self.GetMediationIntention() == True:
+            ws.append(["调解意愿","愿意调解"])
+        else:
+            ws.append(["调解意愿","拒绝调解"])
+
         ws.append(["拒绝调解理由",self.GetRejectMediationReasonText()])
         ws.append(["案件代理的阶段",self.GetCaseAgentStageStr()])
         if self.GetRiskAgentStatus() == True:
@@ -768,6 +808,7 @@ class Case():
         OutputName = "案件信息.xlsx"
         # 保存文件
         wb.save(OutputFilePath + OutputName)
+        print("案件信息已经保存到%s" % (OutputFilePath + OutputName))
 
     # 输出案件信息到前端(输出为json格式的字符串)
     def OutputCaseInfoToFrontEnd(self,DebugMode=False) -> str:
