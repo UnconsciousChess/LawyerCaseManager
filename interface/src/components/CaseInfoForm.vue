@@ -122,6 +122,7 @@ function onSubmit() {
                 console.log("表单校验通过");
                 // 将案件信息的字典传递给后端
                 pywebview.api.inputFromFrontEndForm(caseForm.value);   //关于pywebview的部分在组合前后端的时候再使用
+                return true;
             } 
             else {
                 console.log("表单校验失败");
