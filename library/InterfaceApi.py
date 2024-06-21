@@ -10,20 +10,7 @@ class Api:
         # case属性是一个列表，用于存放案件对象
         self._case = []
   
-    # 该方法用于生成案件归档目录
-    def generateArchiveDirectoryDocument(self,TemplateFilePath,SavedPath):
-        # 导入自写包RenderFile中的RenderArchiveDirectory函数（生成归档目录）
-        from source.RenderFile import RenderArchiveDirectory
-        # 判断输入的路径是否存在
-        if not os.path.exists(SavedPath):
-            return "Error: The path is not exist!"
-        else:
-            # 执行归档目录生成
-            RenderDict = {}      # 用于渲染的字典,格式为{key:(True/False,str)  
-            RenderArchiveDirectory(TemplateFilePath,RenderDict,SavedPath)
-
-        return f"归档目录生成成功,保存路径为{SavedPath}"
-    
+    # ===== 下面是input方法 =====
     # 该方法用于生成案件文件夹及依据模板生成对应的文件
     def inputFromFrontEndForm(self,CaseFormDict):
         # 导入案件类Case
@@ -55,9 +42,8 @@ class Api:
 
         return 0
     
+    # ===== 下面是output方法 =====
     def OutputCaseInfoToExcel(self,OutputFilePath):
-        # 导入案件类Case
-        from library.CaseClass import Case
         # 判断案件列表是否为空
         if len(self._case) == 0:
             # print("Error: The case is empty!")
@@ -74,11 +60,9 @@ class Api:
             OutputFilePath += "\\"        
 
         self._case[0].OutputCaseInfoToExcel(OutputFilePath=OutputFilePath)
-
-    
+  
     def OutputCaseInfoToTxt(self,OutputFilePath):
-        # 导入案件类Case
-        from library.CaseClass import Case
+
         # 判断案件列表是否为空
         if len(self._case) == 0:
             # print("Error: The case is empty!")
@@ -99,6 +83,8 @@ class Api:
         self._case[0].OutputCaseInfoToTxt(OutputFilePath=OutputFilePath)
 
 
+    # ===== 下面是其他方法 =====
+    # 该方法未完善
     def FolderCreator(self):
         # 导入自写包FolderCreator
         from source.Generator import FolderCreator
@@ -109,3 +95,19 @@ class Api:
         FolderCreator(case=self._case[0],              
                       OutputDir=self._case[0].GetCaseFolderPath(),   
                       TemplateListDir=r"test\TestData\TemplateFilesList.txt")
+        
+
+    # 该方法用于生成案件归档目录
+    def generateArchiveDirectoryDocument(self,TemplateFilePath,SavedPath):
+        # 导入自写包RenderFile中的RenderArchiveDirectory函数（生成归档目录）
+        from source.RenderFile import RenderArchiveDirectory
+        # 判断输入的路径是否存在
+        if not os.path.exists(SavedPath):
+            return "Error: The path is not exist!"
+        else:
+            # 执行归档目录生成
+            RenderDict = {}      # 用于渲染的字典,格式为{key:(True/False,str)  
+            RenderArchiveDirectory(TemplateFilePath,RenderDict,SavedPath)
+
+        return f"归档目录生成成功,保存路径为{SavedPath}"
+    
