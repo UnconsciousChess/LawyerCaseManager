@@ -1,38 +1,48 @@
 <template>
-	<el-form
-        :model="litigantForm"
-        label-width="auto"
-        style="max-width: 700px"
-    >
-		<el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告名字">
-			<el-input v-model="litigantForm.litigantName" />
-		</el-form-item>
+    <el-form :model="litigantForm" label-width="auto" style="max-width: 700px">
+        <el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告名字">
+            <el-input v-model="litigantForm.litigantName" />
+        </el-form-item>
         <el-form-item v-else label="被告名字">
             <el-input v-model="litigantForm.litigantName" />
         </el-form-item>
 
 
-		<el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告身份证号码">
-			<el-input v-model="litigantForm.litigantIdNumber" />
-		</el-form-item>
+        <el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告身份证号码">
+            <el-row width="50">
+                <el-col :span="18">
+                    <el-input v-model="litigantForm.litigantIdNumber" />
+                </el-col>
+                <el-col :span="6">
+                    <el-button type="info" @click="checkIdNumber">校验证件号码</el-button>
+                </el-col>
+            </el-row>
+        </el-form-item>
 
         <el-form-item v-else label="被告身份证号码">
-            <el-input v-model="litigantForm.litigantIdNumber" />
+            <el-row width="50">
+                <el-col :span="18">
+                    <el-input v-model="litigantForm.litigantIdNumber" />
+                </el-col>
+                <el-col :span="6">
+                    <el-button type="info" @click="checkIdNumber">校验证件号码</el-button>
+                </el-col>
+            </el-row>
         </el-form-item>
 
 
-		<el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告电话号码">
-			<el-input v-model="litigantForm.litigantPhoneNumber" />
-		</el-form-item>
+        <el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告电话号码">
+            <el-input v-model="litigantForm.litigantPhoneNumber" />
+        </el-form-item>
 
         <el-form-item v-else label="被告电话号码">
             <el-input v-model="litigantForm.litigantPhoneNumber" />
         </el-form-item>
 
-        
-		<el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告地址">
-			<el-input v-model="litigantForm.litigantAddress" />
-		</el-form-item>
+
+        <el-form-item v-if="litigantForm.litigantPosition === 'plaintiff'" label="原告地址">
+            <el-input v-model="litigantForm.litigantAddress" />
+        </el-form-item>
 
         <el-form-item v-else label="被告地址">
             <el-input v-model="litigantForm.litigantAddress" />
@@ -53,37 +63,39 @@
         <el-form-item>
             <el-row :gutter="60" v-if="litigantForm.litigantPosition === 'plaintiff'">
                 <el-col :span="6">
-                    <el-button  type="success" plain @click="sumbitCurrentlitigantInfo">提交该原告</el-button>
+                    <el-button type="success" plain @click="sumbitCurrentlitigantInfo">提交该原告</el-button>
                 </el-col>
                 <el-col :span="6">
-                    <el-button  type="danger" plain @click="deleteCurrentlitigantInfo">删除该原告</el-button>
+                    <el-button type="danger" plain @click="deleteCurrentlitigantInfo">删除该原告</el-button>
                 </el-col>
                 <el-col :span="6">
-                    <el-button  type="info" plain  @click="checkInfo">检验信息</el-button>
+                    <el-button type="info" plain @click="checkInfo">检验信息</el-button>
                 </el-col>
             </el-row>
-            
+
             <el-row :gutter="60" v-else>
                 <el-col :span="6">
-                    <el-button  type="success"  @click="sumbitCurrentlitigantInfo">提交该被告</el-button>
+                    <el-button type="success" @click="sumbitCurrentlitigantInfo">提交该被告</el-button>
                 </el-col>
                 <el-col :span="6">
-                    <el-button  type="danger"  @click="deleteCurrentlitigantInfo">删除该被告</el-button>
+                    <el-button type="danger" @click="deleteCurrentlitigantInfo">删除该被告</el-button>
                 </el-col>
                 <el-col :span="6">
-                    <el-button  type="info"  @click="checkInfo">检验信息</el-button>
+                    <el-button type="info" @click="checkInfo">检验信息</el-button>
                 </el-col>
             </el-row>
         </el-form-item>
 
 
-	</el-form>
+    </el-form>
 </template>
 
 
 <script setup>
 
-import { ref, onMounted,onBeforeUpdate} from 'vue'
+import { ref, onMounted, onBeforeUpdate } from 'vue'
+
+import { checkIdNumberValid, checkEnterpriseIdNumberValid } from '../js/check.js'
 
 const props = defineProps({
     litigantPosition: String,
@@ -91,9 +103,9 @@ const props = defineProps({
 })
 
 const litigantForm = ref({
-	litigantName: "",
-	litigantIdNumber: "",
-	litigantPhoneNumber: "",
+    litigantName: "",
+    litigantIdNumber: "",
+    litigantPhoneNumber: "",
     litigantAddress: "",
     litigantInfoPath: "",
     litigantPosition: "",
@@ -104,7 +116,16 @@ const litigantForm = ref({
 
 const litigantFormRef = ref(null);
 
-
+function checkIdNumber() {
+    // console.log(litigantForm.value.litigantIdNumber)
+    let result = checkIdNumberValid(litigantForm.value.litigantIdNumber);
+    if (result == false) {
+        console.log("该身份号码不合法");
+    }
+    else {
+        console.log("该身份号码合法");
+    }
+}
 
 function sumbitCurrentlitigantInfo() {
     if (litigantForm.value.litigantPosition === 'plaintiff') {
