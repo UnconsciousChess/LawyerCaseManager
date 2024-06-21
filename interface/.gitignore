@@ -34,5 +34,6 @@ coverage
 
 
 /src/assets
+/src/js/test
 
 /temp
