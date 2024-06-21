@@ -59,12 +59,14 @@ class Case():
         self._CaseCourtCode = ""
 
 
-        # 下面通过读取文件得到一些通用列表
+        # 下面通过读取文件得到一些通用列表,并作为类的属性
+
         # 准备所有合法法院名称的列表，方便进行对比，以防止输入的法院名称有误
         with open(r"Data\PublicInfomationList\CourtNameList.txt","r",encoding="utf-8") as f:
             StandardJurisdictionList = f.readlines()
             # 去除每个法院名称的换行符
             self._StandardJurisdictionList = [i.strip() for i in StandardJurisdictionList]
+        # 准备所有合法民事案由的列表，方便进行对比，以防止输入的案由有误
         with open(r"Data\PublicInfomationList\CauseOfActionList.txt","r",encoding="utf-8") as f:
             CaseOfActionList = f.readlines()
             # 去除每个案由的换行符，并放到列表CauseOf中
@@ -204,38 +206,44 @@ class Case():
     # ============Set和Append方法：下面定义设定各属性的方法（含输入值校验）=============
 
     # 案件类型设定方法，1为民事案件，2为行政案件，3为执行案件
-    def SetCaseType(self,CaseType):
+    def SetCaseType(self,CaseType,debugmode=False):
         if isinstance(CaseType,int):
             if CaseType == 1 or CaseType == 2 or CaseType == 3:
                 self._CaseType = CaseType
             else:
-                print("参数只能为1 2 3 ")
+                if debugmode:
+                    print("SetCaseType报错：参数只能为1 2 3 ")
         else:
-            print("SetCaseType报错：参数必须为整型") 
+            if debugmode:
+                print("SetCaseType报错：参数必须为整型") 
     
     # 诉讼标的额设定方法
-    def SetLitigationAmount(self,LitigationAmount):
+    def SetLitigationAmount(self,LitigationAmount,debugmode=False):
         # 尝试将输入值转换为浮点数
         try:
             LitigationAmount = float(LitigationAmount)
         except:
-            print("SetLitigationAmount报错：输入值并非浮点数")
+            if debugmode:
+                print("SetLitigationAmount报错：输入值并非浮点数")
             return
         # 诉讼标的额不能小于零
         if LitigationAmount >= 0:
             self._LitigationAmount = LitigationAmount
         else:
-            print("SetLitigationAmount报错：诉讼标的不能小于零")
+            if debugmode:
+                print("SetLitigationAmount报错：诉讼标的不能小于零")
             return
 
     # 案由设定方法
-    def SetCauseOfAction(self,CaseOfAction):
+    def SetCauseOfAction(self,CaseOfAction,debugmode=False):
 
         if (CaseOfAction in self._CaseOfActionList):
             self._CaseOfAction = CaseOfAction
-            print("输入的案由【%s】添加成功" % CaseOfAction)
+            if debugmode:
+                print("输入的案由【%s】添加成功" % CaseOfAction)
         else:
-            print(" SetCauseOfActionb报错：输入的【%s】名称不符合现有民事、行政、执行案由规定,请重新输入" % CaseOfAction)
+            if debugmode:
+                print(" SetCauseOfActionb报错：输入的【%s】名称不符合现有民事、行政、执行案由规定,请重新输入" % CaseOfAction)
     
     # 管辖法院设定方法
     def SetJurisdictionDict(self,InputJurisdictionDict,debugmode=False):
@@ -256,49 +264,71 @@ class Case():
                     print("SetJurisdictionDict报错：输入的【%s】键名不符合规范" % stage)
 
     # 诉讼请求设定方法
-    def SetClaimText(self,ClaimText):
+    def SetClaimText(self,ClaimText,debugmode=False):
         if isinstance(ClaimText,str):
             self._ClaimText = ClaimText
         else:
-            print("SetClaimText报错：该输入对象的类型与属性不匹配,诉讼请求输入值为字符串")
+            if debugmode:
+                print("SetClaimText报错：该输入对象的类型与属性不匹配,诉讼请求输入值为字符串")
 
     # 事实与理由设定方法
-    def SetFactAndReasonText(self,FactAndReasonText):
+    def SetFactAndReasonText(self,FactAndReasonText,debugmode=False):
         if isinstance(FactAndReasonText,str):
             self._FactAndReasonText = FactAndReasonText
         else:
-            print("SetFactAndReasonText报错：该输入对象的类型与属性不匹配,事实与理由输入值为字符串")
+            if debugmode:
+                print("SetFactAndReasonText报错：该输入对象的类型与属性不匹配,事实与理由输入值为字符串")
 
-    # 案件文件所在文件夹路径设定方法
-    def SetCaseFolderPath(self,CaseFolderPath):
+    # 案件案件生成文件夹路径设定方法
+    def SetCaseFolderPath(self,CaseFolderPath,debugmode=False):
         if isinstance(CaseFolderPath,str):
             if os.path.exists(CaseFolderPath):
-                self._CaseFolderPath = CaseFolderPath
-                print("案件文件所在文件夹路径设定成功")
+                if not os.file(CaseFolderPath):
+                    self._CaseFolderPath = CaseFolderPath
+                    if debugmode:
+                        print("SetCaseFolderPath报错：案件文件所在文件夹路径设定成功")
+                else:
+                    if debugmode:
+                        print("SetCaseFolderPath报错：输入的路径为文件路径，请重新输入")
             else:
-                print("文件夹不存在，请重新输入")
+                if debugmode:
+                    print("SetCaseFolderPath报错：文件夹不存在，请重新输入")
         else:
-            print("该输入对象的类型与属性不匹配,案件文件所在文件夹路径输入值为字符串")
+            if debugmode:
+                print("SetCaseFolderPath报错：该输入对象的类型与属性不匹配,案件文件所在文件夹路径输入值为字符串")
     
     # 备注设定方法
-    def SetCommentText(self,Comment):
+    def SetCommentText(self,Comment,debugmode=False):
         if isinstance(Comment,str):
             self._Comment = Comment
+        else:
+            if debugmode:
+                print("SetCommentText报错：该输入对象的类型与属性不匹配,备注输入值为字符串")
 
     # 调解意愿设定方法
-    def SetMediationIntention(self,MediationIntention):
+    def SetMediationIntention(self,MediationIntention,debugmode=False):
         if isinstance(MediationIntention,bool):
             self._MediationIntention = MediationIntention
+        elif isinstance(MediationIntention,str):
+            if MediationIntention == "True" or MediationIntention == "true" or MediationIntention == "TRUE" or MediationIntention == "1":
+                MediationIntention = True
+            elif MediationIntention == "False" or MediationIntention == "false" or MediationIntention == "FALSE" or MediationIntention == "0":
+                MediationIntention = False
+            self._MediationIntention = MediationIntention
+        else:
+            if debugmode:
+                print("SetMediationIntention报错：该输入对象的类型与属性不匹配,调解意愿输入值为布尔值或字符串")
 
     # 拒绝理由设定方法
-    def SetRejectMediationReasonText(self,RejectReason):
+    def SetRejectMediationReasonText(self,RejectReason,DebugMode=False):
         if isinstance(RejectReason,str):
             self._RejectReason = RejectReason
         else:
-            print("SetRejectMediationReasonText报错：该输入对象的类型与属性不匹配,拒绝理由输入值为字符串")
+            if DebugMode:
+                print("SetRejectMediationReasonText报错：该输入对象的类型与属性不匹配,拒绝理由输入值为字符串")
 
     # 案件代理阶段设定方法
-    def SetCaseAgentStage(self,CaseAgentStage):
+    def SetCaseAgentStage(self,CaseAgentStage,DebugMode=False):
         if isinstance(CaseAgentStage,list):
             # 对比新列表的数字是否与现有的列表重复
             for i in CaseAgentStage:
@@ -308,15 +338,21 @@ class Case():
             if CaseAgentStage not in self._CaseAgentStage and CaseAgentStage in [1,2,3,4,5]:
                 self._CaseAgentStage.append(CaseAgentStage)
         else:
-            print("SetCaseAgentStage报错：该输入对象的类型与属性不匹配,案件代理阶段输入值为列表或1-5的整数")
+            if DebugMode:
+                print("SetCaseAgentStage报错：该输入对象的类型与属性不匹配,案件代理阶段输入值为列表或1-5的整数")
 
     # 风险代理情况设定方法
     def SetRiskAgentStatus(self,RiskAgentStatus,DebugMode=False):
-        if isinstance(RiskAgentStatus,bool):
+        if RiskAgentStatus is bool:
             self._RiskAgentStatus = RiskAgentStatus
+        if RiskAgentStatus is str:
+            if Value == "True" or Value == "true" or Value == "TRUE" or Value == "1":
+                Value = True
+            elif Value == "False" or Value == "false" or Value == "FALSE" or Value == "0":
+                Value = False
         else:
             if DebugMode:
-                print("SetRiskAgentStatus报错：该输入对象的类型与属性不匹配,风险代理情况输入值为布尔值")
+                print("SetRiskAgentStatus报错：该输入对象的类型与属性不匹配,风险代理情况输入值为布尔值或字符串")
     
     # 风险代理前期费用设定方法
     def SetRiskAgentUpfrontFee(self,RiskAgentUpfrontFee,DebugMode=False):
@@ -463,10 +499,6 @@ class Case():
             self.SetCaseFolderPath(Value)
 
         elif Key == '调解意愿':
-            if Value == "True" or Value == "true" or Value == "TRUE" or Value == "1":
-                Value = True
-            elif Value == "False" or Value == "false" or Value == "FALSE" or Value == "0":
-                Value = False
             self.SetMediationIntention(Value)
             
         elif Key == '拒绝调解理由':
@@ -512,7 +544,7 @@ class Case():
             self.SetCaseCourtCode(Value)
 
     # 设定一个类的内部方法，针对从前端读回来的信息（字典），逐个键值对进行处理，本方法后期重点维护  
-    def SetCaseInfoFromWebDict(self,Key,Value):
+    def InputCaseInfoFromWebDict(self,Key,Value):
 
         # 案件类型
         if Key == 'caseType':
@@ -583,7 +615,6 @@ class Case():
         elif Key == 'defendantInfoPath':
             defendant = Litigant()
             defendant.InputLitigantInfoFromTxt(Value)
-
             # 将该参与人设置为被告
             defendant.SetLitigantPosition(2)
             # 测试用，将被告选定为对方当事人（应当删除）
@@ -591,7 +622,6 @@ class Case():
             # 再次读取被告信息并添加到被告列表中 
             defendant.InputLitigantInfoFromTxt(Value)
             self.AppendLitigant(defendant)
-
 
         # 案件代理的阶段
         elif Key == 'caseAgentStage':
@@ -809,6 +839,7 @@ class Case():
         # 保存文件
         wb.save(OutputFilePath + OutputName)
         print("案件信息已经保存到%s" % (OutputFilePath + OutputName))
+
 
     # 输出案件信息到前端(输出为json格式的字符串)
     def OutputCaseInfoToFrontEnd(self,DebugMode=False) -> str:
