@@ -27,9 +27,11 @@ class Api:
     def inputFromTxt(self,TxtPath):
         # 判断输入的两个路径是否存在
         if not os.path.exists(TxtPath):
+            print("Error: The path is not exist!")
             return 1
         # 判断输入的文件是否是txt文件
         if not TxtPath.endswith(".txt"):
+            print("Error: The file is not a txt file!")
             return 2
         
         # 导入案件类Case
@@ -39,9 +41,11 @@ class Api:
         case.InputCaseInfoFromTxt(TxtPath)
         # 将案件对象添加到案件列表中
         self._case.append(case)
+        print("案件导入成功！")
 
         return 0
     
+
     # ===== 下面是output方法 =====
     def OutputCaseInfoToExcel(self,OutputFilePath):
         # 判断案件列表是否为空
@@ -111,3 +115,20 @@ class Api:
 
         return f"归档目录生成成功,保存路径为{SavedPath}"
     
+
+
+    def GetFilepath(self) -> str:
+
+        # 下面是用tkinter的方法获取文件的绝对路径
+        # 导入tkinter包
+        from tkinter import filedialog
+        # #  获取文件路径
+        SelectedFilePath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"),("Excel files", "*.xlsx")])
+        return SelectedFilePath
+
+        # 下面用webview的方法获取文件的绝对路径
+        # import webview
+        # FileTypes = [("Text files", "*.txt"),("Excel files", "*.xlsx")]
+        # result = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False, file_types=FileTypes)
+        # print(result)
+        # return result
