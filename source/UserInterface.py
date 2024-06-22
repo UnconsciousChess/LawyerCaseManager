@@ -22,5 +22,5 @@ window = webview.create_window(title='WorkingDocumentGenerator',
                                js_api = WebApi)
 
 # 窗口循环
-webview.start(debug=False)
+webview.start(debug=True)
 
