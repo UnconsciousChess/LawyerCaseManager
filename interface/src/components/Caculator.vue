@@ -39,7 +39,15 @@ const countLitigationFee = () => {
 	}
 	// 如果是民事案件，调用诉讼费计算函数
 	else {
-		caculator.value.result = litigationFeeCaculator(caculator.value.amount);
+		// 普通程序
+		if (caculator.value.caseProcedureType == 1){
+			caculator.value.result = litigationFeeCaculator(caculator.value.amount);
+		}
+		// 简易程序减半收取受理费
+		// 法律依据 《诉讼费用交纳办法》第十六条：“适用简易程序审理的案件减半交纳案件受理费。”
+		if (caculator.value.caseProcedureType == 2){
+			caculator.value.result = litigationFeeCaculator(caculator.value.amount) / 2;
+		}
 	}
 };
 
