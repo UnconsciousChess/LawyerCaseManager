@@ -1,63 +1,6 @@
 <template>
-	<el-form :model="litigantForm" label-width="auto" style="max-width: 700px">
-		<el-form-item
-			v-if="litigantForm.litigantPosition === 'plaintiff'"
-			label="原告名字"
-		>
-			<el-input v-model="litigantForm.litigantName" />
-		</el-form-item>
-		<el-form-item v-else label="被告名字">
-			<el-input v-model="litigantForm.litigantName" />
-		</el-form-item>
-
-		<el-form-item
-			v-if="litigantForm.litigantPosition === 'plaintiff'"
-			label="原告身份证号码"
-		>
-			<el-row width="50">
-				<el-col :span="18">
-					<el-input v-model="litigantForm.litigantIdNumber" />
-				</el-col>
-				<el-col :span="6">
-					<el-button type="info" @click="checkIdNumber">校验证件号码</el-button>
-				</el-col>
-			</el-row>
-		</el-form-item>
-
-		<el-form-item v-else label="被告身份证号码">
-			<el-row width="50">
-				<el-col :span="18">
-					<el-input v-model="litigantForm.litigantIdNumber" />
-				</el-col>
-				<el-col :span="6">
-					<el-button type="info" @click="checkIdNumber">校验证件号码</el-button>
-				</el-col>
-			</el-row>
-		</el-form-item>
-
-		<el-form-item
-			v-if="litigantForm.litigantPosition === 'plaintiff'"
-			label="原告电话号码"
-		>
-			<el-input v-model="litigantForm.litigantPhoneNumber" />
-		</el-form-item>
-
-		<el-form-item v-else label="被告电话号码">
-			<el-input v-model="litigantForm.litigantPhoneNumber" />
-		</el-form-item>
-
-		<el-form-item
-			v-if="litigantForm.litigantPosition === 'plaintiff'"
-			label="原告地址"
-		>
-			<el-input v-model="litigantForm.litigantAddress" />
-		</el-form-item>
-
-		<el-form-item v-else label="被告地址">
-			<el-input v-model="litigantForm.litigantAddress" />
-		</el-form-item>
-
-		<el-form-item label="是否采取txt导入信息" prop="litigantInfoPath">
+	<el-form :model="litigantForm" label-width="150px" style="max-width: 700px">
+		<el-form-item label="是否采取txt导入信息">
 			<el-switch
 				v-model="litigantForm.litigantInfoByPath"
 				active-text="是"
@@ -66,15 +9,117 @@
 		</el-form-item>
 
 		<el-form-item
-			v-if="litigantForm.litigantPosition === 'plaintiff'"
+			v-if="
+				litigantForm.litigantPosition === 'plaintiff' &&
+				litigantForm.litigantInfoByPath == true
+			"
 			label="原告信息txt路径"
-			prop="litigantInfoPath"
 		>
 			<el-input v-model="litigantForm.litigantInfoPath" />
 		</el-form-item>
 
-		<el-form-item v-else label="被告信息txt路径" prop="litigantInfoPath">
+		<el-form-item
+			v-else-if="
+				litigantForm.litigantPosition === 'defendant' &&
+				litigantForm.litigantInfoByPath == true
+			"
+			label="被告信息txt路径"
+		>
 			<el-input v-model="litigantForm.litigantInfoPath" />
+		</el-form-item>
+
+		<el-form-item
+			v-if="
+				litigantForm.litigantPosition === 'plaintiff' &&
+				litigantForm.litigantInfoByPath == false
+			"
+			label="原告名字"
+		>
+			<el-input v-model="litigantForm.litigantName" prop="litigantName" />
+		</el-form-item>
+
+		<el-form-item
+			v-else-if="
+				litigantForm.litigantPosition === 'defendant' &&
+				litigantForm.litigantInfoByPath == false
+			"
+			label="被告名字"
+		>
+			<el-input v-model="litigantForm.litigantName" prop="litigantName" />
+		</el-form-item>
+
+		<el-form-item
+			v-if="
+				litigantForm.litigantPosition === 'plaintiff' &&
+				litigantForm.litigantInfoByPath == false
+			"
+			label="原告身份证号码"
+		>
+			<el-row width="70">
+				<el-col :span="16">
+					<el-input v-model="litigantForm.litigantIdNumber" />
+				</el-col>
+				<el-col :span="6">
+					<el-button type="info" @click="checkIdNumber">校验证件号码</el-button>
+				</el-col>
+			</el-row>
+		</el-form-item>
+
+		<el-form-item
+			v-else-if="
+				litigantForm.litigantPosition === 'defendant' &&
+				litigantForm.litigantInfoByPath == false
+			"
+			label="被告身份证号码"
+		>
+			<el-row width="50">
+				<el-col :span="18">
+					<el-input v-model="litigantForm.litigantIdNumber" />
+				</el-col>
+				<el-col :span="6">
+					<el-button type="info" @click="checkIdNumber">校验证件号码</el-button>
+				</el-col>
+			</el-row>
+		</el-form-item>
+
+		<el-form-item
+			v-if="
+				litigantForm.litigantPosition === 'plaintiff' &&
+				litigantForm.litigantInfoByPath == false
+			"
+			label="原告电话号码"
+		>
+			<el-input v-model="litigantForm.litigantPhoneNumber" />
+		</el-form-item>
+
+		<el-form-item
+			v-else-if="
+				litigantForm.litigantPosition === 'defendant' &&
+				litigantForm.litigantInfoByPath == false
+			"
+			label="被告电话号码"
+		>
+			<el-input v-model="litigantForm.litigantPhoneNumber" />
+		</el-form-item>
+
+		<el-form-item
+			v-if="
+				litigantForm.litigantPosition === 'plaintiff' &&
+				litigantForm.litigantInfoByPath == false
+			"
+			label="原告地址"
+		>
+			<el-input v-model="litigantForm.litigantAddress" />
+		</el-form-item>
+
+		<el-form-item
+			v-else-if="
+				litigantForm.litigantPosition === 'defendant' &&
+				litigantForm.litigantInfoByPath == false
+			"
+			label="被告地址"
+		>
+			<el-input v-model="litigantForm.litigantAddress" />
 		</el-form-item>
 
 		<el-form-item>
@@ -90,7 +135,9 @@
 					>
 				</el-col>
 				<el-col :span="6">
-					<el-button type="info" plain @click="checkInfo">检验信息</el-button>
+					<el-button type="info" plain @click="checkInfo"
+						>该功能未完善</el-button
+					>
 				</el-col>
 			</el-row>
 
@@ -106,21 +153,35 @@
 					>
 				</el-col>
 				<el-col :span="6">
-					<el-button type="info" @click="checkInfo">检验信息</el-button>
+					<el-button type="info" @click="checkInfo">该功能未完善</el-button>
 				</el-col>
 			</el-row>
+		</el-form-item>
+
+		<el-form-item>
+			<ul>
+				<li v-for="(value, key) in litigantForm">
+					{{ key }} : {{ value }}
+				</li>
+			</ul>
 		</el-form-item>
 	</el-form>
 </template>
 
 <script setup>
-import {ref, onMounted, onBeforeUpdate} from "vue";
+import {ref, onMounted, inject, onUpdated} from "vue";
 
 import {checkIdNumberValid, checkEnterpriseIdNumberValid} from "../js/check.js";
 
+// 从父组件中获取方法
+const reducePlaintiff = inject("reducePlaintiff");
+const reduceDefendant = inject("reduceDefendant");
+const getCurrentplaintiffData = inject("getCurrentplaintiffData");
+const getCurrentDefendantData = inject("getCurrentDefendantData");
+
 const props = defineProps({
 	litigantPosition: String,
-	litigantIndex: Number,
+	id: Number,
 });
 
 const litigantForm = ref({
@@ -130,15 +191,17 @@ const litigantForm = ref({
 	litigantAddress: "",
 	litigantInfoPath: "",
 	litigantPosition: "",
-	litigantIndex: 0,
-	litigantInfoByPath: false,
+	litigantInfoByPath: true,
+	id : 0,
+
 });
 
-const litigantFormRef = ref(null);
 
+
+// 检查身份证号码是否合法
 function checkIdNumber() {
-	// console.log(litigantForm.value.litigantIdNumber)
 	let result = checkIdNumberValid(litigantForm.value.litigantIdNumber);
+	// 下面是测试部分，后面将控制台打印改为弹窗提示
 	if (result == false) {
 		console.log("该身份号码不合法");
 	} else {
@@ -149,29 +212,39 @@ function checkIdNumber() {
 function sumbitCurrentlitigantInfo() {
 	if (litigantForm.value.litigantPosition === "plaintiff") {
 		console.log("提交了一个原告");
+		getCurrentplaintiffData(litigantForm.value, litigantForm.value.id);
 	} else {
 		console.log("提交了一个被告");
+		getCurrentDefendantData(litigantForm.value, litigantForm.value.id);
 	}
-	console.log(litigantForm.value);
 }
 
 function deleteCurrentlitigantInfo() {
 	if (litigantForm.value.litigantPosition === "plaintiff") {
+		reducePlaintiff(litigantForm.value.id);
 		console.log("删除了一个原告");
 	} else {
+		reduceDefendant(litigantForm.value.id);
 		console.log("删除了一个被告");
 	}
 }
 
 function checkInfo() {
-	console.log("检验信息");
+	console.log("该功能未完善");
+	console.log(litigantForm.value);
 }
 
 onMounted(() => {
 	// 在这里赋值
 	litigantForm.value.litigantPosition = props.litigantPosition;
-	// litigantForm.value.litigantIndex = props.litigantIndex;
+	litigantForm.value.id = props.id;
+	
 });
 
-onBeforeUpdate(() => {});
+
+
+// 将litigantForm暴露给父组件
+defineExpose({
+	litigantForm,
+});
 </script>

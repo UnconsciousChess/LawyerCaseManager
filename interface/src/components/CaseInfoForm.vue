@@ -1,29 +1,36 @@
-<!-- 组合式Vue -->
 <script setup>
-import {ref, onMounted, reactive, onUpdated} from "vue";
+import {ref, provide} from "vue";
 
 // 局部注册LitigantForm组件
 import LitigantForm from "./LitigantForm.vue";
 
+// const props = defineProps(['caseForm']);
+// console.log(props.caseForm);
+
+// 当事人表单实例（原告）
+const litigantFormPlaintiff = ref(null);
+// 当事人表单实例（被告）
+const litigantFormDefendant = ref(null);
+
 // 定义表单数据
 const caseForm = ref({
-	caseCourtCode: "",
-	causeOfAction: "",
-	litigationAmount: "",
-	riskAgentStatus: true,
-	riskAgentUpfrontFee: "",
-	riskAgentPostFeeRate: "",
-	caseAgentStage: [],
-	caseType: 0,
-	courtName: "",
-	mediationIntention: false,
-	factAndReason: "",
-	caseFolderGeneratedPath: "",
-	claimText: "",
-	rejectMediationReasonText: "",
-	plaintiffs: [],
-	defendants: [],
-	inputCaseInfoByFilePath: "",
+	caseCourtCode: "", //法院案号
+	causeOfAction: "", //案由
+	litigationAmount: "", //标的额
+	riskAgentStatus: true, //风险收费
+	riskAgentUpfrontFee: "", //前期风险收费金额
+	riskAgentPostFeeRate: "", //后期风险收费比例
+	caseAgentStage: [], //委托阶段
+	caseType: 0, //案件类型
+	courtName: "", //管辖法院
+	mediationIntention: false, //调解意愿
+	factAndReason: "", //事实与理由
+	caseFolderGeneratedPath: "", //案件文件夹生成路径
+	claimText: "", //诉讼请求
+	rejectMediationReasonText: "", //拒绝调解理由
+	plaintiffs: [], //原告列表
+	defendants: [], //被告列表
+	inputCaseInfoByFilePath: "", //案件信息文件路径（用于文件导入模式）
 });
 
 const componentsConfig = ref({
@@ -68,6 +75,14 @@ const caseFormRules = ref({
 	],
 });
 
+// 接受子组件传递的数据
+const emitsUpload = (data) => {
+	console.log(data);
+	caseForm.value.plaintiffs[0].litigantName = data.name;
+	caseForm.value.plaintiffs[0].litigantIdNumber = data.idNumber;
+	caseForm.value.plaintiffs[0].litigantPhoneNumber = data.phoneNumber;
+};
+
 // 监听案件信息的输入方式是否发生变化，文件/前端输入
 function ChangeInputStatus() {
 	if (componentsConfig.value.inputInfoByFile == true) {
@@ -85,45 +100,19 @@ function ChangeInputStatus() {
 	}
 }
 
-// 提交案件信息函数
-function onSubmit() {
-	// 先判断目前是采取何种形式上传
-
-	// 如果采取的是文件上传
-	if (componentsConfig.value.inputInfoByFile == true) {
-		console.log("从文件中导入案件信息");
-		// 如果是文件路径输入模式，则将文件的路径以及文件夹生成路径传递给后端
-		pywebview.api.inputFromTxt(caseForm.value.inputCaseInfoByFilePath); //关于pywebview的部分在组合前后端的时候再使用
-		return;
-	}
-	// 如果采取的是前端输入
-	else {
-		// 则先校验表单
-		caseFormRef.value.validate((valid) => {
-			if (valid) {
-				console.log("表单校验通过");
-				// 将案件信息的字典传递给后端
-				pywebview.api.inputFromFrontEndForm(caseForm.value); //关于pywebview的部分在组合前后端的时候再使用
-				return true;
-			} else {
-				console.log("表单校验失败");
-				return false;
-			}
-		});
-	}
-}
+// ====== 下面是和子组件【案件当事人信息表单】相关的方法 ======
 
 // 新增原告方法
-const onAddPlaintiff = () => {
+function onAddPlaintiff() {
 	caseForm.value.plaintiffs.push({
 		litigantName: "",
 		litigantIdNumber: "",
 		litigantPhoneNumber: "",
-		litigantInfoPath: "",
 		litigantPosition: "plaintiff",
+		id : Date.now()
 	});
 	console.log("新增了一个原告");
-};
+}
 
 // 新增被告方法
 function onAddDefendant() {
@@ -131,18 +120,69 @@ function onAddDefendant() {
 		litigantName: "",
 		litigantIdNumber: "",
 		litigantPhoneNumber: "",
-		litigantInfoPath: "",
 		litigantPosition: "defendant",
+		id : Date.now()
 	});
 	console.log("新增了一个被告");
 }
 
-// 选中“选择文件按钮”,调用隐藏的input事件
+// 删除原告方法
+function reducePlaintiff(id) {
+	console.log("当前原告的id为" + id);
+	// 在原告列表中找到该原告的位置
+	var index = caseForm.value.plaintiffs.findIndex((plaintiff) => plaintiff.id === id);
+	caseForm.value.plaintiffs.splice(index, 1);
+}
+
+// 删除被告方法
+function reduceDefendant(id) {
+	console.log("当前被告的id为" + id);
+	// 在被告列表中找到该被告的位置
+	var index = caseForm.value.defendants.findIndex((defendant) => defendant.id === id);
+	caseForm.value.defendants.splice(index, 1);
+}
+
+const getCurrentplaintiffData = (plaintiffData,id) => {
+	// console.log(plaintiffData);
+	// 在原告列表中找到该原告的位置，并保存到index中
+	var index = caseForm.value.plaintiffs.findIndex((plaintiff) => plaintiff.id === id)
+	console.log("当前原告的位置为" + index);
+
+	// 赋值
+	caseForm.value.plaintiffs[index].litigantName = plaintiffData.litigantName;
+	caseForm.value.plaintiffs[index].litigantIdNumber =
+		plaintiffData.litigantIdNumber;
+	caseForm.value.plaintiffs[index].litigantPhoneNumber =
+		plaintiffData.litigantPhoneNumber;
+};
+
+const getCurrentDefendantData = (defendantData, id) => {
+	// console.log(defendantData);
+	// 在被告列表中找到该被告的位置
+	var index = caseForm.value.defendants.findIndex((defendant) => defendant.id === id);
+	console.log("当前被告的位置为" + index);
+
+	// 赋值
+	caseForm.value.defendants[index].litigantName = defendantData.litigantName;
+	caseForm.value.defendants[index].litigantIdNumber =
+		defendantData.litigantIdNumber;
+	caseForm.value.defendants[index].litigantPhoneNumber =
+		defendantData.litigantPhoneNumber;
+};
+
+// 将该方法提供给子组件
+provide("reducePlaintiff", reducePlaintiff);
+provide("reduceDefendant", reduceDefendant);
+provide("getCurrentplaintiffData", getCurrentplaintiffData);
+provide("getCurrentDefendantData", getCurrentDefendantData);
+
+// ====== 下面是和webview的交互部分的方法 ======
+
+// 选中“选择文件按钮”,调用后端python来弹出文件选择框
 async function promptFileSelection() {
 	console.log("选择文件");
 	caseForm.value.inputCaseInfoByFilePath =
 		await window.pywebview.api.GetFilepath();
-	// console.log(caseForm.value.inputCaseInfoByFilePath);
 	// 读取完毕以后禁用文本框
 	componentsConfig.value.inputCaseInfoByFilePathDisabled = true;
 }
@@ -168,6 +208,33 @@ function outputToTxt() {
 		}
 	});
 }
+
+// 提交案件信息到后端的方法
+function onSubmit() {
+	// 先判断目前是采取何种形式上传
+	// 如果采取的是文件上传
+	if (componentsConfig.value.inputInfoByFile == true) {
+		console.log("从文件中导入案件信息");
+		// 如果是文件路径输入模式，则将文件的路径以及文件夹生成路径传递给后端
+		pywebview.api.inputFromTxt(caseForm.value.inputCaseInfoByFilePath); //关于pywebview的部分在组合前后端的时候再使用
+		return;
+	}
+	// 如果采取的是前端输入
+	else {
+		// 则先校验表单
+		caseFormRef.value.validate((valid) => {
+			if (valid) {
+				console.log("表单校验通过");
+				// 将案件信息的字典传递给后端
+				pywebview.api.inputFromFrontEndForm(caseForm.value); //关于pywebview的部分在组合前后端的时候再使用
+				return true;
+			} else {
+				console.log("表单校验失败");
+				return false;
+			}
+		});
+	}
+}
 </script>
 
 <template>
@@ -183,17 +250,18 @@ function outputToTxt() {
 				@change="ChangeInputStatus"
 				v-model="componentsConfig.inputInfoByFile"
 			/>
-
-			<el-button v-if="!inputInfoByFrontEndStatus" @click="promptFileSelection"
-				>选择文件
-			</el-button>
 		</el-form-item>
 
 		<el-form-item v-if="!inputInfoByFrontEndStatus" label="案件信息文件路径">
 			<el-input
 				v-model="caseForm.inputCaseInfoByFilePath"
 				:disabled="componentsConfig.inputCaseInfoByFilePathDisabled"
+				placeholder="仅支持txt文件和xlsx文件"
+				style="max-width: 300px"
 			/>
+			<el-button v-if="!inputInfoByFrontEndStatus" @click="promptFileSelection"
+				>选择文件
+			</el-button>
 		</el-form-item>
 
 		<el-form-item
@@ -307,14 +375,17 @@ function outputToTxt() {
 		</el-form-item>
 
 		<el-form-item label="案件文件夹生成路径" prop="caseFolderGeneratedPath">
-			<el-input v-model="caseForm.caseFolderGeneratedPath" />
+			<el-input
+				v-model="caseForm.caseFolderGeneratedPath"
+				style="max-width: 400px"
+			/>
 		</el-form-item>
 
 		<el-form-item>
 			<el-button type="danger" @click="onSubmit(ruleFormRef)"
 				>提交案件信息</el-button
 			>
-			<el-button type="warning" disabled> 一键上传（功能开发中）</el-button>
+			<el-button type="warning" disabled> 一键上传OA（功能开发中）</el-button>
 			<el-button type="primary" @click="outputToExcel()"
 				>输出案件信息到excel</el-button
 			>
@@ -334,19 +405,44 @@ function outputToTxt() {
 	</el-form>
 
 	<!-- 导入当事人表格部件 -->
-	<LitigantForm
-		litigantPosition="plaintiff"
-		v-for="(item, index) in caseForm.plaintiffs"
-	/>
-	<LitigantForm
-		litigantPosition="defendant"
-		v-for="(item, index) in caseForm.defendants"
-	/>
+	<!-- 原告部分 -->
+	<div v-for="plaintiff in caseForm.plaintiffs" :key="plaintiff.id">
+		<LitigantForm
+			ref="litigantFormPlaintiff"
+			:litigantPosition="plaintiff.litigantPosition"
+			:id="plaintiff.id"
+		/>
+	</div>
+	<!-- 被告部分 -->
+	<div v-for="defendant in caseForm.defendants" :key="defendant.id">
+		<LitigantForm
+			ref="litigantFormDefendant"
+			:litigantPosition="defendant.litigantPosition"
+			:id="defendant.id"
+		/>
+	</div>
 
-	<hr />
 	<!-- 下面的是用于测试，直接展示从表格中输入的数据 -->
-	<ul>
-		<p>案件信息</p>
-		<li v-for="(item, key) in caseForm">{{ key }} - {{ item }}</li>
-	</ul>
+	<div>
+		<ul>
+			<p>案件信息</p>
+			<li v-for="(item, key) in caseForm">{{ key }} - {{ item }}</li>
+		</ul>
+	</div>
 </template>
+
+<style>
+/* 展示信息表格的css */
+.cell-item {
+	display: flex;
+	align-items: center;
+}
+
+.margin-top {
+	margin-top: 20px;
+}
+
+.el-descriptions {
+	margin-top: 20px;
+}
+</style>
