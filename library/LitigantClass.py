@@ -395,25 +395,22 @@ class Litigant():
             return 
 
     # 定义将当前诉讼参与人各项信息输出到前端json的方法
-    def OutputLitigantInfoToFrontEnd(self,outputType="json"):
+    def OutputLitigantInfoToFrontEnd(self):
         LitigantInfoDict = {}
-        LitigantInfoDict["litigantName"] = self._Name
-        LitigantInfoDict["litigantIdNumber"] = self._IDCode
-        LitigantInfoDict["litigantAddress"] = self._Location
-        LitigantInfoDict["litigantPhoneNumber"] = self._ContactNumber
-        LitigantInfoDict["litigantIsOurClient"] = self._OurClient
+
+        # 返回的字典中的键值对应的是前端需要的字段
+        LitigantInfoDict["litigantName"] = self.GetName()
+        LitigantInfoDict["litigantIdNumber"] = self.GetIDCode()
+        LitigantInfoDict["litigantAddress"] = self.GetLocation()
+        LitigantInfoDict["litigantPhoneNumber"] = self.GetContactNumber()
+        LitigantInfoDict["litigantIsOurClient"] = self.IsOurClient()
+
         # 如果是公司具有法定代表人属性
-        if self._LitigantType == 2 or self._LitigantType == 3:
-            LitigantInfoDict["legalRepresentative"] = self._LegalRepresentative
-            LitigantInfoDict["legalRepresentativeIdNumber"] = self._LegalRepresentativeIDCode
-        
-        if outputType == "dict":
-            return LitigantInfoDict
-        elif outputType == "json":
-            # 将字典转化为json
-            import json
-            LitigantInfoJson = json.dumps(LitigantInfoDict)
-            return LitigantInfoJson
+        if self.GetLitigantType() == 2 or self.GetLitigantType() == 3:
+            LitigantInfoDict["legalRepresentative"] = self.GetLegalRepresentative()
+            LitigantInfoDict["legalRepresentativeIdNumber"] = self.GetLegalRepresentativeIDCode()
+
+        return LitigantInfoDict
 
         
 
