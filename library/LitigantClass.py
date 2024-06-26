@@ -77,7 +77,7 @@ class Litigant():
         return self._OurClient
     # 定义外部获取诉讼参与人类型的方法
     def GetLitigantType(self):
-        return self.__LitigantType
+        return self._LitigantType
     # 定义外部获取诉讼参与人性别的方法
     def GetSex(self):
         return self._Sex
