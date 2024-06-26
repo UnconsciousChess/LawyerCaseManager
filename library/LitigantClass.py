@@ -92,7 +92,7 @@ class Litigant():
     # =========== 下面是Set方法 ===========
     # 定义外部设置诉讼参与人姓名的方法
     def SetName(self,Name,debug=False):
-        if Name is str:
+        if isinstance(Name,str):
             if Name == "":
                 if debug:
                     print("SetName方法报错：诉讼参与人姓名不能为空")
@@ -102,22 +102,22 @@ class Litigant():
 
     # 定义外部设置诉讼参与人身份证/统一社会信用代码的方法
     def SetIDCode(self,IDCode,debug=False):
-        if IDCode is str:
+        if isinstance(IDCode,str):
             if IDCode == "":
                 if debug:
                     print("SetIDCode方法报错：诉讼参与人身份证号码不能为空")
                 return
-            # 调用id_validator库的验证方法，判断身份证号码是否合法
-            if not validator.is_valid(IDCode):
-                if debug:
-                    print("SetIDCode方法报错：身份证号码有误")
-                return
+            # # 如果是自然人，则调用id_validator库的验证方法，判断身份证号码是否合法
+            # if not validator.is_valid(IDCode):
+            #     if debug:
+            #         print("SetIDCode方法报错：身份证号码有误")
+            #     return
             else:
                 self._IDCode = IDCode
 
     # 定义外部设置诉讼参与人地址的方法
     def SetLocation(self,Location):
-        if Location is str:
+        if isinstance(Location,str):
             self._Location = Location
 
     # 定义外部设置诉讼参与人联系方式的方法
@@ -136,9 +136,9 @@ class Litigant():
         
     # 定义外部设置是否为我方当事人的方法
     def SetOurClient(self,OurClient):
-        if OurClient is bool:
+        if isinstance(OurClient,bool):
             self._OurClient = OurClient
-        if OurClient is str:
+        if isinstance(OurClient,str):
             if OurClient == "是" or OurClient == "True" or OurClient == "true" or OurClient == "TRUE" or OurClient == "Yes" or OurClient == "yes" or OurClient == "YES" :
                 self._OurClient = True
             if OurClient == "否" or OurClient == "False" or OurClient == "false" or OurClient == "FALSE" or OurClient == "No" or OurClient == "no" or OurClient == "NO":
@@ -156,13 +156,21 @@ class Litigant():
 
     # 定义外部设置法定代表人名称的方法
     def SetLegalRepresentative(self,LegalRepresentative):
-        if LegalRepresentative is str:
+        if isinstance(LegalRepresentative,str):
             self._LegalRepresentative = LegalRepresentative
 
     # 定义外部设置法定代表人身份证号码的方法
     def SetLegalRepresentativeIDCode(self,LegalRepresentativeIDCode):
-        if LegalRepresentativeIDCode is str:
-            self._LegalRepresentativeIDCode = LegalRepresentativeIDCode
+        if isinstance(LegalRepresentativeIDCode,str):
+            if LegalRepresentativeIDCode == "":
+                print("SetLegalRepresentativeIDCode方法报错：法定代表人身份证号码不能为空")
+                return
+            # 调用id_validator库的验证方法，判断身份证号码是否合法
+            if not validator.is_valid(LegalRepresentativeIDCode):
+                print("SetLegalRepresentativeIDCode方法报错：法定代表人身份证号码有误")
+                return
+            else:
+                self._LegalRepresentativeIDCode = LegalRepresentativeIDCode
 
     # 定义内部根据规则设置诉讼参与人性别的方法
     def SetSexByRule(self,debug=False):
@@ -186,19 +194,27 @@ class Litigant():
                     print("SetSexByRule报错：该诉讼参与人对象还没有身份证号码，因此无法自动设置性别")
 
     def SetLitigantTypeByRule(self,debug=False):
-        # 先判断身份证号码的长度，如果是18位，就是自然人，否则就继续判断是否包含公司
-        if hasattr(self,"_IDCode"):
-            if len(self._IDCode) == 18:
-                self._LitigantType = 1
-                return
+        # 如果名称大于6个字，就视为公司或非法人组织
+        if len(self._Name) > 6:
+            # 如果名称里面包括公司就是法人，否则就视为非法人组织
+            if "公司" in self._Name:
+                self._LitigantType = 2
+                return 
             else:
-                # 如果名称里面包括公司就是法人，否则就视为非法人组织
-                if "公司" in self._Name:
-                    self._LitigantType = 2
-                    return 
-                else:
-                    self._LitigantType = 3
-                    return
+                UnincorporatedOrganizationStr = (
+                    "厂","店","馆","部","行","中心"    #《个体工商户名称登记管理办法》第十条规定的个体工商户组织形式
+                    "协会","商会","学会","研究会","促进会","联合会",   #《社会团体登记管理条例》第十二条第一款规定的社会团体
+                    "基金会",    #《社会团体登记管理条例》第十二条第二款规定的基金会
+                    "学校","大学","学院","医院","中心","院","园","所","馆","站","社"   #《社会团体登记管理条例》第十二条第三款规定的民办非企业单位
+                    )
+                for str in UnincorporatedOrganizationStr:
+                    if str in self._Name:
+                        self._LitigantType = 3
+                        return
+        # 如果名称小于6个字，就视为自然人
+        else:
+            self._LitigantType = 1
+            return
 
 
     # ===========下面是Bind方法，用于绑定其他类的主体（共计2个）============
@@ -240,7 +256,7 @@ class Litigant():
 
     # 定义通过一个txt的方法用于输入诉讼参与人信息
     # 该方法在后续如不需要的话，可废弃
-    def InputLitigantInfoFromTxt(self,InfoFile):
+    def InputLitigantInfoFromTxt(self,InfoFile,LitigantPosition=""):
         # 判断路径是否存在
         if not os.path.exists(InfoFile):
             print("InputLitigantInfoFromTxt函数报错：输入的文件路径不存在")
@@ -261,29 +277,44 @@ class Litigant():
             # 判断是否为赋值行
             if "=" not in line:
                 continue
-            # 将赋值行按照等号分割
+            # 将赋值行按照等号分割成两部分，key和information
             key,information = line.split("=")
             # 诉讼参与人的姓名属性
             if key == "Name":
-                self.SetName(information)
+                self.SetName(Name=information)
             # 诉讼参与人的身份证号码属性
             if key == "IDCode":
-                self.SetIDCode(information)
+                self.SetIDCode(IDCode=information)
             # 诉讼参与人的地址属性
             if key == "Location":
-                self.SetLocation(information)
+                self.SetLocation(Location=information)
+            # 诉讼参与人的联系方式属性
+            if key == "ContactNumber":
+                self.SetContactNumber(ContactNumber=information)
             # 诉讼参与人在诉讼中的地位属性
             if key == "LitigantPosition":
-                self.SetLitigantPosition(information)
+                self.SetLitigantPosition(LitigantPosition=information)
             # 诉讼参与人是否为我方当事人
             if key == "OurClient":
-                self.SetOurClient(information)
+                self.SetOurClient(OurClient=information)
             # 法定代表人名称
             if key == "LegalRepresentative":
-                self.SetLegalRepresentative(information)
+                self.SetLegalRepresentative(LegalRepresentative=information)
             # 法定代表人身份证号码  
             if key == "LegalRepresentativeIDCode":
-                self.SetLegalRepresentativeIDCode(information)
+                self.SetLegalRepresentativeIDCode(LegalRepresentativeIDCode=information)
+
+        # 如果传入了LitigantPosition参数，就设置诉讼参与人的地位属性，方便前端传入
+        if LitigantPosition != "":
+            if LitigantPosition == "plaintiff":
+                self.SetLitigantPosition(1)
+            elif LitigantPosition == "defendant":
+                self.SetLitigantPosition(2)
+        
+        # 先根据规则设置诉讼参与人的类型属性
+        self.SetLitigantTypeByRule()
+        # 再根据规则设置诉讼参与人的性别属性
+        self.SetSexByRule()
 
     # 定义通过前端输入的方法用于输入诉讼参与人信息
     def InputLitigantInfoFromFrontEnd(self,LitigantInfoDict):
@@ -333,15 +364,58 @@ class Litigant():
                 print("该诉讼主体身份证明文件上传路径为空\n")
             else:    
                 print(str(self._Name)+"的身份证明文件上传路径="+str(self._DocumentsPath)+"\n")
-            if self.__Sex == 1:
+            
+            # 输出性别
+            if self._Sex == 1:
                 print(str(self._Name)+"的性别为男")
-            elif self.__Sex == 0:
+            elif self._Sex == 0:
                 print(str(self._Name)+"的性别为女")
             elif self._Sex == -1:
-                print("该诉讼参与人并非自然人，无性别属性")
+                print("该诉讼参与人并非自然人，无性别属性"+"\n")
+
+            # 输出诉讼地位
+            if self._LitigantPosition == 1:
+                print(str(self._Name)+"的诉讼地位为原告"+"\n")
+            elif self._LitigantPosition == 2:
+                print(str(self._Name)+"的诉讼地位为被告"+"\n")
+            if self._LitigantPosition == 3:
+                print(str(self._Name)+"的诉讼地位为第三人"+"\n")
+            
+            # 如果是公司或非法人组织具有法定代表人属性，则输出该属性
+            if self._LitigantType == 2 or self._LitigantType == 3:
+                print(str(self._Name)+"的法定代表人为"+str(self._LegalRepresentative)+"\n")
+                print(str(self._Name)+"的法定代表人身份证号码为"+str(self._LegalRepresentativeIDCode)+"\n")
+
+            # 输出是否为我方当事人
+            if self._OurClient:
+                print(str(self._Name)+"是我方当事人"+"\n")
+            else:
+                print(str(self._Name)+"不是我方当事人"+"\n")
 
             return 
 
+    # 定义将当前诉讼参与人各项信息输出到前端json的方法
+    def OutputLitigantInfoToFrontEnd(self,outputType="json"):
+        LitigantInfoDict = {}
+        LitigantInfoDict["litigantName"] = self._Name
+        LitigantInfoDict["litigantIdNumber"] = self._IDCode
+        LitigantInfoDict["litigantAddress"] = self._Location
+        LitigantInfoDict["litigantPhoneNumber"] = self._ContactNumber
+        LitigantInfoDict["litigantIsOurClient"] = self._OurClient
+        # 如果是公司具有法定代表人属性
+        if self._LitigantType == 2 or self._LitigantType == 3:
+            LitigantInfoDict["legalRepresentative"] = self._LegalRepresentative
+            LitigantInfoDict["legalRepresentativeIdNumber"] = self._LegalRepresentativeIDCode
+        
+        if outputType == "dict":
+            return LitigantInfoDict
+        elif outputType == "json":
+            # 将字典转化为json
+            import json
+            LitigantInfoJson = json.dumps(LitigantInfoDict)
+            return LitigantInfoJson
+
+        
 
 
 # 设定律师类
