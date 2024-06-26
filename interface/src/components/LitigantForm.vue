@@ -98,6 +98,7 @@
 			</el-row>
 		</el-form-item>
 
+		<!-- 下面是调试显示部分 -->
 		<!-- <el-form-item>
 			<ul>
 				<li v-for="(value, key) in litigantForm">{{ key }} : {{ value }}</li>
@@ -224,6 +225,8 @@ const props = defineProps({
 	id: Number,
 });
 
+// const returnData = ref(null);
+
 const litigantForm = ref({
 	litigantName: "",
 	litigantIdNumber: "",
@@ -232,6 +235,9 @@ const litigantForm = ref({
 	litigantInfoPath: "",
 	litigantPosition: "",
 	litigantInfoByPath: true,
+	litigantIsOurClient: false,
+	litigantRepresentative: "",
+	litigantRepresentativeIdNumber: "",
 	id: 0,
 });
 
@@ -246,18 +252,65 @@ function checkIdNumber() {
 	}
 }
 
-function sumbitCurrentlitigantInfo() {
-	if (litigantForm.value.litigantInfoByPath == true) {
-		console.log("调用pywebview读取文件");
-		pywebview.api.inputLitigantFromTxt(litigantForm.value.litigantInfoPath);
-		return;
-	} else {
-		if (litigantForm.value.litigantPosition === "plaintiff") {
-			console.log("提交了一个原告");
-			getCurrentplaintiffData(litigantForm.value, litigantForm.value.id);
+async function sumbitCurrentlitigantInfo() {
+	// 原告
+	if (litigantForm.value.litigantPosition === "plaintiff") {
+		// 通过文件导入
+		if (litigantForm.value.litigantInfoByPath == true) {
+			console.log("调用pywebview读取原告信息文件");
+
+			// 用returnData接收pywebview返回的数据，这里的returnData已经被pywebview转换为js对象
+			const returnData = await pywebview.api.inputLitigantFromTxt(
+				litigantForm.value.litigantInfoPath,
+				litigantForm.value.litigantPosition
+			);
+
+			// 遍历对象并赋值给litigantForm
+			for (let key in returnData) {
+				litigantForm.value[key] = returnData[key];
+			}
+
+			console.log("文件信息读取完毕，提交了一个原告");
+			// 调用父组件的方法将通过文件导入的数据传递给父组件
+			getCurrentplaintiffData(litigantForm.value, litigantForm.value.id)
+			return;
+
+		// 通过表单直接输入
 		} else {
+			// 这里要写检验函数
+			console.log("表单信息检验无误，提交了一个原告");
+			getCurrentplaintiffData(litigantForm.value, litigantForm.value.id);
+			return;
+		}
+
+		// 被告
+	} else {
+		// 通过文件导入
+		if (litigantForm.value.litigantInfoByPath == true) {
+			console.log("调用pywebview读取被告信息文件");
+			// 用returnData接收pywebview返回的数据，这里的returnData已经被pywebview转换为js对象
+			const returnData = await pywebview.api.inputLitigantFromTxt(
+				litigantForm.value.litigantInfoPath,
+				litigantForm.value.litigantPosition
+			);
+
+			// 遍历对象并赋值给litigantForm
+			for (let key in returnData) {
+				litigantForm.value[key] = returnData[key];
+			}
+
+			console.log("文件信息读取完毕，提交了一个被告");
+			// 调用父组件的方法将通过文件导入的数据传递给父组件
+			getCurrentDefendantData(litigantForm.value, litigantForm.value.id);
+			return
+
+
+		// 通过表单直接输入
+		} else {
+			// 这里要写检验函数
 			console.log("提交了一个被告");
 			getCurrentDefendantData(litigantForm.value, litigantForm.value.id);
+			return;
 		}
 	}
 }
