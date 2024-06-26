@@ -146,7 +146,7 @@ const getCurrentplaintiffData = (plaintiffData,id) => {
 	// console.log(plaintiffData);
 	// 在原告列表中找到该原告的位置，并保存到index中
 	var index = caseForm.value.plaintiffs.findIndex((plaintiff) => plaintiff.id === id)
-	console.log("当前原告的位置为" + index);
+	// console.log("当前原告的位置为" + index);
 
 	// 赋值
 	caseForm.value.plaintiffs[index].litigantName = plaintiffData.litigantName;
@@ -160,7 +160,7 @@ const getCurrentDefendantData = (defendantData, id) => {
 	// console.log(defendantData);
 	// 在被告列表中找到该被告的位置
 	var index = caseForm.value.defendants.findIndex((defendant) => defendant.id === id);
-	console.log("当前被告的位置为" + index);
+	// console.log("当前被告的位置为" + index);
 
 	// 赋值
 	caseForm.value.defendants[index].litigantName = defendantData.litigantName;
@@ -216,7 +216,7 @@ function onSubmit() {
 	if (componentsConfig.value.inputInfoByFile == true) {
 		console.log("从文件中导入案件信息");
 		// 如果是文件路径输入模式，则将文件的路径以及文件夹生成路径传递给后端
-		pywebview.api.inputFromTxt(caseForm.value.inputCaseInfoByFilePath); //关于pywebview的部分在组合前后端的时候再使用
+		pywebview.api.inputCaseFromTxt(caseForm.value.inputCaseInfoByFilePath); //关于pywebview的部分在组合前后端的时候再使用
 		return;
 	}
 	// 如果采取的是前端输入
@@ -226,7 +226,7 @@ function onSubmit() {
 			if (valid) {
 				console.log("表单校验通过");
 				// 将案件信息的字典传递给后端
-				pywebview.api.inputFromFrontEndForm(caseForm.value); //关于pywebview的部分在组合前后端的时候再使用
+				pywebview.api.inputCaseFromFrontEndForm(caseForm.value); //关于pywebview的部分在组合前后端的时候再使用
 				return true;
 			} else {
 				console.log("表单校验失败");
