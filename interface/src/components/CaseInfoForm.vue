@@ -4,8 +4,7 @@ import {ref, provide} from "vue";
 // 局部注册LitigantForm组件
 import LitigantForm from "./LitigantForm.vue";
 
-// const props = defineProps(['caseForm']);
-// console.log(props.caseForm);
+
 
 // 当事人表单实例（原告）
 const litigantFormPlaintiff = ref(null);
@@ -32,6 +31,8 @@ const caseForm = ref({
 	defendants: [], //被告列表
 	inputCaseInfoByFilePath: "", //案件信息文件路径（用于文件导入模式）
 });
+
+
 
 const componentsConfig = ref({
 	inputInfoByFile: true,
@@ -75,13 +76,6 @@ const caseFormRules = ref({
 	],
 });
 
-// 接受子组件传递的数据
-const emitsUpload = (data) => {
-	console.log(data);
-	caseForm.value.plaintiffs[0].litigantName = data.name;
-	caseForm.value.plaintiffs[0].litigantIdNumber = data.idNumber;
-	caseForm.value.plaintiffs[0].litigantPhoneNumber = data.phoneNumber;
-};
 
 // 监听案件信息的输入方式是否发生变化，文件/前端输入
 function ChangeInputStatus() {
@@ -226,7 +220,9 @@ function onSubmit() {
 			if (valid) {
 				console.log("表单校验通过");
 				// 将案件信息的字典传递给后端
-				pywebview.api.inputCaseFromFrontEndForm(caseForm.value); //关于pywebview的部分在组合前后端的时候再使用
+				// pywebview.api.inputCaseFromFrontEndForm(caseForm.value); //关于pywebview的部分在组合前后端的时候再使用
+				// 同时将该信息保存到sessionStorage中
+				sessionStorage.setItem("caseFormData", JSON.stringify(caseForm.value));
 				return true;
 			} else {
 				console.log("表单校验失败");

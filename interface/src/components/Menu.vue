@@ -24,7 +24,7 @@ const aboutDialog = ref({
 			<el-menu-item index="/case-info-form">案件信息录入</el-menu-item>
 			<el-menu-item disabled>模板文件选择</el-menu-item>
 			<el-menu-item disabled>归档材料生成</el-menu-item>
-			<el-menu-item disabled>还没有想好的功能1</el-menu-item>
+			<el-menu-item index="/case-info-list">已录入案件信息列表</el-menu-item>
 			<el-menu-item disabled>还没有想好的功能2</el-menu-item>
 		</el-sub-menu>
 		<el-sub-menu index="3">
