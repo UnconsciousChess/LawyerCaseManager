@@ -12,7 +12,7 @@ class Api:
   
     # ===== 下面是input方法 =====
     # 该方法用于生成案件文件夹及依据模板生成对应的文件
-    def inputFromFrontEndForm(self,CaseFormDict):
+    def inputCaseFromFrontEndForm(self,CaseFormDict):
         # 导入案件类Case
         from library.CaseClass import Case
         case = Case()
@@ -24,7 +24,7 @@ class Api:
         return 0
     
     # 该方法用于前端输入一个txt文件的路径，然后生成案件文件夹及依据模板生成对应的文件
-    def inputFromTxt(self,TxtPath):
+    def inputCaseFromTxt(self,TxtPath):
         # 判断输入的两个路径是否存在
         if not os.path.exists(TxtPath):
             print("Error: The path is not exist!")
@@ -46,6 +46,34 @@ class Api:
         return 0
     
 
+
+    def inputLitigantFromTxt(self,TxtPath,LitigantType):
+        # 判断输入的路径是否存在
+        if not os.path.exists(TxtPath):
+            print("Error: The path is not exist!")
+            return 1
+        # 判断输入的文件是否是txt文件
+        if not TxtPath.endswith(".txt"):
+            print("Error: The file is not a txt file!")
+            return 2
+        
+        # 导入案件类litigant
+        from library.LitigantClass import Litigant
+
+        # 实例化一个Litigant对象
+        litigant = Litigant()
+
+        # 调用InputLitigantInfoFromTxt方法将txt导入到当前litigant对象中
+        litigant.InputLitigantInfoFromTxt(TxtPath,LitigantType)
+
+        # 将当事人信息调用OutputLitigantInfoToFrontEnd方法输出到前端
+        # 返回值原本为字典，会被自动pywebview自动转化为js对象
+        print(litigant.OutputLitigantInfoToFrontEnd())
+        return litigant.OutputLitigantInfoToFrontEnd()
+        
+
+
+        return 0
     # ===== 下面是output方法 =====
     def OutputCaseInfoToExcel(self,OutputFilePath):
         # 判断案件列表是否为空
