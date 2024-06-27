@@ -6,6 +6,9 @@ sys.path.append(os.getcwd())
 # 不要生成字节码
 sys.dont_write_bytecode = True
 
+# 导入nanoid模块
+from nanoid import generate
+
 # 导入诉讼参与人类
 from .LitigantClass import *
 
@@ -57,6 +60,8 @@ class Case():
         self._AgentFixedFeeList = []
         # 案号
         self._CaseCourtCode = ""
+        # 案件id（实例化案件时自动生成，用于前后端交互时识别）,该属性没有对应的Set方法，也无法input
+        self._CaseId = "Case-" + generate(alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', size=16)
 
 
         # 下面通过读取文件得到一些通用列表,并作为类的属性
@@ -138,6 +143,9 @@ class Case():
     # 法院案号
     def GetCaseCourtCode(self):
         return self._CaseCourtCode
+    # 案件id
+    def GetCaseId(self):
+        return self._CaseId
     
 
     # ===== Get方法：下面定义外部获取各属性的一些进阶方法（主要涉及输出一些常用字符串）=====
@@ -866,6 +874,7 @@ class Case():
             OutputDict["agentFixedFee"] = self.GetAgentFixedFee()
 
         OutputDict["caseCourtCode"] = self.GetCaseCourtCode()
+        OutputDict["caseId"] = self.GetCaseId()
         
         # 返回字典
         return OutputDict
