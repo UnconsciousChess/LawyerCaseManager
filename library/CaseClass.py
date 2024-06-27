@@ -841,34 +841,59 @@ class Case():
         print("案件信息已经保存到%s" % (OutputFilePath + OutputName))
 
 
-    # 输出案件信息到前端(输出为json格式的字符串)
-    def OutputCaseInfoToFrontEnd(self,DebugMode=False) -> str:
+    # 输出案件信息到前端（直接输出字典）
+    def OutputCaseInfoToFrontEnd(self,DebugMode=False) -> dict:
+        # 需要返回的字典初始化
         OutputDict = {}
+
         # 逐个输出案件信息
-        OutputDict["案件类型"] = self.GetCaseType()
-        OutputDict["诉讼标的"] = self.GetLitigationAmount()
-        OutputDict["案由"] = self.GetCauseOfAction()
-        OutputDict["管辖法院"] = self.GetJurisdictionDict()
-        OutputDict["诉讼请求"] = self.GetClaimText()
-        OutputDict["事实与理由"] = self.GetFactAndReasonText()
-        OutputDict["案件文件所在文件夹路径"] = self.GetCaseFolderPath()
-        OutputDict["原告主体列表"] = self.GetPlaintiffList()
-        OutputDict["被告主体列表"] = self.GetDefendantList()
-        OutputDict["第三人主体列表"] = self.GetLegalThirdPartyList()
-        OutputDict["调解意愿"] = self.GetMediationIntention()
-        OutputDict["拒绝调解理由"] = self.GetRejectMediationReasonText()
-        OutputDict["案件代理的阶段"] = self.GetCaseAgentStageStr()
+        OutputDict["caseCourtCode"] = self.GetCaseType()
+        OutputDict["litigantAmount"] = self.GetLitigationAmount()
+        OutputDict["causeOfAction"] = self.GetCauseOfAction()
+        OutputDict["courtName"] = self.GetJurisdictionDict()
+        OutputDict["claimText"] = self.GetClaimText()
+        OutputDict["factAndReason"] = self.GetFactAndReasonText()
+        OutputDict["caseFolderGeneratedPath"] = self.GetCaseFolderPath()
+        OutputDict["mediationIntention"] = self.GetMediationIntention()
+        OutputDict["rejectMediationReasonText"] = self.GetRejectMediationReasonText()
+        OutputDict["caseAgentStage"] = self.GetCaseAgentStageStr()
+
+        # 根据是否为风险收费代理，输出不同的费用信息
         if self.GetRiskAgentStatus() == True:
-            OutputDict["风险代理前期费用"] = self.GetRiskAgentUpfrontFee()
-            OutputDict["风险代理后期比例"] = self.GetRiskAgentPostFeeRate()
+            OutputDict["riskAgentUpfrontFee"] = self.GetRiskAgentUpfrontFee()
+            OutputDict["riskAgentPostFeeRate"] = self.GetRiskAgentPostFeeRate()
         else:
-            OutputDict["非风险代理的固定费用"] = self.GetAgentFixedFee()
-        OutputDict["法院案号"] = self.GetCaseCourtCode()
+            OutputDict["agentFixedFee"] = self.GetAgentFixedFee()
 
-        # 将字典转换为json格式
-        import json
-        OutputJson = json.dumps(OutputDict,ensure_ascii=False)
-
-        # 返回json格式的字符串
-        return OutputJson
+        OutputDict["caseCourtCode"] = self.GetCaseCourtCode()
+        
+        # 返回字典
+        return OutputDict
     
+
+    # 输出当前案件的当事人信息到前端
+    def OutputLitigantInfoToFrontEnd(self,DebugMode=False) -> dict:
+
+        # 需要返回的字典初始化
+        OutputDict = {}
+
+        # 原告主体列表（列表归零）
+        LitigantList = []
+        for plaintiff in self.GetPlaintiffList():
+            LitigantList.append(plaintiff.OutputLitigantInfoToFrontEnd())
+        OutputDict["plaintiffs"] = LitigantList 
+        
+        # 被告主体列表（列表重新归零）
+        LitigantList = []
+        for defendant in self.GetDefendantList():
+            LitigantList.append(defendant.OutputLitigantInfoToFrontEnd())
+        OutputDict["defendants"] = LitigantList
+
+        # 第三人主体列表（列表重新归零）
+        LitigantList = []
+        for thirdparty in self.GetLegalThirdPartyList():
+            LitigantList.append(thirdparty.OutputLitigantInfoToFrontEnd())
+        OutputDict["thirdParties"] = LitigantList
+
+        # 返回字典
+        return OutputDict
