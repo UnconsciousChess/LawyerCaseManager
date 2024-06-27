@@ -225,8 +225,6 @@ const props = defineProps({
 	id: Number,
 });
 
-// const returnData = ref(null);
-
 const litigantForm = ref({
 	litigantName: "",
 	litigantIdNumber: "",
@@ -240,6 +238,8 @@ const litigantForm = ref({
 	litigantRepresentativeIdNumber: "",
 	id: 0,
 });
+
+
 
 // 检查身份证号码是否合法
 function checkIdNumber() {

@@ -137,17 +137,12 @@ function reduceDefendant(id) {
 }
 
 const getCurrentplaintiffData = (plaintiffData,id) => {
-	// console.log(plaintiffData);
-	// 在原告列表中找到该原告的位置，并保存到index中
+	// 在原告列表中找到该原告的序号，并保存到index中
 	var index = caseForm.value.plaintiffs.findIndex((plaintiff) => plaintiff.id === id)
-	// console.log("当前原告的位置为" + index);
-
 	// 赋值
 	caseForm.value.plaintiffs[index].litigantName = plaintiffData.litigantName;
-	caseForm.value.plaintiffs[index].litigantIdNumber =
-		plaintiffData.litigantIdNumber;
-	caseForm.value.plaintiffs[index].litigantPhoneNumber =
-		plaintiffData.litigantPhoneNumber;
+	caseForm.value.plaintiffs[index].litigantIdNumber = plaintiffData.litigantIdNumber;
+	caseForm.value.plaintiffs[index].litigantPhoneNumber = plaintiffData.litigantPhoneNumber;
 };
 
 const getCurrentDefendantData = (defendantData, id) => {
@@ -158,10 +153,8 @@ const getCurrentDefendantData = (defendantData, id) => {
 
 	// 赋值
 	caseForm.value.defendants[index].litigantName = defendantData.litigantName;
-	caseForm.value.defendants[index].litigantIdNumber =
-		defendantData.litigantIdNumber;
-	caseForm.value.defendants[index].litigantPhoneNumber =
-		defendantData.litigantPhoneNumber;
+	caseForm.value.defendants[index].litigantIdNumber = defendantData.litigantIdNumber;
+	caseForm.value.defendants[index].litigantPhoneNumber = defendantData.litigantPhoneNumber;
 };
 
 // 将该方法提供给子组件
