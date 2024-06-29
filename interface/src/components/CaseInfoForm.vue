@@ -1,5 +1,5 @@
 <script setup>
-import {ref, provide} from "vue";
+import { ref, provide } from "vue";
 
 // 局部注册LitigantForm组件
 import LitigantForm from "./LitigantForm.vue";
@@ -47,32 +47,32 @@ const inputInfoByFrontEndStatus = ref(false);
 
 // 设定表单的校验规则
 const caseFormRules = ref({
-	caseCourtCode: [{required: true, message: "请输入法院案号", trigger: "blur"}],
-	causeOfAction: [{required: true, message: "请输入案由", trigger: "blur"}],
+	caseCourtCode: [{ required: true, message: "请输入法院案号", trigger: "blur" }],
+	causeOfAction: [{ required: true, message: "请输入案由", trigger: "blur" }],
 	litigationAmount: [
-		{required: true, message: "请输入标的额", trigger: "blur"},
-		{type: "number", message: "请输入数字", trigger: "blur"},
+		{ required: true, message: "请输入标的额", trigger: "blur" },
+		{ type: "number", message: "请输入数字", trigger: "blur" },
 	],
 	riskAgentUpfrontFee: [
-		{required: true, message: "请输入前期风险收费金额", trigger: "blur"},
+		{ required: true, message: "请输入前期风险收费金额", trigger: "blur" },
 	],
 	riskAgentPostFeeRate: [
-		{required: true, message: "请输入后期风险收费比例", trigger: "blur"},
+		{ required: true, message: "请输入后期风险收费比例", trigger: "blur" },
 	],
 	caseAgentStage: [
-		{required: true, message: "请选择委托阶段", trigger: "change"},
+		{ required: true, message: "请选择委托阶段", trigger: "change" },
 	],
-	caseType: [{required: true, message: "请选择案件类型", trigger: "change"}],
-	courtName: [{required: true, message: "请输入管辖法院", trigger: "blur"}],
-	claimText: [{required: true, message: "请输入诉讼请求", trigger: "blur"}],
+	caseType: [{ required: true, message: "请选择案件类型", trigger: "change" }],
+	courtName: [{ required: true, message: "请输入管辖法院", trigger: "blur" }],
+	claimText: [{ required: true, message: "请输入诉讼请求", trigger: "blur" }],
 	factAndReason: [
-		{required: true, message: "请输入事实与理由", trigger: "blur"},
+		{ required: true, message: "请输入事实与理由", trigger: "blur" },
 	],
 	rejectMediationReasonText: [
-		{required: true, message: "请输入拒绝调解理由", trigger: "blur"},
+		{ required: true, message: "请输入拒绝调解理由", trigger: "blur" },
 	],
 	caseFolderGeneratedPath: [
-		{required: true, message: "请输入案件文件夹生成路径", trigger: "blur"},
+		{ required: true, message: "请输入案件文件夹生成路径", trigger: "blur" },
 	],
 });
 
@@ -103,7 +103,7 @@ function onAddPlaintiff() {
 		litigantIdNumber: "",
 		litigantPhoneNumber: "",
 		litigantPosition: "plaintiff",
-		id : Date.now()
+		id: Date.now()
 	});
 	console.log("新增了一个原告");
 }
@@ -115,7 +115,7 @@ function onAddDefendant() {
 		litigantIdNumber: "",
 		litigantPhoneNumber: "",
 		litigantPosition: "defendant",
-		id : Date.now()
+		id: Date.now()
 	});
 	console.log("新增了一个被告");
 }
@@ -136,7 +136,7 @@ function reduceDefendant(id) {
 	caseForm.value.defendants.splice(index, 1);
 }
 
-const getCurrentplaintiffData = (plaintiffData,id) => {
+const getCurrentplaintiffData = (plaintiffData, id) => {
 	// 在原告列表中找到该原告的序号，并保存到index中
 	var index = caseForm.value.plaintiffs.findIndex((plaintiff) => plaintiff.id === id)
 	// 赋值
@@ -167,33 +167,20 @@ provide("getCurrentDefendantData", getCurrentDefendantData);
 
 // 选中“选择文件按钮”,调用后端python来弹出文件选择框
 async function promptFileSelection() {
-	console.log("选择文件");
-	caseForm.value.inputCaseInfoByFilePath =
-		await window.pywebview.api.GetFilepath();
-	// 读取完毕以后禁用文本框
-	componentsConfig.value.inputCaseInfoByFilePathDisabled = true;
-}
+	console.log("选择文件按钮");
+	// 判断是否有pywebview对象
+	if (typeof pywebview === "undefined") {
+		console.log("未链接到后端");
+		return;
+	}
+	// 调用后端的方法，弹出文件选择框
+	else {
+		caseForm.value.inputCaseInfoByFilePath =
+			await pywebview.api.GetFilepath();
+		// 读取完毕以后禁用文本框
+		componentsConfig.value.inputCaseInfoByFilePathDisabled = true;
+	}
 
-// 输出案件信息到excel的方法
-function outputToExcel() {
-	console.log("输出案件信息到excel");
-	pywebview.api.OutputCaseInfoToExcel(caseForm.value.caseFolderGeneratedPath);
-}
-
-// 输出案件信息到txt文本的方法
-function outputToTxt() {
-	// 校验表单
-	caseFormRef.value.validate((valid) => {
-		if (valid) {
-			console.log("表单校验通过，调用python输出文本");
-			// 调用该函数，将案件信息输出到txt文本
-			pywebview.api.OutputCaseInfoToTxt(caseForm.value.caseFolderGeneratedPath); //关于pywebview的部分在组合前后端的时候再使用
-			return true;
-		} else {
-			console.log("表单校验失败");
-			return false;
-		}
-	});
 }
 
 // 提交案件信息到后端的方法
@@ -201,25 +188,41 @@ function onSubmit() {
 	// 先判断目前是采取何种形式上传
 	// 如果采取的是文件上传
 	if (componentsConfig.value.inputInfoByFile == true) {
-		console.log("从文件中导入案件信息");
-		// 如果是文件路径输入模式，则将文件的路径以及文件夹生成路径传递给后端
-		pywebview.api.inputCaseFromTxt(caseForm.value.inputCaseInfoByFilePath); //关于pywebview的部分在组合前后端的时候再使用
-		return;
+		console.log("onSubmit()：当前导入模式为-从文件中导入案件信息");
+		// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端，如果没有就提示未链接到后端
+		if (typeof pywebview === "undefined") {
+			console.log("onSubmit()：未链接到后端");
+			return;
+		}
+		else {
+			// 如果是文件路径输入模式，则将文件的路径以及文件夹生成路径传递给后端
+			pywebview.api.inputCaseFromTxt(caseForm.value.inputCaseInfoByFilePath); //关于pywebview的部分在组合前后端的时候再使用
+			return;
+		}
+
 	}
 	// 如果采取的是前端输入
 	else {
-		// 则先校验表单
+		console.log("onSubmit()：当前导入模式为-从前端表单中导入案件信息");
+		// 先校验表单
 		caseFormRef.value.validate((valid) => {
-			if (valid) {
-				console.log("表单校验通过");
-				// 将案件信息的字典传递给后端
-				// pywebview.api.inputCaseFromFrontEndForm(caseForm.value); //关于pywebview的部分在组合前后端的时候再使用
-				// 同时将该信息保存到sessionStorage中
-				sessionStorage.setItem("caseFormData", JSON.stringify(caseForm.value));
-				return true;
+			if (valid) {	//如果表单校验通过
+				console.log("onSubmit()：表单校验通过");
+
+				// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端，如果没有就提示未链接到后端
+				if (typeof pywebview === "undefined") {
+					console.log("onSubmit()：未链接到后端");
+					return;
+				}
+				else {
+					// 将案件信息的字典传递给后端
+					pywebview.api.inputCaseFromFrontEndForm(caseForm.value);
+					return;
+				}
+
 			} else {
-				console.log("表单校验失败");
-				return false;
+				console.log("onSubmit()：表单校验失败");
+				return;
 			}
 		});
 	}
@@ -227,58 +230,38 @@ function onSubmit() {
 </script>
 
 <template>
-	<el-form
-		v-bind:model="caseForm"
-		v-bind:rules="caseFormRules"
-		label-width="auto"
-		style="max-width: 700px"
-		ref="caseFormRef"
-	>
+	<el-form v-bind:model="caseForm" v-bind:rules="caseFormRules" label-width="auto" style="max-width: 700px"
+		ref="caseFormRef">
+
+
+		<el-form-item>
+			<el-button type="primary" plain @click="onAddPlaintiff">新增原告</el-button>
+			<el-button type="info" plain @click="onAddDefendant">新增被告</el-button>
+			<el-button type="danger" @click="onSubmit(ruleFormRef)">提交案件信息</el-button>
+		</el-form-item>
+
 		<el-form-item label="从文件中导入案件信息">
-			<el-switch
-				@change="ChangeInputStatus"
-				v-model="componentsConfig.inputInfoByFile"
-			/>
+			<el-switch @change="ChangeInputStatus" v-model="componentsConfig.inputInfoByFile" />
 		</el-form-item>
 
 		<el-form-item v-if="!inputInfoByFrontEndStatus" label="案件信息文件路径">
-			<el-input
-				v-model="caseForm.inputCaseInfoByFilePath"
-				:disabled="componentsConfig.inputCaseInfoByFilePathDisabled"
-				placeholder="仅支持txt文件和xlsx文件"
-				style="max-width: 300px"
-			/>
-			<el-button v-if="!inputInfoByFrontEndStatus" @click="promptFileSelection"
-				>选择文件
+			<el-input v-model="caseForm.inputCaseInfoByFilePath"
+				:disabled="componentsConfig.inputCaseInfoByFilePathDisabled" placeholder="仅支持txt文件和xlsx文件"
+				style="max-width: 300px" />
+			<el-button v-if="!inputInfoByFrontEndStatus" @click="promptFileSelection">选择文件
 			</el-button>
 		</el-form-item>
 
-		<el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="法院案号"
-			prop="caseCourtCode"
-		>
+		<el-form-item v-if="inputInfoByFrontEndStatus" label="法院案号" prop="caseCourtCode">
 			<el-input v-model.trim="caseForm.caseCourtCode" style="width: 240px" />
 		</el-form-item>
 
-		<el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="案由"
-			prop="causeOfAction"
-		>
+		<el-form-item v-if="inputInfoByFrontEndStatus" label="案由" prop="causeOfAction">
 			<el-input v-model.trim="caseForm.causeOfAction" style="width: 240px" />
 		</el-form-item>
 
-		<el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="标的额"
-			prop="litigationAmount"
-		>
-			<el-input
-				v-model.number="caseForm.litigationAmount"
-				placeholder="计价单位：人民币元"
-				style="width: 240px"
-			/>
+		<el-form-item v-if="inputInfoByFrontEndStatus" label="标的额" prop="litigationAmount">
+			<el-input v-model.number="caseForm.litigationAmount" placeholder="计价单位：人民币元" style="width: 240px" />
 		</el-form-item>
 
 		<el-row>
@@ -296,20 +279,12 @@ function onSubmit() {
 
 		<el-row>
 			<el-col :span="12">
-				<el-form-item
-					v-if="inputInfoByFrontEndStatus"
-					label="前期风险收费金额"
-					prop="riskAgentUpfrontFee"
-				>
+				<el-form-item v-if="inputInfoByFrontEndStatus" label="前期风险收费金额" prop="riskAgentUpfrontFee">
 					<el-input v-model.number="caseForm.riskAgentUpfrontFee" />
 				</el-form-item>
 			</el-col>
 			<el-col :span="12">
-				<el-form-item
-					v-if="inputInfoByFrontEndStatus"
-					label="后期风险收费比例"
-					prop="riskAgentPostFeeRate"
-				>
+				<el-form-item v-if="inputInfoByFrontEndStatus" label="后期风险收费比例" prop="riskAgentPostFeeRate">
 					<el-input v-model.number="caseForm.riskAgentPostFeeRate" />
 				</el-form-item>
 			</el-col>
@@ -335,27 +310,15 @@ function onSubmit() {
 			</el-radio-group>
 		</el-form-item>
 
-		<el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="管辖法院"
-			prop="courtName"
-		>
+		<el-form-item v-if="inputInfoByFrontEndStatus" label="管辖法院" prop="courtName">
 			<el-input v-model="caseForm.courtName" />
 		</el-form-item>
 
-		<el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="诉讼请求"
-			prop="claimText"
-		>
+		<el-form-item v-if="inputInfoByFrontEndStatus" label="诉讼请求" prop="claimText">
 			<el-input v-model="caseForm.claimText" type="textarea" />
 		</el-form-item>
 
-		<el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="事实与理由"
-			prop="factAndReason"
-		>
+		<el-form-item v-if="inputInfoByFrontEndStatus" label="事实与理由" prop="factAndReason">
 			<el-input v-model="caseForm.factAndReason" type="textarea" />
 		</el-form-item>
 
@@ -363,61 +326,29 @@ function onSubmit() {
 			<el-input v-model="caseForm.rejectMediationReasonText" type="textarea" />
 		</el-form-item>
 
-		<el-form-item label="案件文件夹生成路径" prop="caseFolderGeneratedPath">
-			<el-input
-				v-model="caseForm.caseFolderGeneratedPath"
-				style="max-width: 400px"
-			/>
+		<el-form-item v-if="inputInfoByFrontEndStatus" label="案件文件夹生成路径" prop="caseFolderGeneratedPath">
+			<el-input v-model="caseForm.caseFolderGeneratedPath" style="max-width: 400px" />
 		</el-form-item>
 
-		<el-form-item>
-			<el-button type="danger" @click="onSubmit(ruleFormRef)"
-				>提交案件信息</el-button
-			>
-			<el-button type="warning" disabled> 一键上传OA（功能开发中）</el-button>
-			<el-button type="primary" @click="outputToExcel()"
-				>输出案件信息到excel</el-button
-			>
-			<el-button type="success" @click="outputToTxt()"
-				>输出案件信息到Txt文本</el-button
-			>
-		</el-form-item>
-
-		<hr />
-
-		<el-form-item>
-			<el-button type="primary" plain @click="onAddPlaintiff"
-				>新增原告</el-button
-			>
-			<el-button type="info" plain @click="onAddDefendant">新增被告</el-button>
-		</el-form-item>
 	</el-form>
 
 	<!-- 导入当事人表格部件 -->
 	<!-- 原告部分 -->
 	<div v-for="plaintiff in caseForm.plaintiffs" :key="plaintiff.id">
-		<LitigantForm
-			ref="litigantFormPlaintiff"
-			:litigantPosition="plaintiff.litigantPosition"
-			:id="plaintiff.id"
-		/>
+		<LitigantForm ref="litigantFormPlaintiff" :litigantPosition="plaintiff.litigantPosition" :id="plaintiff.id" />
 	</div>
 	<!-- 被告部分 -->
 	<div v-for="defendant in caseForm.defendants" :key="defendant.id">
-		<LitigantForm
-			ref="litigantFormDefendant"
-			:litigantPosition="defendant.litigantPosition"
-			:id="defendant.id"
-		/>
+		<LitigantForm ref="litigantFormDefendant" :litigantPosition="defendant.litigantPosition" :id="defendant.id" />
 	</div>
 
 	<!-- 下面的是用于测试，直接展示从表格中输入的数据 -->
-	<div>
+	<!-- <div>
 		<ul>
 			<p>案件信息</p>
 			<li v-for="(item, key) in caseForm">{{ key }} - {{ item }}</li>
 		</ul>
-	</div>
+	</div> -->
 </template>
 
 <style>
