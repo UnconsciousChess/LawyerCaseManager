@@ -210,6 +210,15 @@ class Case():
             OurClientNames += litigant.GetName() + "、"
         OurClientNames = OurClientNames[:-1]
         return OurClientNames
+    
+    def GetCourtNameStr(self) -> str:
+        CourtNameStr = ""
+        for stage,court in self._JurisdictionDict.items():
+            # 如果法院不为空，则添加到字符串中
+            if court != "":
+                CourtNameStr += stage + "：" + court + "、"
+        CourtNameStr = CourtNameStr[:-1]
+        return CourtNameStr
 
     # ============Set和Append方法：下面定义设定各属性的方法（含输入值校验）=============
 
@@ -351,13 +360,13 @@ class Case():
 
     # 风险代理情况设定方法
     def SetRiskAgentStatus(self,RiskAgentStatus,DebugMode=False):
-        if RiskAgentStatus is bool:
+        if isinstance(RiskAgentStatus,bool):
             self._RiskAgentStatus = RiskAgentStatus
-        if RiskAgentStatus is str:
-            if Value == "True" or Value == "true" or Value == "TRUE" or Value == "1":
-                Value = True
-            elif Value == "False" or Value == "false" or Value == "FALSE" or Value == "0":
-                Value = False
+        elif isinstance(RiskAgentStatus,str):
+            if RiskAgentStatus == "True" or RiskAgentStatus == "true" or RiskAgentStatus == "TRUE" or RiskAgentStatus == "1":
+                self._RiskAgentStatus = True
+            elif RiskAgentStatus == "False" or RiskAgentStatus == "false" or RiskAgentStatus == "FALSE" or RiskAgentStatus == "0":
+                self._RiskAgentStatus = False
         else:
             if DebugMode:
                 print("SetRiskAgentStatus报错：该输入对象的类型与属性不匹配,风险代理情况输入值为布尔值或字符串")
@@ -528,10 +537,6 @@ class Case():
                     self.SetCaseAgentStage(5)
 
         elif Key == '风险代理情况':
-            if Value == "True" or Value == "true" or Value == "TRUE" or Value == "1":
-                Value = True
-            elif Value == "False" or Value == "false" or Value == "FALSE" or Value == "0":
-                Value = False
             self.SetRiskAgentStatus(Value)
 
         elif Key == '风险代理前期费用':
@@ -856,26 +861,30 @@ class Case():
 
         # 逐个输出案件信息
         OutputDict["caseCourtCode"] = self.GetCaseType()
-        OutputDict["litigantAmount"] = self.GetLitigationAmount()
+        OutputDict["litigationAmount"] = self.GetLitigationAmount()
         OutputDict["causeOfAction"] = self.GetCauseOfAction()
-        OutputDict["courtName"] = self.GetJurisdictionDict()
+        OutputDict["courtName"] = self.GetCourtNameStr()    #法院名称直接输出字符串
         OutputDict["claimText"] = self.GetClaimText()
         OutputDict["factAndReason"] = self.GetFactAndReasonText()
         OutputDict["caseFolderGeneratedPath"] = self.GetCaseFolderPath()
         OutputDict["mediationIntention"] = self.GetMediationIntention()
         OutputDict["rejectMediationReasonText"] = self.GetRejectMediationReasonText()
-        OutputDict["caseAgentStage"] = self.GetCaseAgentStageStr()
+        OutputDict["caseAgentStage"] = self.GetCaseAgentStage()
+        OutputDict["caseType"] = self.GetCaseType()
+        OutputDict["caseCourtCode"] = self.GetCaseCourtCode()
+        OutputDict["caseId"] = self.GetCaseId()
 
         # 根据是否为风险收费代理，输出不同的费用信息
-        if self.GetRiskAgentStatus() == True:
+        if self.GetRiskAgentStatus() == True:     #风险收费
+            OutputDict["riskAgentStatus"] = self.GetRiskAgentStatus()
             OutputDict["riskAgentUpfrontFee"] = self.GetRiskAgentUpfrontFee()
             OutputDict["riskAgentPostFeeRate"] = self.GetRiskAgentPostFeeRate()
         else:
+            OutputDict["riskAgentStatus"] = self.GetRiskAgentStatus()
             OutputDict["agentFixedFee"] = self.GetAgentFixedFee()
 
-        OutputDict["caseCourtCode"] = self.GetCaseCourtCode()
-        OutputDict["caseId"] = self.GetCaseId()
-        
+        # 测试
+        print(OutputDict)
         # 返回字典
         return OutputDict
     
