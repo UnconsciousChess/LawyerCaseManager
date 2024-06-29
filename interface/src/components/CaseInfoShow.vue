@@ -1,6 +1,6 @@
 <template>
-    <el-table :data="tableData" stripe style="width: 100%" empty-text="目前暂无案件" :expand-row-keys="expandRowKeys" :row-key="row => row.caseId"
-        @expand-change="(row, expandedRows) => generateShowText(row, expandedRows)">
+    <el-table :data="tableData" stripe style="width: 100%" empty-text="目前暂无案件" :expand-row-keys="expandRowKeys"
+        :row-key="row => row.caseId" @expand-change="(row, expandedRows) => generateShowText(row, expandedRows)">
         <el-table-column label="" width="40" type="expand">
             <template #default>
                 <CaseInfoShowDescription :propShowTextList="showTextList" :propId="caseId" />
@@ -11,15 +11,36 @@
         <el-table-column prop="caseCourtCode" label="案号" width="250" />
         <el-table-column fixed="right" label="操作" width="300">
             <template #default="{ row }">
-                <el-button type="primary" size="small">查看</el-button>
-                <el-button type="danger" size="small" @click="deleteData(row)">删除</el-button>
-                <el-button type="success" size="small">输出</el-button>
-                <el-button type="info" size="small">上传</el-button>
+                <el-button type="primary" size="small">编辑</el-button>
+                <el-button type="danger" size="small" @click="handledeleteData(row)">删除</el-button>
+                <el-button type="success" size="small" @click="handleOutputData(row)">输出</el-button>
+                <el-button color="#626aef" size="small" disabled>上传</el-button>
             </template>
         </el-table-column>
     </el-table>
 
-    <el-button type="primary" @click="getTableData">刷新</el-button>
+    <!-- 刷新按钮 -->
+    <div>
+        <el-button type="primary" @click="getTableData">刷新</el-button>
+    </div>
+
+
+    <!-- 删除确认对话框 -->
+    <el-dialog title="注意" v-model="dialogDeleteDataVisible" width="400" align-center>
+        <span>确认删除当前案件吗？</span>
+        <template #footer>
+            <div>
+                <el-button @click="dialogDeleteDataVisible = false">取 消</el-button>
+                <el-button type="danger" @click="deleteData(currentDeleteRow)">确 定</el-button>
+            </div>
+        </template>
+    </el-dialog>
+    <!-- 输出对话框 -->
+    <el-dialog v-model="dialogOutputDataVisible" title="选择输出格式" width="500" align-center>
+        <el-button type="primary" @click="row => outputToExcel(currentOutputRow)">输出当前案件信息为Excel文件</el-button>
+        <el-button type="success" @click="row => outputToTxt(currentOutputRow)">输出当前案件信息为Txt文件</el-button>
+    </el-dialog>
+
 </template>
 
 <script setup>
@@ -28,22 +49,26 @@ import { ref, onMounted, defineProps } from "vue";
 import CaseInfoShowDescription from "./CaseInfoShowDescription.vue";
 
 
-
+// 初始化tableData，为空数组，是案件表格的数据
+const tableData = ref([]);
 
 
 const showTextList = ref([]);
-const caseId = ref(null);
 
+// 这个变量是用于传递给子组件的caseId
+const caseId = ref(null);
 //一开始展开的行的数量为0
 const currentExpandedRow = ref(0);
 
-// 
+// 这个列表是存放展开的行的caseId（即rowkey
 const expandRowKeys = ref([]);
 
+// 以下变量是用于控制输出对话框的显示
+const dialogOutputDataVisible = ref(false);
+const dialogDeleteDataVisible = ref(false);
 
-
-// 初始化tableData，为空数组，是案件表格的数据
-const tableData = ref([]);
+const currentDeleteRow = ref(null);
+const currentOutputRow = ref(null);
 
 // 测试数据
 const testCase1 = {
@@ -103,6 +128,9 @@ const testCase3 = {
     agentFixedFee: "一审3000元，二审5000元，执行1000元，再审1000元",
     caseId: "3.4"
 };
+
+
+
 
 
 // 工厂函数，传入tableData的数据，返回可以直接输出的showText
@@ -277,6 +305,8 @@ function getTableData() {
 // 删除数据
 function deleteData(val) {
     console.log("当前要删除的案件id为" + val.caseId);
+    // 将对话框隐藏
+    dialogDeleteDataVisible.value = false;
 
     // 获取要删除的数据的index
     var deleteItemIndex = tableData.value.findIndex(
@@ -308,6 +338,54 @@ function deleteData(val) {
         tableData.value[i].index = i + 1;
     }
 }
+
+function handledeleteData(val) {
+    // console.log("当前要输出的案件id为" + val.caseId);
+    dialogDeleteDataVisible.value = true;
+    // 将当前要删除的案件的对象传递给currentDeleteRow，便于接下来的组件调用
+    currentDeleteRow.value = val;
+    // console.log(currentDeleteRow.value);
+}
+
+function handleOutputData(val) {
+    // console.log("当前要输出的案件id为" + val.caseId);
+    dialogOutputDataVisible.value = true;
+    // 将当前要输出的案件的对象传递给currentOutputRow，便于接下来的组件调用
+    currentOutputRow.value = val;
+}
+
+
+function outputToExcel(val) {
+    // 将对话框隐藏
+    dialogOutputDataVisible.value = false;
+    console.log("输出案件信息到excel");
+    console.log(val.caseId)
+    // 如果未连接后端，则只测试前端
+    if (typeof pywebview === 'undefined') {
+        console.log("outputToExcel()：未连接后端，目前只测试前端");
+    }
+    // 如果连接了后端，则调用后端的函数
+    else {
+        pywebview.api.OutputCaseInfoToExcel(val.caseId);
+    }
+}
+
+
+function outputToTxt(val) {
+    // 将对话框隐藏
+    dialogOutputDataVisible.value = false;
+    console.log("输出案件信息到txt");
+    console.log(val.caseId)
+    // 如果未连接后端，则只测试前端
+    if (typeof pywebview === 'undefined') {
+        console.log("outputToTxt()：未连接后端，目前只测试前端");
+    }
+    // 如果连接了后端，则调用后端的函数
+    else {
+        pywebview.api.OutputCaseInfoToTxt(val.caseId);
+    }
+}
+
 
 // 加载页面时先调用一次getTableData()获取数据
 onMounted(() => {

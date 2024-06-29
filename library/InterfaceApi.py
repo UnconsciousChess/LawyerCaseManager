@@ -46,7 +46,6 @@ class Api:
         return 0
     
 
-
     def inputLitigantFromTxt(self,TxtPath,LitigantType):
         # 判断输入的路径是否存在
         if not os.path.exists(TxtPath):
@@ -72,48 +71,46 @@ class Api:
         return litigant.OutputLitigantInfoToFrontEnd()
         
 
-
-        return 0
     # ===== 下面是output方法 =====
-    def OutputCaseInfoToExcel(self,OutputFilePath):
+    def OutputCaseInfoToExcel(self,caseId):
         # 判断案件列表是否为空
         if len(self._case) == 0:
-            # print("Error: The case is empty!")
             return 1
-        # 判断输出路径是否存在
-        if not os.path.exists(OutputFilePath):
-            # print("Error: The path is not exist!")
-            return 2
-        # 判断输出路径是否是文件
-        if os.path.isfile(OutputFilePath):
-            return 3
-        # 判断该路径是否以'/'结尾，如果不是则加上
-        if not OutputFilePath.endswith("\\"):
-            OutputFilePath += "\\"        
+        # 如果案件列表不为空，则根据caseId找到对应案件
+        for case in self._case:
+            if case.GetCaseId() == caseId:
+                case.OutputCaseInfoToExcel()
+                return 0
 
-        self._case[0].OutputCaseInfoToExcel(OutputFilePath=OutputFilePath)
   
-    def OutputCaseInfoToTxt(self,OutputFilePath):
-
+    def OutputCaseInfoToTxt(self,caseId):
         # 判断案件列表是否为空
         if len(self._case) == 0:
-            # print("Error: The case is empty!")
             return 1
-        # 判断输出路径是否存在
-        if not os.path.exists(OutputFilePath):
-            # print("Error: The path is not exist!")
-            return 2
-        # 判断输出路径是否是文件
-        if os.path.isfile(OutputFilePath):
-            # print("Error: The path is a file!")
-            return 3
-        
-        # 判断该路径是否以'/'结尾，如果不是则加上
-        if not OutputFilePath.endswith("\\"):
-            OutputFilePath += "\\"        
-        
-        self._case[0].OutputCaseInfoToTxt(OutputFilePath=OutputFilePath)
+        # 如果案件列表不为空，则根据caseId找到对应案件
+        for case in self._case:
+            if case.GetCaseId() == caseId:
+                case.OutputCaseInfoToTxt()
+                return 0
 
+    def OutputAllCaseInfoToFrontEnd(self):
+        
+        
+        # 下面是正式代码
+        # 判断案件列表是否为空
+        if len(self._case) == 0:
+            # return 1
+            # 生成测试案件对象
+            self.test()
+             
+
+        Result = []
+        for case in self._case:
+            Result.append(case.OutputCaseInfoToFrontEnd())
+        # 返回案件列表
+        return Result
+
+    
 
     # ===== 下面是其他方法 =====
     # 该方法未完善
@@ -144,7 +141,6 @@ class Api:
         return f"归档目录生成成功,保存路径为{SavedPath}"
     
 
-
     def GetFilepath(self) -> str:
 
         # 下面是用tkinter的方法获取文件的绝对路径
@@ -160,3 +156,22 @@ class Api:
         # result = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False, file_types=FileTypes)
         # print(result)
         # return result
+
+
+    # ===== 下面是删除方法 =====
+    def BackEndDeleteCase(self,CaseId):
+        # 测试是否收到了前端传来的案件ID
+        print(CaseId)
+        # 在案件列表中删除指定案件
+        for case in self._case:
+            # 判断案件ID是否相同,如果相同则在后端也删除并返回
+            if case.GetCaseId() == CaseId:
+                self._case.remove(case)
+                return 
+    
+    # ===== 下面是测试方法 =====
+    def test(self):
+        # 直接先调用input方法，生成案件对象
+        self.inputCaseFromTxt(r"test\TestData\测试案件信息输入.txt")
+        self.inputCaseFromTxt(r"test\TestData\测试案件信息输入2.txt")
+        self.inputCaseFromTxt(r"test\TestData\测试案件信息输入3.txt")
