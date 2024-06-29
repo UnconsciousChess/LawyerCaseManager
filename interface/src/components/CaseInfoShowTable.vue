@@ -57,26 +57,32 @@
 			{{ showText.mediationIntention }}
 		</el-descriptions-item>
 
-		<el-descriptions-item>
+		<el-descriptions-item v-if="showText.riskAgentStatus == '是'">
 			<template #label>
 				<div class="cell-item">前期风险收费金额</div>
 			</template>
 			{{ showText.riskAgentUpfrontFee }} 元
 		</el-descriptions-item>
 
-		<el-descriptions-item>
+		<el-descriptions-item v-if="showText.riskAgentStatus == '是'">
 			<template #label>
 				<div class="cell-item">后期风险收费比例</div>
 			</template>
 			{{ showText.riskAgentPostFeeRate }} %
 		</el-descriptions-item>
+
+		
+		<el-descriptions-item v-if="showText.riskAgentStatus == '否'">
+			<template #label>
+				<div class="cell-item">固定收费标准</div>
+			</template>
+			{{ showText.agentFixedFee }}
+		</el-descriptions-item>
+
+
 	</el-descriptions>
 
-	<!-- <el-button @click="showText.showTextCreate()">
-		刷新案件信息
-	</el-button> -->
-
-	<!-- 下面是诉讼请求等折叠栏 -->
+	<!-- 下面是诉讼请求、事实与理由、拒绝调解理由等折叠栏 -->
 	<div class="demo-collapse" style="max-width: 800px">
 		<el-collapse>
 			<el-collapse-item title="诉讼请求" name="1">
