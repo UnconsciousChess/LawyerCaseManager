@@ -1,9 +1,9 @@
 <template>
-    <el-table :data="tableData" stripe style="width: 100%" :expand-row-keys="expandRowKeys" :row-key="row => row.caseId"
+    <el-table :data="tableData" stripe style="width: 100%" empty-text="目前暂无案件" :expand-row-keys="expandRowKeys" :row-key="row => row.caseId"
         @expand-change="(row, expandedRows) => generateShowText(row, expandedRows)">
         <el-table-column label="" width="40" type="expand">
             <template #default>
-                <CaseInfoShowTable :propShowTextList="showTextList" :propId="caseId" />
+                <CaseInfoShowDescription :propShowTextList="showTextList" :propId="caseId" />
             </template>
         </el-table-column>
         <el-table-column prop="index" label="序号" width="80" />
@@ -25,7 +25,7 @@
 <script setup>
 import { ref, onMounted, defineProps } from "vue";
 
-import CaseInfoShowTable from "./CaseInfoShowTable.vue";
+import CaseInfoShowDescription from "./CaseInfoShowDescription.vue";
 
 
 
