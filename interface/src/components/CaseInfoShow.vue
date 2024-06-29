@@ -1,8 +1,8 @@
 <template>
-    <el-table :data="tableData" stripe style="width: 100%"
+    <el-table :data="tableData" stripe style="width: 100%" :expand-row-keys="expandRowKeys" :row-key="row => row.caseId"
         @expand-change="(row, expandedRows) => generateShowText(row, expandedRows)">
         <el-table-column label="" width="40" type="expand">
-            <template #default="{ row }">
+            <template #default>
                 <CaseInfoShowTable :propShowTextList="showTextList" :propId="caseId" />
             </template>
         </el-table-column>
@@ -30,11 +30,15 @@ import CaseInfoShowTable from "./CaseInfoShowTable.vue";
 
 
 
+
 const showTextList = ref([]);
 const caseId = ref(null);
 
 //一开始展开的行的数量为0
 const currentExpandedRow = ref(0);
+
+// 
+const expandRowKeys = ref([]);
 
 
 
@@ -53,7 +57,7 @@ const currentExpandedRow = ref(0);
 //     claimText: "诉讼请求",
 //     factAndReason: "事实与理由",
 //     rejectMediationReasonText: "拒绝调解理由",
-//     id : 时间戳
+//     caseId : 案件id，由后端统一生成，测试的时候可以随便写
 // }
 // 测试时将下面这一行注释掉
 const tableData = ref([]);
@@ -71,11 +75,11 @@ const tableData = ref([]);
 //         riskAgentUpfrontFee: "100",
 //         caseType: 1,
 //         riskAgentPostFeeRate: "1",
-//         caseAgentStage: ['1','2'],
+//         caseAgentStage: ['1', '2'],
 //         claimText: "诉讼请求1",
 //         factAndReason: "事实与理由1",
 //         rejectMediationReasonText: "拒绝调解理由1",
-//         id: 1.1
+//         caseId: "1.1"
 //     },
 //     {
 //         index: 2,
@@ -88,11 +92,11 @@ const tableData = ref([]);
 //         riskAgentUpfrontFee: "200",
 //         caseType: 2,
 //         riskAgentPostFeeRate: "2",
-//         caseAgentStage: ['3','4'],
+//         caseAgentStage: ['3', '4'],
 //         claimText: "诉讼请求2",
 //         factAndReason: "事实与理由2",
 //         rejectMediationReasonText: "拒绝调解理由2",
-//         id: 2.3
+//         caseId: "2.3"
 //     },
 //     {
 //         index: 3,
@@ -105,11 +109,11 @@ const tableData = ref([]);
 //         riskAgentUpfrontFee: "300",
 //         caseType: 3,
 //         riskAgentPostFeeRate: "3",
-//         caseAgentStage: ['1','2','3','4','5'],
+//         caseAgentStage: ['1', '2', '3', '4', '5'],
 //         claimText: "诉讼请求3",
 //         factAndReason: "事实与理由3",
 //         rejectMediationReasonText: "拒绝调解理由3",
-//         id: 3.4
+//         caseId: "3.4"
 //     }
 // ]);
 
@@ -192,26 +196,30 @@ function generateShowText(row, expandedRows) {
         // 如果expandedRows的长度大于currentExpandedRow
         // 则将currentExpandedRow更新为当前展开的行的数量,同时认为目前是点选了一下展开的状态
         currentExpandedRow.value = expandedRows.length;
-
         // 利用row的数据，运用showTextCreator工厂函数生成showText
         var showText = showTextCreator(row)
         // 将当前行的数据推向showTextList
         showTextList.value.push(showText);
-
         // 要prop给子组件的caseId为当前行对象的caseId
         caseId.value = row.caseId;
-
-        console.log(showTextList.value)
-        console.log("展开，当前展开行数量为"+currentExpandedRow.value);
+        
+        // 将当前行的caseId推向expandRowKeys
+        expandRowKeys.value.push(row.caseId);
+        // console.log(expandRowKeys.value)
+        // console.log("展开，当前展开行数量为" + currentExpandedRow.value);
 
     } else {
         // 如果expandedRows的长度小于currentExpandedRow
         // 则将currentExpandedRow更新为当前展开的行的数量,同时认为目前是点选了一下收起的状态
         currentExpandedRow.value = expandedRows.length;
+
+         // 从expandRowKeys中删除对应的caseId
+        expandRowKeys.value.splice(expandRowKeys.value.findIndex((item) => item === row.caseId), 1);
+
         // 从showTextList中删除对应的数据
-        showTextList.value.splice(showTextList.value.findIndex((item) => item.id === row.id), 1);
-        console.log(showTextList.value);
-        console.log("收起，当前展开行数量为"+currentExpandedRow.value);
+        showTextList.value.splice(showTextList.value.findIndex((item) => item.caseid === row.caseid), 1);
+        
+        // console.log("收起，当前展开行数量为" + currentExpandedRow.value);
     }
 
 }
@@ -265,7 +273,7 @@ function getTableData() {
 
 // 删除数据
 function deleteData(val) {
-    console.log("当前案件的id为" + val.caseId);
+    console.log("当前要删除的案件id为" + val.caseId);
 
     // 获取要删除的数据的index
     var deleteItemIndex = tableData.value.findIndex(
@@ -278,8 +286,11 @@ function deleteData(val) {
     // 删除tableData中对应数组index的数据
     tableData.value.splice(deleteItemIndex, 1);
 
+    // 对应的expandRowKeys也要删除
+    expandRowKeys.value.splice(expandRowKeys.value.findIndex((item) => item === val.caseId), 1);
+
     // 对应的showTextList也要删除
-    showTextList.value.splice(showTextList.value.findIndex((item) => item.id === val.id), 1);
+    showTextList.value.splice(showTextList.value.findIndex((item) => item.caseId === val.caseId), 1);
 
     // 对应展开的行数减一
     currentExpandedRow.value -= 1;
