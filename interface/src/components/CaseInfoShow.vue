@@ -42,80 +42,68 @@ const expandRowKeys = ref([]);
 
 
 
-// 初始化tableData，为空数组，其内部格式为
-// {
-//     index: 1,
-//     causeOfAction: "案由",
-//     caseCourtCode: "案号",
-//     courtName: "法院",
-//     litigationAmount: "诉讼金额",
-//     mediationIntention: true,
-//     riskAgentUpfrontFee: "前期风险收费金额",
-//     riskAgentPostFeeRate: "后期风险收费比例",
-//     caseType: 1,
-//     caseAgentStage: ['1','2'],
-//     claimText: "诉讼请求",
-//     factAndReason: "事实与理由",
-//     rejectMediationReasonText: "拒绝调解理由",
-//     caseId : 案件id，由后端统一生成，测试的时候可以随便写
-// }
-// 测试时将下面这一行注释掉
+// 初始化tableData，为空数组，是案件表格的数据
 const tableData = ref([]);
 
 // 测试数据
-// const tableData = ref([
-//     {
-//         index: 1,
-//         title: "案件1",
-//         causeOfAction: "案由1",
-//         litigationAmount: "1000",
-//         courtName: "法院1",
-//         caseCourtCode: "案号1",
-//         mediationIntention: true,
-//         riskAgentUpfrontFee: "100",
-//         caseType: 1,
-//         riskAgentPostFeeRate: "1",
-//         caseAgentStage: ['1', '2'],
-//         claimText: "诉讼请求1",
-//         factAndReason: "事实与理由1",
-//         rejectMediationReasonText: "拒绝调解理由1",
-//         caseId: "1.1"
-//     },
-//     {
-//         index: 2,
-//         title: "案件2",
-//         causeOfAction: "案由2",
-//         courtName: "法院2",
-//         litigationAmount: "2000",
-//         caseCourtCode: "案号2",
-//         mediationIntention: false,
-//         riskAgentUpfrontFee: "200",
-//         caseType: 2,
-//         riskAgentPostFeeRate: "2",
-//         caseAgentStage: ['3', '4'],
-//         claimText: "诉讼请求2",
-//         factAndReason: "事实与理由2",
-//         rejectMediationReasonText: "拒绝调解理由2",
-//         caseId: "2.3"
-//     },
-//     {
-//         index: 3,
-//         title: "案件3",
-//         causeOfAction: "案由3",
-//         courtName: "法院3",
-//         litigationAmount: "3000",
-//         caseCourtCode: "案号3",
-//         mediationIntention: true,
-//         riskAgentUpfrontFee: "300",
-//         caseType: 3,
-//         riskAgentPostFeeRate: "3",
-//         caseAgentStage: ['1', '2', '3', '4', '5'],
-//         claimText: "诉讼请求3",
-//         factAndReason: "事实与理由3",
-//         rejectMediationReasonText: "拒绝调解理由3",
-//         caseId: "3.4"
-//     }
-// ]);
+const testCase1 = {
+    index: 1,
+    title: "案件1",
+    causeOfAction: "案由1",
+    litigationAmount: "1000",
+    courtName: "法院1",
+    caseCourtCode: "案号1",
+    mediationIntention: false,
+    riskAgentUpfrontFee: "100",
+    caseType: 1,
+    riskAgentPostFeeRate: "1",
+    caseAgentStage: ['1', '2'],
+    riskAgentStatus: false,
+    claimText: "诉讼请求1",
+    factAndReason: "事实与理由1",
+    rejectMediationReasonText: "拒绝调解理由1",
+    agentFixedFee: "一审3000元，二审5000元，执行1000元，再审2000元",
+    caseId: "1.1"
+};
+const testCase2 = {
+    index: 2,
+    title: "案件2",
+    causeOfAction: "案由2",
+    courtName: "法院2",
+    litigationAmount: "2000",
+    caseCourtCode: "案号2",
+    mediationIntention: false,
+    riskAgentUpfrontFee: "200",
+    caseType: 2,
+    riskAgentPostFeeRate: "2",
+    caseAgentStage: ['3', '4'],
+    riskAgentStatus: true,
+    claimText: "诉讼请求2",
+    factAndReason: "事实与理由2",
+    rejectMediationReasonText: "拒绝调解理由2",
+    agentFixedFee: "",
+    caseId: "2.3"
+};
+const testCase3 = {
+    index: 3,
+    title: "案件3",
+    causeOfAction: "案由3",
+    courtName: "法院3",
+    litigationAmount: "3000",
+    caseCourtCode: "案号3",
+    mediationIntention: true,
+    riskAgentUpfrontFee: "300",
+    caseType: 3,
+    riskAgentPostFeeRate: "3",
+    caseAgentStage: ['1', '2', '3', '4', '5'],
+    riskAgentStatus: false,
+    claimText: "诉讼请求3",
+    factAndReason: "事实与理由3",
+    rejectMediationReasonText: "拒绝调解理由3",
+    agentFixedFee: "一审3000元，二审5000元，执行1000元，再审1000元",
+    caseId: "3.4"
+};
+
 
 // 工厂函数，传入tableData的数据，返回可以直接输出的showText
 function showTextCreator(tableData) {
@@ -132,6 +120,7 @@ function showTextCreator(tableData) {
     o.claimText = tableData.claimText;
     o.factAndReason = tableData.factAndReason;
     o.rejectMediationReasonText = tableData.rejectMediationReasonText;
+    o.agentFixedFee = tableData.agentFixedFee;
     o.caseId = tableData.caseId;
 
     // 下面是需要转换的字段
@@ -145,9 +134,9 @@ function showTextCreator(tableData) {
 
     // 转换风险代理人状态为√或×
     if (tableData.riskAgentStatus == true) {
-        o.riskAgentStatus = "√";
+        o.riskAgentStatus = "是";
     } else {
-        o.riskAgentStatus = "×";
+        o.riskAgentStatus = "否";
     }
 
     // 转换案件类型为文字
@@ -202,7 +191,7 @@ function generateShowText(row, expandedRows) {
         showTextList.value.push(showText);
         // 要prop给子组件的caseId为当前行对象的caseId
         caseId.value = row.caseId;
-        
+
         // 将当前行的caseId推向expandRowKeys
         expandRowKeys.value.push(row.caseId);
         // console.log(expandRowKeys.value)
@@ -213,12 +202,12 @@ function generateShowText(row, expandedRows) {
         // 则将currentExpandedRow更新为当前展开的行的数量,同时认为目前是点选了一下收起的状态
         currentExpandedRow.value = expandedRows.length;
 
-         // 从expandRowKeys中删除对应的caseId
+        // 从expandRowKeys中删除对应的caseId
         expandRowKeys.value.splice(expandRowKeys.value.findIndex((item) => item === row.caseId), 1);
 
         // 从showTextList中删除对应的数据
         showTextList.value.splice(showTextList.value.findIndex((item) => item.caseid === row.caseid), 1);
-        
+
         // console.log("收起，当前展开行数量为" + currentExpandedRow.value);
     }
 
@@ -228,47 +217,61 @@ function generateShowText(row, expandedRows) {
 
 // 从后端获取数据
 function getTableData() {
-    // 从前端获取数据
-    pywebview.api.OutputAllCaseInfoToFrontEnd().then((cases) => {
-        // 遍历cases，将数据根据一定的规则添加到tableData中
-        for (let i = 0; i < cases.length; i++) {
-            // 对比案件的id，如果相同则不添加
-            if (
-                tableData.value.findIndex((item) => item.caseId === cases[i].caseId) !==
-                -1
-            ) {
-                continue;
+    // 如果未连接后端，则只测试前端
+    if (typeof pywebview === 'undefined') {
+        console.log("getTableData()：未连接后端，目前只测试前端");
+        // 当tableData为空时，添加测试数据
+        if (tableData.value.length == 0) {
+            tableData.value.push(testCase1);
+            tableData.value.push(testCase2);
+            tableData.value.push(testCase3);
+        }
+    }
+    // 如果连接了后端，则从后端获取数据(实际工作流程)
+    else {
+        pywebview.api.OutputAllCaseInfoToFrontEnd().then((cases) => {
+            // 遍历cases，将数据根据一定的规则添加到tableData中
+            for (let i = 0; i < cases.length; i++) {
+                // 对比案件的id，如果相同则不添加
+                if (
+                    tableData.value.findIndex((item) => item.caseId === cases[i].caseId) !==
+                    -1
+                ) {
+                    continue;
+                }
+                // 如果没有相同的，则将数据添加到tableData中
+                tableData.value.push({
+                    causeOfAction: cases[i].causeOfAction,
+                    courtName: cases[i].courtName,
+                    litigationAmount: cases[i].litigationAmount,
+                    caseCourtCode: cases[i].caseCourtCode,
+                    mediationIntention: cases[i].mediationIntention,
+                    caseType: cases[i].caseType,
+                    riskAgentStatus: cases[i].riskAgentStatus,
+                    riskAgentUpfrontFee: cases[i].riskAgentUpfrontFee,
+                    riskAgentPostFeeRate: cases[i].riskAgentPostFeeRate,
+                    caseAgentStage: cases[i].caseAgentStage,
+                    claimText: cases[i].claimText,
+                    factAndReason: cases[i].factAndReason,
+                    rejectMediationReasonText: cases[i].rejectMediationReasonText,
+                    agentFixedFee: cases[i].agentFixedFee,
+                    caseId: cases[i].caseId,
+
+                    // 测试title的数据
+                    title: cases[i].causeOfAction + "一案，编号：" + cases[i].caseId,
+
+                });
+                // console.log(tableData.value)
+
             }
-            // 如果没有相同的，则将数据添加到tableData中
-            tableData.value.push({
-                causeOfAction: cases[i].causeOfAction,
-                courtName: cases[i].courtName,
-                litigationAmount: cases[i].litigationAmount,
-                caseCourtCode: cases[i].caseCourtCode,
-                mediationIntention: cases[i].mediationIntention,
-                caseType: cases[i].caseType,
-                riskAgentStatus: cases[i].riskAgentStatus,
-                riskAgentUpfrontFee: cases[i].riskAgentUpfrontFee,
-                riskAgentPostFeeRate: cases[i].riskAgentPostFeeRate,
-                caseAgentStage: cases[i].caseAgentStage,
-                claimText: cases[i].claimText,
-                factAndReason: cases[i].factAndReason,
-                rejectMediationReasonText: cases[i].rejectMediationReasonText,
-                caseId: cases[i].caseId,
 
-                // 测试title的数据
-                title: cases[i].causeOfAction + "一案，编号：" + cases[i].caseId,
+            // 对tableData的index进行重新排序
+            for (let i = 0; i < tableData.value.length; i++) {
+                tableData.value[i].index = i + 1;
+            }
+        });
+    }
 
-            });
-            // console.log(tableData.value)
-
-        }
-
-        // 对tableData的index进行重新排序
-        for (let i = 0; i < tableData.value.length; i++) {
-            tableData.value[i].index = i + 1;
-        }
-    });
 }
 
 // 删除数据
@@ -281,7 +284,12 @@ function deleteData(val) {
     );
 
     // 将对应的id传递给后端
-    pywebview.api.BackEndDeleteCase(val.caseId);
+    try {
+        pywebview.api.BackEndDeleteCase(val.caseId);
+    } catch (e) {
+        console.log("未连接后端，目前只测试前端");
+    }
+
 
     // 删除tableData中对应数组index的数据
     tableData.value.splice(deleteItemIndex, 1);
@@ -301,7 +309,7 @@ function deleteData(val) {
     }
 }
 
-// 加载页面时获取数据
+// 加载页面时先调用一次getTableData()获取数据
 onMounted(() => {
     getTableData();
 });
