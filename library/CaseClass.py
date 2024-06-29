@@ -300,7 +300,8 @@ class Case():
     def SetCaseFolderPath(self,CaseFolderPath,debugmode=False):
         if isinstance(CaseFolderPath,str):
             if os.path.exists(CaseFolderPath):
-                if not os.file(CaseFolderPath):
+                # 判断输入的路径是否为文件路径
+                if os.path.isfile(CaseFolderPath) == False:
                     self._CaseFolderPath = CaseFolderPath
                     if debugmode:
                         print("SetCaseFolderPath报错：案件文件所在文件夹路径设定成功")
@@ -722,7 +723,9 @@ class Case():
     # ===========Output方法：下面定义输出案件信息的方法=============
 
     # 输出案件信息到txt文件
-    def OutputCaseInfoToTxt(self,OutputFilePath,DebugMode=False):
+    def OutputCaseInfoToTxt(self,DebugMode=False):
+        # 输出文件路径=案件文件夹路径中获取
+        OutputFilePath = self.GetCaseFolderPath() 
         # 判断路径是否存在
         if not os.path.exists(OutputFilePath):
             if DebugMode:
@@ -781,10 +784,19 @@ class Case():
             f.write("法院案号是：%s\n" % self.GetCaseCourtCode())
     
     # 输出案件信息到excel文件
-    def OutputCaseInfoToExcel(self,OutputFilePath,DebugMode=False):
+    def OutputCaseInfoToExcel(self):
         from openpyxl import Workbook
         from openpyxl.styles import Font,Alignment
 
+
+        # 输出文件路径=案件文件夹路径中获取
+        OutputFilePath = self.GetCaseFolderPath()
+        # 判断路径是否存在
+        if not os.path.exists(OutputFilePath):
+            return
+        # 判断路径是否以\结尾,如果不是则加上\
+        if not OutputFilePath.endswith("\\"):
+            OutputFilePath += "\\"
         wb = Workbook()
         ws = wb.active
         # 表头
