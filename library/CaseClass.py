@@ -879,8 +879,11 @@ class Case():
             OutputDict["riskAgentStatus"] = self.GetRiskAgentStatus()
             OutputDict["riskAgentUpfrontFee"] = self.GetRiskAgentUpfrontFee()
             OutputDict["riskAgentPostFeeRate"] = self.GetRiskAgentPostFeeRate()
+            OutputDict["agentFixedFee"] = ""
         else:
             OutputDict["riskAgentStatus"] = self.GetRiskAgentStatus()
+            OutputDict["riskAgentUpfrontFee"] = ""
+            OutputDict["riskAgentPostFeeRate"] = ""
             OutputDict["agentFixedFee"] = self.GetAgentFixedFee()
 
         # 测试
