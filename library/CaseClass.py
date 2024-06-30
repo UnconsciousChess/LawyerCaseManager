@@ -543,7 +543,9 @@ class Case():
     # 设定一个类的内部方法，对于参数键名和键值，分别进行处理（键值为中文，来源于txt和excel文件）
     def SetCaseInfoWithKeyAndValue(self,Key,Value):
         # 根据Key的不同，调用不同的设定方法
-        if Key == '案件类型':
+        if Key == '案件Id' :
+            self._CaseId = Value
+        elif Key == '案件类型':
             self.SetCaseType(int(Value))
 
         elif Key == '诉讼标的':
@@ -994,7 +996,7 @@ class Case():
         OutputStr = ""
 
         # 逐个输出案件信息
-        OutputStr += "案件ID=%s\n" % self.GetCaseId()
+        OutputStr += "案件Id=%s\n" % self.GetCaseId()
         OutputStr += "案件类型=%s\n" % self.GetCaseType()
         OutputStr += "诉讼标的=%s\n" % self.GetLitigationAmount()
         OutputStr += "案由=%s\n" % self.GetCauseOfAction()
@@ -1105,7 +1107,7 @@ class Case():
             OutputDict["agentFixedFee"] = self.GetAgentFixedFee()
 
         # 测试
-        print(OutputDict)
+        # print(OutputDict)
         # 返回字典
         return OutputDict
     

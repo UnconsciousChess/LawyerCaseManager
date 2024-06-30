@@ -124,8 +124,11 @@ class Api:
                 case = Case()
                 # 将案件内容调用InputCaseInfoFromTxt方法导入到当前case对象中
                 case.InputCaseInfoFromStringList(CaseContent)
-                # 将案件对象添加到self._case中
-                self._case.append(case)
+                # 如果该案件的案件Id与列表中的案件均不相同，则将案件对象添加到self._case中
+                if case.GetCaseId() not in [case.GetCaseId() for case in self._case]:
+                    self._case.append(case)
+                else:
+                    print(f"编号为{case.GetCaseId()}的案件已存在，无需重复导入！")
 
         print("全部案件导入成功！")
         return 0
@@ -151,7 +154,6 @@ class Api:
 
         # 将当事人信息调用OutputLitigantInfoToFrontEnd方法输出到前端
         # 返回值原本为字典，会被自动pywebview自动转化为js对象
-        print(litigant.OutputLitigantInfoToFrontEnd())
         return litigant.OutputLitigantInfoToFrontEnd()
         
     def bulkInputCaseFromTxt(self):
