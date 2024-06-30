@@ -133,6 +133,8 @@ class Litigant():
     def SetLitigantPosition(self,LitigantPosition):
         if LitigantPosition in [1,2,3]:
             self._LitigantPosition = LitigantPosition
+        if LitigantPosition in ["1","2","3"]:
+            self._LitigantPosition = int(LitigantPosition)
         
     # 定义外部设置是否为我方当事人的方法
     def SetOurClient(self,OurClient):
@@ -304,7 +306,7 @@ class Litigant():
             if key == "LegalRepresentativeIDCode":
                 self.SetLegalRepresentativeIDCode(LegalRepresentativeIDCode=information)
 
-        # 如果传入了LitigantPosition参数，就设置诉讼参与人的地位属性，方便前端传入
+        # 如果传入了LitigantPosition参数，就直接设置诉讼参与人的地位属性，方便前端传入
         if LitigantPosition != "":
             if LitigantPosition == "plaintiff":
                 self.SetLitigantPosition(1)
@@ -338,6 +340,8 @@ class Litigant():
                     self.SetLegalRepresentative(LitigantInfoDict[key])
                 if key == "legalRepresentativeIDCode":
                     self.SetLegalRepresentativeIDCode(LitigantInfoDict[key])
+
+       
 
     # ========== 下面是Output方法 ========== 
 
