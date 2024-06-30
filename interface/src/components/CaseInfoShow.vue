@@ -11,21 +11,34 @@
         <el-table-column prop="caseCourtCode" label="案号" width="250" />
         <el-table-column fixed="right" label="操作" width="300">
             <template #default="{ row }">
-                <el-button type="primary" size="small">编辑</el-button>
+                <el-button type="primary" size="small" @click="handleEditData(row)">编辑</el-button>
                 <el-button type="danger" size="small" @click="handledeleteData(row)">删除</el-button>
                 <el-button type="success" size="small" @click="handleOutputData(row)">输出</el-button>
                 <el-button color="#626aef" size="small" disabled>上传</el-button>
             </template>
         </el-table-column>
     </el-table>
-
+    
+    <el-divider></el-divider>
     <!-- 刷新按钮 -->
     <div>
-        <el-button type="primary" @click="getTableData">刷新</el-button>
+        <el-button type="success" @click="createNewCase">新建案件</el-button>
+        <el-button type="primary" @click="getTableData">刷新数据</el-button>
     </div>
 
 
-    <!-- 删除确认对话框 -->
+
+
+
+
+    <!-- 下面是操作按钮以后的对话框 -->
+
+    <!-- 编辑对话框 -->
+    <el-dialog title="编辑案件信息" width="700" align-center v-model="dialogEditDataVisible">
+        <CaseInfoForm :propCaseData="currentEditRow" :propMode="caseInfoFormMode"/>
+    </el-dialog>
+
+    <!-- 删除对话框 -->
     <el-dialog title="注意" v-model="dialogDeleteDataVisible" width="400" align-center>
         <span>确认删除当前案件吗？</span>
         <template #footer>
@@ -35,11 +48,14 @@
             </div>
         </template>
     </el-dialog>
+
     <!-- 输出对话框 -->
     <el-dialog v-model="dialogOutputDataVisible" title="选择输出格式" width="500" align-center>
-        <el-button type="primary" @click="row => outputToExcel(currentOutputRow)">输出当前案件信息为Excel文件</el-button>
-        <el-button type="success" @click="row => outputToTxt(currentOutputRow)">输出当前案件信息为Txt文件</el-button>
+        <el-button type="primary" @click="outputToExcel(currentOutputRow)">输出当前案件信息为Excel文件</el-button>
+        <el-button type="success" @click="outputToTxt(currentOutputRow)">输出当前案件信息为Txt文件</el-button>
     </el-dialog>
+
+    <!-- 上传功能对话框（待开发）-->
 
 </template>
 
@@ -47,6 +63,7 @@
 import { ref, onMounted, defineProps } from "vue";
 
 import CaseInfoShowDescription from "./CaseInfoShowDescription.vue";
+import CaseInfoForm  from "./CaseInfoForm.vue";
 
 
 // 初始化tableData，为空数组，是案件表格的数据
@@ -66,9 +83,13 @@ const expandRowKeys = ref([]);
 // 以下变量是用于控制输出对话框的显示
 const dialogOutputDataVisible = ref(false);
 const dialogDeleteDataVisible = ref(false);
+const dialogEditDataVisible = ref(false);
 
+
+const currentEditRow = ref(null);
 const currentDeleteRow = ref(null);
 const currentOutputRow = ref(null);
+const caseInfoFormMode = ref(null);
 
 // 测试数据
 const testCase1 = {
@@ -241,7 +262,14 @@ function generateShowText(row, expandedRows) {
 
 }
 
-
+// 创建新案件
+function createNewCase(){
+    dialogEditDataVisible.value = true;
+    // 改变caseInfoFormMode为create（有edit和create两种模式）
+    caseInfoFormMode.value = "create";
+    // 将案件对象设为null，因为不需要传递现有案件对象到caseInfo之中
+    currentEditRow.value = null;
+}
 
 // 从后端获取数据
 function getTableData() {
@@ -337,6 +365,15 @@ function deleteData(val) {
     for (let i = 0; i < tableData.value.length; i++) {
         tableData.value[i].index = i + 1;
     }
+}
+
+function handleEditData(val) {
+    console.log("当前要编辑的案件id为" + val.caseId);
+    dialogEditDataVisible.value = true;
+    // 将当前要编辑的案件的对象传递给currentEditRow，便于接下来的组件调用
+    currentEditRow.value = val;
+    // 改变caseInfoFormMode为edit（有edit和create两种模式）
+    caseInfoFormMode.value = "edit";
 }
 
 function handledeleteData(val) {

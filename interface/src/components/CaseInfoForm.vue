@@ -1,10 +1,8 @@
 <script setup>
-import { ref, provide } from "vue";
+import { ref, provide, onMounted, onUpdated } from "vue";
 
 // 局部注册LitigantForm组件
 import LitigantForm from "./LitigantForm.vue";
-
-
 
 // 当事人表单实例（原告）
 const litigantFormPlaintiff = ref(null);
@@ -13,22 +11,28 @@ const litigantFormDefendant = ref(null);
 
 // 定义表单数据
 const caseForm = ref({
+	caseId: "", //案件ID
+
 	caseCourtCode: "", //法院案号
 	causeOfAction: "", //案由
 	litigationAmount: "", //标的额
-	riskAgentStatus: true, //风险收费
-	riskAgentUpfrontFee: "", //前期风险收费金额
-	riskAgentPostFeeRate: "", //后期风险收费比例
 	caseAgentStage: [], //委托阶段
 	caseType: 0, //案件类型
 	courtName: "", //管辖法院
 	mediationIntention: false, //调解意愿
-	factAndReason: "", //事实与理由
 	caseFolderGeneratedPath: "", //案件文件夹生成路径
+
+	riskAgentStatus: true, //风险收费
+	riskAgentUpfrontFee: "", //前期风险收费金额
+	riskAgentPostFeeRate: "", //后期风险收费比例
+
+	factAndReason: "", //事实与理由
 	claimText: "", //诉讼请求
 	rejectMediationReasonText: "", //拒绝调解理由
+
 	plaintiffs: [], //原告列表
 	defendants: [], //被告列表
+
 	inputCaseInfoByFilePath: "", //案件信息文件路径（用于文件导入模式）
 });
 
@@ -37,6 +41,7 @@ const caseForm = ref({
 const componentsConfig = ref({
 	inputInfoByFile: true,
 	inputCaseInfoByFilePathDisabled: false,
+	inputInfoByFileSwitchStatus: true,
 });
 
 // ===下面是定义的变量 ===
@@ -76,6 +81,13 @@ const caseFormRules = ref({
 	],
 });
 
+
+
+// 接收父组件传递的方法
+const propData = defineProps({
+	propCaseData: Object,
+	propMode: String,
+})
 
 // 监听案件信息的输入方式是否发生变化，文件/前端输入
 function ChangeInputStatus() {
@@ -227,10 +239,100 @@ function onSubmit() {
 		});
 	}
 }
+
+
+function caseFormInfoInitiation(prop) {
+
+	// 已有案件内容以后的编辑模式
+	if (propData.propMode == "edit") {
+
+		console.log("当前CaseInfoform为编辑模式")
+
+		if (propData.propCaseData == null) {
+			console.log("没有传递过来案件信息");
+			return;
+		}
+		// 如果有传递过来的案件信息，则将其赋值给表单
+		let caseData = propData.propCaseData
+		console.log(caseData);
+		caseForm.value.caseId = caseData.caseId;
+		caseForm.value.caseCourtCode = caseData.caseCourtCode
+		caseForm.value.causeOfAction = caseData.causeOfAction;
+		caseForm.value.litigationAmount = caseData.litigationAmount;
+		caseForm.value.caseAgentStage = caseData.caseAgentStage;
+		caseForm.value.caseType = caseData.caseType.toString();
+		caseForm.value.courtName = caseData.courtName;
+		caseForm.value.mediationIntention = caseData.mediationIntention;
+		caseForm.value.caseFolderGeneratedPath = caseData.caseFolderGeneratedPath;
+		caseForm.value.riskAgentStatus = caseData.riskAgentStatus;
+
+		// 如果风险代理人状态为true，则将风险代理人的前期风险收费金额和后期风险收费比例赋值给表单
+		if (caseData.riskAgentStatus == true) {
+			caseForm.value.riskAgentUpfrontFee = caseData.riskAgentUpfrontFee;
+			caseForm.value.riskAgentPostFeeRate = caseData.riskAgentPostFeeRate;
+		} else {
+			caseForm.value.riskAgentUpfrontFee = "";
+			caseForm.value.riskAgentPostFeeRate = "";
+		}
+
+		caseForm.value.factAndReason = caseData.factAndReason;
+		caseForm.value.claimText = caseData.claimText;
+		caseForm.value.rejectMediationReasonText = caseData.rejectMediationReasonText;
+
+		// 因为是编辑模式，所以不显示文件导入模式的开关
+		componentsConfig.value.inputInfoByFileSwitchStatus = false;
+		// 因为是编辑模式，所以默认打开前端输入状态
+		inputInfoByFrontEndStatus.value = true;
+
+		console.log("案件信息已经传递过来了");
+		console.log(caseForm.value);
+	}
+	// 新建案件的创建模式
+	else if  (propData.propMode == "create") {
+		console.log("当前CaseInfoform为新建案件模式")
+
+		// 因为是新建模式，因此显示文件导入模式的开关
+		componentsConfig.value.inputInfoByFileSwitchStatus = true;
+		// 因为是编辑模式，所以默认关闭前端输入状态，
+		inputInfoByFrontEndStatus.value = false;
+		// 所有信息回归初始值（似乎引起了bug）
+		caseForm.value.caseId = "";
+		caseForm.value.caseCourtCode = "";
+		caseForm.value.causeOfAction = "";
+		caseForm.value.litigationAmount = "";
+		caseForm.value.caseAgentStage = [];
+		caseForm.value.caseType = "";
+		caseForm.value.courtName = "";
+		caseForm.value.mediationIntention = true;
+		caseForm.value.caseFolderGeneratedPath = "";
+		caseForm.value.riskAgentStatus = false;
+
+		caseForm.value.riskAgentUpfrontFee = "";
+		caseForm.value.riskAgentPostFeeRate = "";
+
+		caseForm.value.factAndReason = "";
+		caseForm.value.claimText = "";
+		caseForm.value.rejectMediationReasonText = "";
+
+		// caseForm.value.plaintiffs = [];
+		// caseForm.value.defendants = [];
+
+	}
+}
+
+// ====== 下面是在挂载时调用的方法 ======
+onMounted(() => {
+	caseFormInfoInitiation(propData);
+});
+// ====== 下面是在数据更新时调用的方法 ======
+onUpdated(() => {
+	caseFormInfoInitiation(propData);
+});
+
 </script>
 
 <template>
-	<el-form v-bind:model="caseForm" v-bind:rules="caseFormRules" label-width="auto" style="max-width: 700px"
+	<el-form v-bind:model="caseForm" v-bind:rules="caseFormRules" label-width="150" style="max-width: 700px"
 		ref="caseFormRef">
 
 
@@ -240,7 +342,7 @@ function onSubmit() {
 			<el-button type="danger" @click="onSubmit(ruleFormRef)">提交案件信息</el-button>
 		</el-form-item>
 
-		<el-form-item label="从文件中导入案件信息">
+		<el-form-item v-if="componentsConfig.inputInfoByFileSwitchStatus" label="文件导入模式">
 			<el-switch @change="ChangeInputStatus" v-model="componentsConfig.inputInfoByFile" />
 		</el-form-item>
 
@@ -350,6 +452,7 @@ function onSubmit() {
 		</ul>
 	</div> -->
 </template>
+
 
 <style>
 /* 展示信息表格的css */
