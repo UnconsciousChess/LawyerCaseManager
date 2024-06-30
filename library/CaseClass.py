@@ -903,7 +903,7 @@ class Case():
                 else:
                     for fee in self.GetAgentFixedFee():
                         f.write("%s," % fee)
-            f.write("法院案号是：%s\n" % self.GetCaseCourtCode())
+            f.write("法院案号：%s\n" % self.GetCaseCourtCode())
     
     # 输出案件信息到excel文件
     def OutputCaseInfoToExcel(self) -> None:
@@ -1005,6 +1005,7 @@ class Case():
         OutputStr += "诉讼请求=%s\n" % self.GetClaimText()
         OutputStr += "事实与理由=%s\n" % self.GetFactAndReasonText()
         OutputStr += "案件文件所在文件夹路径=%s\n" % self.GetCaseFolderPath()
+        OutputStr += "法院案号=%s\n" % self.GetCaseCourtCode()
 
         # 写原告主体列表
         index = 0

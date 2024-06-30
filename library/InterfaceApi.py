@@ -9,7 +9,36 @@ class Api:
 
         # case属性是一个列表，用于存放案件对象
         self._case = []
-  
+
+    # ===== 下面是获取文件或文件夹路径的方法 =====
+    def GetFilepath(self) -> str:
+        # 下面是用tkinter的方法获取文件的绝对路径
+        from tkinter import filedialog
+        # #  获取文件路径
+        SelectedFilePath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"),("Excel files", "*.xlsx")])
+        return SelectedFilePath
+
+        # 下面用webview的方法获取文件的绝对路径
+        # import webview
+        # FileTypes = [("Text files", "*.txt"),("Excel files", "*.xlsx")]
+        # result = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False, file_types=FileTypes)
+        # print(result)
+        # return result
+
+    def GetFolderpath(self) -> str:
+        # 下面是用tkinter的方法获取文件夹的绝对路径
+        from tkinter import filedialog
+        # 获取文件夹路径
+        SelectedFolderPath = filedialog.askdirectory()
+        return SelectedFolderPath
+
+        # 下面用webview的方法获取文件夹的绝对路径
+        # import webview
+        # result = window.create_file_dialog(webview.FOLDER_DIALOG)
+        # print(result)
+        # return result
+
+
     # ===== 下面是input方法 =====
     # 该方法用于生成案件文件夹及依据模板生成对应的文件
     def inputCaseFromFrontEndForm(self,CaseFormDict):
@@ -125,6 +154,12 @@ class Api:
         print(litigant.OutputLitigantInfoToFrontEnd())
         return litigant.OutputLitigantInfoToFrontEnd()
         
+    def bulkInputCaseFromTxt(self):
+        GetInputPath = self.GetFilepath()
+        # 调用inputAllCaseFromTxt方法将txt导入
+        self.inputAllCaseFromTxt(InputPath=GetInputPath)
+        return 0
+
 
     # ===== 下面是output方法 =====
     def OutputCaseInfoToExcel(self,caseId):
@@ -136,8 +171,7 @@ class Api:
             if case.GetCaseId() == caseId:
                 case.OutputCaseInfoToExcel()
                 return 0
-
-  
+            
     def OutputCaseInfoToTxt(self,caseId):
         # 判断案件列表是否为空
         if len(self._case) == 0:
@@ -151,25 +185,39 @@ class Api:
     def OutputAllCaseInfoToFrontEnd(self):
 
         # 如果案件列表为空，则生成案件对象，测试阶段使用
-        if len(self._case) == 0:
-            # 生成测试案件对象
-            self.test()
-
+        # if len(self._case) == 0:
+        #     # 生成测试案件对象
+        #     self.test()
         Result = []
         for case in self._case:
             Result.append(case.OutputCaseInfoToFrontEnd())
         # 返回案件列表
         return Result
     
-    def OutputAllCaseInfoToTxt(self,OutputPath):
+    def OutputAllCaseInfoToTxt(self,OutputFolderPath):
+        print(OutputFolderPath)
+        # 判断OutputPath是否存在
+        if not os.path.exists(OutputFolderPath):
+            print("Error: The path is not exist!")
+            return 1
+        # 判断OutputPath是否是文件夹
+        if not os.path.isdir(OutputFolderPath):
+            print("Error: The path is not a directory!")
+            return 2
+        OutputFolderPath = OutputFolderPath + "\\"
         OutputName = "所有案件信息输出.txt"
-        with open(OutputPath+OutputName,"w",encoding='utf-8') as f:
+        with open(OutputFolderPath+OutputName,"w",encoding='utf-8') as f:
             for case in self._case:
                 f.write("$CaseStart$\n")
                 f.write(case.OutputCaseInfoToStr())
                 f.write("$CaseEnd$\n\n")
             print("全部案件信息输出成功！")
+            return 0
 
+    def bulkOutputCaseInfoToTxt(self):
+        GetOutputFolderPath = self.GetFolderpath()
+        # 调用OutputAllCaseInfoToTxt方法输出
+        self.OutputAllCaseInfoToTxt(OutputFolderPath=GetOutputFolderPath)
     
 
     # ===== 下面是其他方法 =====
@@ -186,6 +234,8 @@ class Api:
                       TemplateListDir=r"test\TestData\TemplateFilesList.txt")
         
 
+
+
     # 该方法用于生成案件归档目录
     def generateArchiveDirectoryDocument(self,TemplateFilePath,SavedPath):
         # 导入自写包RenderFile中的RenderArchiveDirectory函数（生成归档目录）
@@ -201,21 +251,7 @@ class Api:
         return f"归档目录生成成功,保存路径为{SavedPath}"
     
 
-    def GetFilepath(self) -> str:
 
-        # 下面是用tkinter的方法获取文件的绝对路径
-        # 导入tkinter包
-        from tkinter import filedialog
-        # #  获取文件路径
-        SelectedFilePath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"),("Excel files", "*.xlsx")])
-        return SelectedFilePath
-
-        # 下面用webview的方法获取文件的绝对路径
-        # import webview
-        # FileTypes = [("Text files", "*.txt"),("Excel files", "*.xlsx")]
-        # result = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False, file_types=FileTypes)
-        # print(result)
-        # return result
 
 
     # ===== 下面是删除方法 =====

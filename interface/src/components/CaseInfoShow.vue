@@ -18,12 +18,14 @@
             </template>
         </el-table-column>
     </el-table>
-    
+
     <el-divider></el-divider>
     <!-- 刷新按钮 -->
     <div>
-        <el-button type="success" @click="createNewCase">新建案件</el-button>
-        <el-button type="primary" @click="getTableData">刷新数据</el-button>
+        <el-button color="#9EC1DD" @click="createNewCase">新建案件</el-button>
+        <el-button color="#B5BEF2" @click="getTableData">刷新数据</el-button>
+        <el-button color="#CEECAB" @click="handleBulkLoadingData">批量加载案件</el-button>
+        <el-button color="#FDC3D6" @click="handleBulkOutputData">批量导出案件</el-button>
     </div>
 
 
@@ -35,7 +37,7 @@
 
     <!-- 编辑对话框 -->
     <el-dialog title="编辑案件信息" width="700" align-center v-model="dialogEditDataVisible">
-        <CaseInfoForm :propCaseData="currentEditRow" :propMode="caseInfoFormMode"/>
+        <CaseInfoForm :propCaseData="currentEditRow" :propMode="caseInfoFormMode" />
     </el-dialog>
 
     <!-- 删除对话框 -->
@@ -63,7 +65,7 @@
 import { ref, onMounted, defineProps } from "vue";
 
 import CaseInfoShowDescription from "./CaseInfoShowDescription.vue";
-import CaseInfoForm  from "./CaseInfoForm.vue";
+import CaseInfoForm from "./CaseInfoForm.vue";
 
 
 // 初始化tableData，为空数组，是案件表格的数据
@@ -263,7 +265,7 @@ function generateShowText(row, expandedRows) {
 }
 
 // 创建新案件
-function createNewCase(){
+function createNewCase() {
     dialogEditDataVisible.value = true;
     // 改变caseInfoFormMode为create（有edit和create两种模式）
     caseInfoFormMode.value = "create";
@@ -329,6 +331,38 @@ function getTableData() {
     }
 
 }
+
+// 批量加载案件
+async function handleBulkLoadingData() {
+    console.log("批量加载案件");
+    // 如果未连接后端，则只测试前端
+    if (typeof pywebview === 'undefined') {
+        console.log("handleBulkLoadingData()：未连接后端，目前只测试前端");
+    }
+    // 如果连接了后端，则调用后端的函数
+    else {
+        let backendResult = await pywebview.api.bulkInputCaseFromTxt();
+        if (backendResult == 0) {   // 如果后端返回成功，则刷新数据
+            getTableData();
+        }
+
+    }
+}
+
+// 批量导出案件
+async function handleBulkOutputData() {
+    console.log("批量导出案件");
+    // 如果未连接后端，则只测试前端
+    if (typeof pywebview === 'undefined') {
+        console.log("handleBulkOutputData()：未连接后端，目前只测试前端");
+    }
+    // 如果连接了后端，则调用后端的函数
+    else {
+        pywebview.api.bulkOutputCaseInfoToTxt();
+    }
+}
+
+
 
 // 删除数据
 function deleteData(val) {
