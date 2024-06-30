@@ -16,7 +16,7 @@ class Litigant():
         # 1.姓名
         self._Name = ""
         # 2.身份证/统一社会信用代码
-        self._IDCode = ""
+        self._IdCode = ""
         # 3.联系地址
         self._Location = ""
         # 4.联系方式
@@ -34,7 +34,7 @@ class Litigant():
         # 10.法定代表人名称（专属于公司或非法人组织）
         self._LegalRepresentative = None
         # 11.法定代表人的身份证号码（专属于公司或非法人组织）
-        self._LegalRepresentativeIDCode = None
+        self._LegalRepresentativeIdCode = None
         # 12.诉讼代理人属性（一个列表）
         self._LawsuitRepresentative = []
 
@@ -44,8 +44,8 @@ class Litigant():
     def GetName(self):
         return self._Name
     # 定义外部获取诉讼参与人身份证/统一社会信用代码的方法
-    def GetIDCode(self):
-        return self._IDCode
+    def GetIdCode(self):
+        return self._IdCode
     # 定义外部获取诉讼参与人地址的方法
     def GetLocation(self):
         return self._Location
@@ -85,8 +85,8 @@ class Litigant():
     def GetLegalRepresentative(self):
         return self._LegalRepresentative
     # 定义外部获取法定代表人身份证号码的方法
-    def GetLegalRepresentativeIDCode(self):
-        return self._LegalRepresentativeIDCode
+    def GetLegalRepresentativeIdCode(self):
+        return self._LegalRepresentativeIdCode
     
 
     # =========== 下面是Set方法 ===========
@@ -101,19 +101,19 @@ class Litigant():
                 self._Name = Name
 
     # 定义外部设置诉讼参与人身份证/统一社会信用代码的方法
-    def SetIDCode(self,IDCode,debug=False):
-        if isinstance(IDCode,str):
-            if IDCode == "":
+    def SetIdCode (self,IdCode,debug=False):
+        if isinstance(IdCode,str):
+            if IdCode == "":
                 if debug:
-                    print("SetIDCode方法报错：诉讼参与人身份证号码不能为空")
+                    print("SetIdCode 方法报错：诉讼参与人身份证号码不能为空")
                 return
             # # 如果是自然人，则调用id_validator库的验证方法，判断身份证号码是否合法
-            # if not validator.is_valid(IDCode):
+            # if not validator.is_valid(IdCode):
             #     if debug:
-            #         print("SetIDCode方法报错：身份证号码有误")
+            #         print("SetIdCode 方法报错：身份证号码有误")
             #     return
             else:
-                self._IDCode = IDCode
+                self._IdCode = IdCode
 
     # 定义外部设置诉讼参与人地址的方法
     def SetLocation(self,Location):
@@ -162,27 +162,27 @@ class Litigant():
             self._LegalRepresentative = LegalRepresentative
 
     # 定义外部设置法定代表人身份证号码的方法
-    def SetLegalRepresentativeIDCode(self,LegalRepresentativeIDCode):
-        if isinstance(LegalRepresentativeIDCode,str):
-            if LegalRepresentativeIDCode == "":
-                print("SetLegalRepresentativeIDCode方法报错：法定代表人身份证号码不能为空")
+    def SetLegalRepresentativeIdCode(self,LegalRepresentativeIdCode):
+        if isinstance(LegalRepresentativeIdCode,str):
+            if LegalRepresentativeIdCode == "":
+                print("SetLegalRepresentativeIdCode方法报错：法定代表人身份证号码不能为空")
                 return
             # 调用id_validator库的验证方法，判断身份证号码是否合法
-            if not validator.is_valid(LegalRepresentativeIDCode):
-                print("SetLegalRepresentativeIDCode方法报错：法定代表人身份证号码有误")
+            if not validator.is_valid(LegalRepresentativeIdCode):
+                print("SetLegalRepresentativeIdCode方法报错：法定代表人身份证号码有误")
                 return
             else:
-                self._LegalRepresentativeIDCode = LegalRepresentativeIDCode
+                self._LegalRepresentativeIdCode = LegalRepresentativeIdCode
 
     # 定义内部根据规则设置诉讼参与人性别的方法
     def SetSexByRule(self,debug=False):
         # 先看诉讼参与人的属性是什么，如果是自然人，就可以设置性别属性
         if self._LitigantType == 1:
             # 如果有身份证号码，就可以判断性别
-            if hasattr(self,"_IDCode"):
+            if hasattr(self,"_IdCode"):
                 # 判断男女, 1 = 男性 0 = 女性
-                if len(self._IDCode) == 18:
-                    if int(self._IDCode[16]) % 2 == 1:
+                if len(self._IdCode) == 18:
+                    if int(self._IdCode[16]) % 2 == 1:
                         self._Sex = 1
                         return
                     else:
@@ -285,8 +285,8 @@ class Litigant():
             if key == "Name":
                 self.SetName(Name=information)
             # 诉讼参与人的身份证号码属性
-            if key == "IDCode":
-                self.SetIDCode(IDCode=information)
+            if key == "IdCode":
+                self.SetIdCode (IdCode=information)
             # 诉讼参与人的地址属性
             if key == "Location":
                 self.SetLocation(Location=information)
@@ -303,8 +303,8 @@ class Litigant():
             if key == "LegalRepresentative":
                 self.SetLegalRepresentative(LegalRepresentative=information)
             # 法定代表人身份证号码  
-            if key == "LegalRepresentativeIDCode":
-                self.SetLegalRepresentativeIDCode(LegalRepresentativeIDCode=information)
+            if key == "LegalRepresentativeIdCode":
+                self.SetLegalRepresentativeIdCode(LegalRepresentativeIdCode=information)
 
         # 如果传入了LitigantPosition参数，就直接设置诉讼参与人的地位属性，方便前端传入
         if LitigantPosition != "":
@@ -324,8 +324,8 @@ class Litigant():
             for key in LitigantInfoDict.keys():
                 if key == "name":
                     self.SetName(LitigantInfoDict[key])
-                if key == "idCode":
-                    self.SetIDCode(LitigantInfoDict[key])
+                if key == "IdCode":
+                    self.SetIdCode (LitigantInfoDict[key])
                 if key == "location":
                     self.SetLocation(LitigantInfoDict[key])
                 if key == "contactNumber":
@@ -338,8 +338,8 @@ class Litigant():
                     self.SetOurClient(LitigantInfoDict[key])
                 if key == "legalRepresentative":
                     self.SetLegalRepresentative(LitigantInfoDict[key])
-                if key == "legalRepresentativeIDCode":
-                    self.SetLegalRepresentativeIDCode(LitigantInfoDict[key])
+                if key == "legalRepresentativeIdCode":
+                    self.SetLegalRepresentativeIdCode(LitigantInfoDict[key])
 
        
 
@@ -352,10 +352,10 @@ class Litigant():
             return
         else:
             print("该诉讼主体名称="+str(self._Name)+"\n")
-            if self._IDCode is None:
+            if self._IdCode is None:
                 print("该诉讼主体身份证号码为空\n")
             else:
-                print(str(self._Name)+"的身份证、统一社会信用代码="+str(self._IDCode)+"\n")
+                print(str(self._Name)+"的身份证、统一社会信用代码="+str(self._IdCode)+"\n")
             if self._Location is None:
                 print("该诉讼主体地址为空\n")
             else:
@@ -388,7 +388,7 @@ class Litigant():
             # 如果是公司或非法人组织具有法定代表人属性，则输出该属性
             if self._LitigantType == 2 or self._LitigantType == 3:
                 print(str(self._Name)+"的法定代表人为"+str(self._LegalRepresentative)+"\n")
-                print(str(self._Name)+"的法定代表人身份证号码为"+str(self._LegalRepresentativeIDCode)+"\n")
+                print(str(self._Name)+"的法定代表人身份证号码为"+str(self._LegalRepresentativeIdCode)+"\n")
 
             # 输出是否为我方当事人
             if self._OurClient:
@@ -404,7 +404,7 @@ class Litigant():
 
         # 返回的字典中的键值对应的是前端需要的字段
         LitigantInfoDict["litigantName"] = self.GetName()
-        LitigantInfoDict["litigantIdNumber"] = self.GetIDCode()
+        LitigantInfoDict["litigantIdNumber"] = self.GetIdCode()
         LitigantInfoDict["litigantAddress"] = self.GetLocation()
         LitigantInfoDict["litigantPhoneNumber"] = self.GetContactNumber()
         LitigantInfoDict["litigantIsOurClient"] = self.IsOurClient()
@@ -412,7 +412,7 @@ class Litigant():
         # 如果是公司具有法定代表人属性
         if self.GetLitigantType() == 2 or self.GetLitigantType() == 3:
             LitigantInfoDict["legalRepresentative"] = self.GetLegalRepresentative()
-            LitigantInfoDict["legalRepresentativeIdNumber"] = self.GetLegalRepresentativeIDCode()
+            LitigantInfoDict["legalRepresentativeIdNumber"] = self.GetLegalRepresentativeIdCode()
 
         return LitigantInfoDict
 
@@ -425,7 +425,7 @@ class Lawyer():
         # 1.姓名
         self._Name = ""
         # 2.身份证号码
-        self._IDCode = ""
+        self._IdCode = ""
         # 3.联系地址
         self._Location = ""
         # 4.联系方式
@@ -443,8 +443,8 @@ class Lawyer():
         return self._Name
     
     # 定义外部获取律师身份证号的方法
-    def GetIDCode(self):
-        return self._IDCode
+    def GetIdCode(self):
+        return self._IdCode
     
     # 定义外部获取律师地址的方法
     def GetLocation(self):
@@ -473,8 +473,8 @@ class Lawyer():
         self._Name = Name
     
     # 定义外部设置律师身份证号的方法
-    def SetIDCode(self,IDCode):
-        self._IDCode = IDCode
+    def SetIdCode (self,IdCode):
+        self._IdCode = IdCode
 
     # 定义外部设置律师地址的方法
     def SetLocation(self,Location):
@@ -505,8 +505,8 @@ class Lawyer():
         for information in LitigantInfoFromTxtList:
             if "Name" in information:
                 self._Name = information.split("=")[-1]
-            if "IDCode" in information:
-                self._IDCode = information.split("=")[-1]
+            if "IdCode" in information:
+                self._IdCode = information.split("=")[-1]
             if "Location" in information:
                 self._Location = information.split("=")[-1]
             if "ContactNumber" in information:
@@ -525,7 +525,7 @@ class Lawyer():
     # 输出律师信息到屏幕
     def OutputLawyerInfoToScreen(self):
         print(self._Name+"律师的执业证号="+self._LawyerLicense)
-        print(self._Name+"律师的身份证号="+self._IDCode)
+        print(self._Name+"律师的身份证号="+self._IdCode)
         print(self._Name+"律师的联系方式="+self._ContactNumber)
         print(self._Name+"律师的收件地址="+self._Location)
         print(self._Name+"律师的律师证上传路径="+self._DocumentsPath)
