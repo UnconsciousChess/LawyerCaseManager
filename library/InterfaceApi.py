@@ -45,6 +45,61 @@ class Api:
 
         return 0
     
+    def inputAllCaseFromTxt(self,InputPath):
+        # 判断输入的路径是否存在
+        if not os.path.exists(InputPath):
+            print("Error: The path is not exist!")
+            return 1
+        # 判断输入的文件是否是txt文件
+        if not InputPath.endswith(".txt"):
+            print("Error: The file is not a txt file!")
+            return 2
+        
+        # 导入案件类Case
+        from library.CaseClass import Case
+
+        # 打开文件
+        with open(InputPath,"r",encoding='utf-8') as f:
+            CaseContentList = []
+            CurrentCaseContent = []
+            # 读取文件内容
+            Content = f.readlines()
+            # 将文件内容分成不同的CaseContent，并放入CaseContentList中
+            for line in Content:
+                # 如果读取到案件开始符，则跳过
+                if "$CaseStart$" in line:
+                    continue
+                # 如果当前行以#开头，则跳过
+                elif line.startswith("#"):
+                    continue
+                # 如果当前行为空行，则跳过
+                elif line == "\n":
+                    continue
+                # 如果读取到案件结束符，则将当前案件内容添加到CaseContentList中，同时清空当前案件内容
+                elif "$CaseEnd$" in line:
+                    CaseContentList.append(CurrentCaseContent)
+                    CurrentCaseContent = []
+                    continue
+                # 如果当前行不为空，则将当前行添加到当前案件内容中
+                else:
+                    # 去掉当前行的换行符
+                    line = line.strip("\n")
+                    CurrentCaseContent.append(line)
+
+            # 循环读取每个案件的CaseContent，注意CaseContent也是一个列表
+            for CaseContent in CaseContentList:
+                # 如果案件内容为空，则跳过
+                if CaseContent == "": 
+                    continue
+                # 实例化一个Case对象
+                case = Case()
+                # 将案件内容调用InputCaseInfoFromTxt方法导入到当前case对象中
+                case.InputCaseInfoFromStringList(CaseContent)
+                # 将案件对象添加到self._case中
+                self._case.append(case)
+
+        print("全部案件导入成功！")
+        return 0
 
     def inputLitigantFromTxt(self,TxtPath,LitigantType):
         # 判断输入的路径是否存在
@@ -94,21 +149,26 @@ class Api:
                 return 0
 
     def OutputAllCaseInfoToFrontEnd(self):
-        
-        
-        # 下面是正式代码
-        # 判断案件列表是否为空
+
+        # 如果案件列表为空，则生成案件对象，测试阶段使用
         if len(self._case) == 0:
-            # return 1
             # 生成测试案件对象
             self.test()
-             
 
         Result = []
         for case in self._case:
             Result.append(case.OutputCaseInfoToFrontEnd())
         # 返回案件列表
         return Result
+    
+    def OutputAllCaseInfoToTxt(self,OutputPath):
+        OutputName = "所有案件信息输出.txt"
+        with open(OutputPath+OutputName,"w",encoding='utf-8') as f:
+            for case in self._case:
+                f.write("$CaseStart$\n")
+                f.write(case.OutputCaseInfoToStr())
+                f.write("$CaseEnd$\n\n")
+            print("全部案件信息输出成功！")
 
     
 
@@ -174,4 +234,3 @@ class Api:
         # 直接先调用input方法，生成案件对象
         self.inputCaseFromTxt(r"test\TestData\测试案件信息输入.txt")
         self.inputCaseFromTxt(r"test\TestData\测试案件信息输入2.txt")
-        self.inputCaseFromTxt(r"test\TestData\测试案件信息输入3.txt")

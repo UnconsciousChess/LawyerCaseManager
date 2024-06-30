@@ -173,15 +173,15 @@ class Case():
             return CaseAgentStageOutputString
         for i in self._CaseAgentStage:
             if i == 1:
-                CaseAgentStageOutputString += "一审立案阶段、"
+                CaseAgentStageOutputString += "一审立案阶段,"
             elif i == 2:
-                CaseAgentStageOutputString += "一审开庭阶段、"
+                CaseAgentStageOutputString += "一审开庭阶段,"
             elif i == 3:
-                CaseAgentStageOutputString += "二审阶段、"
+                CaseAgentStageOutputString += "二审阶段,"
             elif i == 4:
-                CaseAgentStageOutputString += "执行阶段、"
+                CaseAgentStageOutputString += "执行阶段,"
             elif i == 5:
-                CaseAgentStageOutputString += "再审阶段、"
+                CaseAgentStageOutputString += "再审阶段,"
         # 去掉最后一个顿号
         CaseAgentStageOutputString = CaseAgentStageOutputString[:-1]
         return CaseAgentStageOutputString        
@@ -340,7 +340,7 @@ class Case():
     # 拒绝理由设定方法
     def SetRejectMediationReasonText(self,RejectReason,DebugMode=False):
         if isinstance(RejectReason,str):
-            self._RejectReason = RejectReason
+            self._RejectMediationReasonText = RejectReason
         else:
             if DebugMode:
                 print("SetRejectMediationReasonText报错：该输入对象的类型与属性不匹配,拒绝理由输入值为字符串")
@@ -505,8 +505,8 @@ class Case():
                 if Key == "Name":
                     litigant.SetName(Name=Value)
                 # 诉讼参与人的身份证号码属性
-                if Key == "IDCode":
-                    litigant.SetIDCode(IDCode=Value)
+                if Key == "IdCode":
+                    litigant.SetIdCode(IdCode=Value)
                 # 诉讼参与人的地址属性
                 if Key == "Location":
                     litigant.SetLocation(Location=Value)
@@ -523,8 +523,8 @@ class Case():
                 if Key == "LegalRepresentative":
                     litigant.SetLegalRepresentative(LegalRepresentative=Value)
                 # 法定代表人身份证号码  
-                if Key == "LegalRepresentativeIDCode":
-                    litigant.SetLegalRepresentativeIDCode(LegalRepresentativeIDCode=Value)
+                if Key == "LegalRepresentativeIdCode":
+                    litigant.SetLegalRepresentativeIdCode(LegalRepresentativeIdCode=Value)
 
             
             # 先根据规则设置诉讼参与人的类型属性
@@ -546,7 +546,7 @@ class Case():
         if Key == '案件类型':
             self.SetCaseType(int(Value))
 
-        elif Key == '诉讼标的额':
+        elif Key == '诉讼标的':
             self.SetLitigationAmount(float(Value))
 
         elif Key == '案由':
@@ -583,16 +583,19 @@ class Case():
             self.SetMediationIntention(Value)
             
         elif Key == '拒绝调解理由':
-            self.SetRejectMediationReasonText(str(Value))
+            self.SetRejectMediationReasonText(Value)
 
         elif Key == '案件代理阶段':
             # 将Value转换为数字，以便SetCaseAgentStage方法处理
             # 以逗号分割字符串,分割出各阶段的字符串列表
             StageList = Value.split(",")
             for stagestr in StageList:
-                if "一审" in stagestr:
+                if "一审立案" in stagestr:
+                    self.SetCaseAgentStage(1)
+                elif "一审开庭" in stagestr:
+                    self.SetCaseAgentStage(2)
+                elif "一审阶段" in stagestr:
                     self.SetCaseAgentStage([1,2])
-
                 elif "二审" in stagestr:
                     self.SetCaseAgentStage(3)
                 elif "执行" in stagestr:
@@ -620,7 +623,7 @@ class Case():
         elif Key == '法院案号':
             self.SetCaseCourtCode(Value)
 
-        elif Key == '案件当事人':
+        elif ('案件当事人' in Key) or ("原告" in Key) or ("被告" in Key) or ("第三人" in Key):
             self.SetLitigant(Value)
 
     # 设定一个类的内部方法，针对从前端读回来的信息（字典），逐个键值对进行处理，本方法后期重点维护  
@@ -731,6 +734,25 @@ class Case():
 
 
 
+
+    # 设定一个方法从字符串的列表中读取案件信息（主要便于前端的批量读入）
+    def InputCaseInfoFromStringList(self,CaseInfoStringList,DebugMode=False):
+        # 判断是否为列表
+        if not isinstance(CaseInfoStringList,list):
+            if DebugMode:
+                print("输入的案件信息不是列表")
+            return
+
+        # 逐个读取列表中的字符串
+        for line in CaseInfoStringList:
+            # 判断是否有等于号，没有则跳过
+            if "=" not in line:
+                continue
+            # 以等于号分割字符串
+            Key,Value = line.split("=")
+            # 对上述分割出来的键值对进行处理
+            self.SetCaseInfoWithKeyAndValue(Key,Value)
+
     # 读取一个txt文档的路径来输入上述案件信息
     def InputCaseInfoFromTxt(self,CaseInfoFilePath,DebugMode=False):
         # 判断路径是否存在
@@ -741,7 +763,7 @@ class Case():
         # 路径存在，则读取文件
         with open(CaseInfoFilePath,"r",encoding="utf-8") as f:
             CaseInfoLines = f.readlines()
-        # 去除每个案由的换行符
+        # 去除行的空格
         CaseInfoLines = [i.strip() for i in CaseInfoLines]
         # 逐行读取文件
         for line in CaseInfoLines:
@@ -789,7 +811,7 @@ class Case():
     # ===========Output方法：下面定义输出案件信息的方法=============
 
     # 输出案件信息到txt文件
-    def OutputCaseInfoToTxt(self,DebugMode=False):
+    def OutputCaseInfoToTxt(self,DebugMode=False) -> None:
         # 输出文件路径=案件文件夹路径中获取
         OutputFilePath = self.GetCaseFolderPath() 
         # 判断路径是否存在
@@ -826,46 +848,46 @@ class Case():
             index = 0
             for plaintiff in self.GetPlaintiffList():
                 index += 1
-                f.write("原告%d=Name:%s;IdCode=%s;Location=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIDCode=%s\n" 
+                f.write("原告%d=Name:%s;IdCode=%s;Location=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n" 
                         % (index,
                            plaintiff.GetName(),
-                           plaintiff.GetIDCode(),
+                           plaintiff.GetIdCode(),
                            plaintiff.GetLocation(),
                            plaintiff.GetContactNumber(),
                            plaintiff.GetLitigantPosition(),
                            plaintiff.IsOurClient(),
                            plaintiff.GetLegalRepresentative(),
-                            plaintiff.GetLegalRepresentativeIDCode()))
+                            plaintiff.GetLegalRepresentativeIdCode()))
 
             # 写被告主体列表
             index = 0
             for defendant in self.GetDefendantList():
                 index += 1
-                f.write("被告%d=Name:%s;IdCode=%s;Location=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIDCode=%s\n" 
+                f.write("被告%d=Name:%s;IdCode=%s;Location=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n" 
                         % (index,
                            defendant.GetName(),
-                           defendant.GetIDCode(),
+                           defendant.GetIdCode(),
                            defendant.GetLocation(),
                            defendant.GetContactNumber(),
                            defendant.GetLitigantPosition(),
                            defendant.IsOurClient(),
                            defendant.GetLegalRepresentative(),
-                           defendant.GetLegalRepresentativeIDCode()))
+                           defendant.GetLegalRepresentativeIdCode()))
 
             # 写第三人主体列表
             index = 0
             for thirdparty in self.GetLegalThirdPartyList():
                 index += 1
-                f.write("第三人%d=Name:%s;IdCode=%s;Location=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIDCode=%s\n"
+                f.write("第三人%d=Name:%s;IdCode=%s;Location=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n"
                         % (index,
                            thirdparty.GetName(),
-                           thirdparty.GetIDCode(),
+                           thirdparty.GetIdCode(),
                            thirdparty.GetLocation(),
                            thirdparty.GetContactNumber(),
                            thirdparty.GetLitigantPosition(),
                            thirdparty.IsOurClient(),
                            thirdparty.GetLegalRepresentative(),
-                           thirdparty.GetLegalRepresentativeIDCode()))
+                           thirdparty.GetLegalRepresentativeIdCode()))
 
             f.write("调解意愿=%s\n" % self.GetMediationIntention())
             f.write("拒绝调解理由=%s\n" % self.GetRejectMediationReasonText())
@@ -884,7 +906,7 @@ class Case():
             f.write("法院案号是：%s\n" % self.GetCaseCourtCode())
     
     # 输出案件信息到excel文件
-    def OutputCaseInfoToExcel(self):
+    def OutputCaseInfoToExcel(self) -> None:
         from openpyxl import Workbook
         from openpyxl.styles import Font,Alignment
 
@@ -966,6 +988,89 @@ class Case():
         print("案件信息已经保存到%s" % (OutputFilePath + OutputName))
 
 
+    # 输出案件信息为字符串
+    def OutputCaseInfoToStr(self) -> str:
+        # 初始化输出字符串
+        OutputStr = ""
+
+        # 逐个输出案件信息
+        OutputStr += "案件ID=%s\n" % self.GetCaseId()
+        OutputStr += "案件类型=%s\n" % self.GetCaseType()
+        OutputStr += "诉讼标的=%s\n" % self.GetLitigationAmount()
+        OutputStr += "案由=%s\n" % self.GetCauseOfAction()
+        OutputStr += "管辖法院="
+        for stage,court in self.GetJurisdictionDict().items():
+            OutputStr += "%s:%s," % (stage,court)
+        OutputStr += "\n"
+        OutputStr += "诉讼请求=%s\n" % self.GetClaimText()
+        OutputStr += "事实与理由=%s\n" % self.GetFactAndReasonText()
+        OutputStr += "案件文件所在文件夹路径=%s\n" % self.GetCaseFolderPath()
+
+        # 写原告主体列表
+        index = 0
+        for plaintiff in self.GetPlaintiffList():
+            index += 1
+            OutputStr += ("原告%d=Name:%s;IdCode:%s;Location:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n" 
+                    % (index,
+                        plaintiff.GetName(),
+                        plaintiff.GetIdCode(),
+                        plaintiff.GetLocation(),
+                        plaintiff.GetContactNumber(),
+                        plaintiff.GetLitigantPosition(),
+                        plaintiff.IsOurClient(),
+                        plaintiff.GetLegalRepresentative(),
+                        plaintiff.GetLegalRepresentativeIdCode()))
+
+        # 写被告主体列表
+        index = 0
+        for defendant in self.GetDefendantList():
+            index += 1
+            OutputStr += ("被告%d=Name:%s;IdCode:%s;Location:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n" 
+                    % (index,
+                        defendant.GetName(),
+                        defendant.GetIdCode(),
+                        defendant.GetLocation(),
+                        defendant.GetContactNumber(),
+                        defendant.GetLitigantPosition(),
+                        defendant.IsOurClient(),
+                        defendant.GetLegalRepresentative(),
+                        defendant.GetLegalRepresentativeIdCode()))
+
+        # 写第三人主体列表
+        index = 0
+        for thirdparty in self.GetLegalThirdPartyList():
+            index += 1
+            OutputStr += ("第三人%d=Name:%s;IdCode:%s;Location:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n"
+                    % (index,
+                        thirdparty.GetName(),
+                        thirdparty.GetIdCode(),
+                        thirdparty.GetLocation(),
+                        thirdparty.GetContactNumber(),
+                        thirdparty.GetLitigantPosition(),
+                        thirdparty.IsOurClient(),
+                        thirdparty.GetLegalRepresentative(),
+                        thirdparty.GetLegalRepresentativeIdCode()))
+
+        OutputStr += "调解意愿=%s\n" % self.GetMediationIntention()
+        OutputStr += "拒绝调解理由=%s\n" % self.GetRejectMediationReasonText()
+        OutputStr += "案件代理阶段=%s\n" % self.GetCaseAgentStageStr()
+
+        if self.GetRiskAgentStatus() == True:
+            OutputStr += "风险代理情况=1\n"
+            OutputStr += "风险代理前期费用=%s\n" % self.GetRiskAgentUpfrontFee()
+            OutputStr += "风险代理后期比例=%s\n" % self.GetRiskAgentPostFeeRate()
+        elif self.GetRiskAgentStatus() == False:
+            OutputStr += "风险代理情况=0\n"
+            OutputStr += "非风险代理的固定费用="
+            if self.GetAgentFixedFee() == []:
+                OutputStr += "无\n"
+            else:
+                for fee in self.GetAgentFixedFee():
+                    OutputStr += "%s," % fee
+        
+        # 最终输出
+        return OutputStr
+
     # 输出案件信息到前端（直接输出字典）
     def OutputCaseInfoToFrontEnd(self,DebugMode=False) -> dict:
         # 需要返回的字典初始化
@@ -1004,12 +1109,10 @@ class Case():
         return OutputDict
     
 
-    # 输出当前案件的当事人信息到前端
+    # 输出当前案件的当事人信息到前端（直接输出字典）
     def OutputLitigantInfoToFrontEnd(self,DebugMode=False) -> dict:
-
         # 需要返回的字典初始化
         OutputDict = {}
-
         # 原告主体列表（列表归零）
         LitigantList = []
         for plaintiff in self.GetPlaintiffList():
