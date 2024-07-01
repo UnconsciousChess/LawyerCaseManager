@@ -224,16 +224,22 @@ class Api:
 
     # ===== 下面是其他方法 =====
     # 该方法未完善
-    def FolderCreator(self):
+    def DocumentsGenerate(self,caseId):
+        # 先将对应caseId的案件对象找到，赋值给TargetCase
+        for case in self._case:
+            if case.GetCaseId() == caseId:
+                TargetCase = case
+                break
+
         # 导入自写包FolderCreator
         from source.Generator import FolderCreator
 
-        # 进行检验后面再写
-
         # 检验无误后，执行案件文件夹生成的操作
-        FolderCreator(case=self._case[0],              
-                      OutputDir=self._case[0].GetCaseFolderPath(),   
+        FolderCreator(case=TargetCase,              
+                      OutputDir=TargetCase.GetCaseFolderPath(),   
                       TemplateListDir=r"test\TestData\TemplateFilesList.txt")
+        print("案件文件夹及对应的文件模板生成成功！")
+        return 0
         
 
 

@@ -1,5 +1,5 @@
 <template>
-    <el-table :data="tableData" stripe style="width: 100%" empty-text="目前暂无案件" :expand-row-keys="expandRowKeys"
+    <el-table :data="tableData" style="width: 100%" empty-text="目前暂无案件" :expand-row-keys="expandRowKeys"
         :row-key="row => row.caseId" @expand-change="(row, expandedRows) => generateShowText(row, expandedRows)">
         <el-table-column label="" width="40" type="expand">
             <template #default>
@@ -9,12 +9,13 @@
         <el-table-column prop="index" label="序号" width="80" />
         <el-table-column prop="causeOfAction" label="案由" width="250" />
         <el-table-column prop="caseCourtCode" label="案号" width="250" />
-        <el-table-column fixed="right" label="操作" width="300">
+        <el-table-column fixed="right" label="操作" width="350">
             <template #default="{ row }">
                 <el-button type="primary" size="small" @click="handleEditData(row)">编辑</el-button>
                 <el-button type="danger" size="small" @click="handledeleteData(row)">删除</el-button>
-                <el-button type="success" size="small" @click="handleOutputData(row)">输出</el-button>
+                <el-button type="success" size="small" @click="handleOutputData(row)">导出</el-button>
                 <el-button color="#626aef" size="small" disabled>上传</el-button>
+                <el-button type="warning" size="small" plain @click="handleDocumentsGenerate(row)">文书生成</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -29,10 +30,6 @@
     </div>
 
 
-
-
-
-
     <!-- 下面是操作按钮以后的对话框 -->
 
     <!-- 编辑对话框 -->
@@ -45,8 +42,8 @@
         <span>确认删除当前案件吗？</span>
         <template #footer>
             <div>
-                <el-button @click="dialogDeleteDataVisible = false">取 消</el-button>
-                <el-button type="danger" @click="deleteData(currentDeleteRow)">确 定</el-button>
+                <el-button @click="dialogDeleteDataVisible = false">取消</el-button>
+                <el-button type="danger" @click="deleteData(currentDeleteRow)">确定</el-button>
             </div>
         </template>
     </el-dialog>
@@ -151,8 +148,6 @@ const testCase3 = {
     agentFixedFee: "一审3000元，二审5000元，执行1000元，再审1000元",
     caseId: "3.4"
 };
-
-
 
 
 
@@ -332,7 +327,8 @@ function getTableData() {
 
 }
 
-// 批量加载案件
+
+// 批量加载案件到后端,其中需要调用后端的函数
 async function handleBulkLoadingData() {
     console.log("批量加载案件");
     // 如果未连接后端，则只测试前端
@@ -363,8 +359,26 @@ async function handleBulkOutputData() {
 }
 
 
+// 编辑数据的前置函数
+function handleEditData(val) {
+    console.log("当前要编辑的案件id为" + val.caseId);
+    dialogEditDataVisible.value = true;
+    // 将当前要编辑的案件的对象传递给currentEditRow，便于接下来的组件调用
+    currentEditRow.value = val;
+    // 改变caseInfoFormMode为edit（有edit和create两种模式）
+    caseInfoFormMode.value = "edit";
+}
 
-// 删除数据
+// 删除数据的前置函数，作用是打开对话框，提示是否删除，最终确认后调用下面的deleteData
+function handledeleteData(val) {
+    // console.log("当前要输出的案件id为" + val.caseId);
+    dialogDeleteDataVisible.value = true;
+    // 将当前要删除的案件的对象传递给currentDeleteRow，便于接下来的组件调用
+    currentDeleteRow.value = val;
+    // console.log(currentDeleteRow.value);
+}
+
+// 具体删除数据的函数
 function deleteData(val) {
     console.log("当前要删除的案件id为" + val.caseId);
     // 将对话框隐藏
@@ -375,12 +389,16 @@ function deleteData(val) {
         (item) => item.caseId === val.caseId
     );
 
-    // 将对应的id传递给后端
-    try {
-        pywebview.api.BackEndDeleteCase(val.caseId);
-    } catch (e) {
-        console.log("未连接后端，目前只测试前端");
+    // 如果未连接后端，则只测试前端
+    if (typeof pywebview === 'undefined') {
+        console.log("deleteData()：未连接后端，目前只测试前端");
     }
+    // 将对应的id传递给后端(实际运行环境)
+    else {
+        pywebview.api.BackEndDeleteCase(val.caseId);
+    }
+
+
 
 
     // 删除tableData中对应数组index的数据
@@ -401,31 +419,15 @@ function deleteData(val) {
     }
 }
 
-function handleEditData(val) {
-    console.log("当前要编辑的案件id为" + val.caseId);
-    dialogEditDataVisible.value = true;
-    // 将当前要编辑的案件的对象传递给currentEditRow，便于接下来的组件调用
-    currentEditRow.value = val;
-    // 改变caseInfoFormMode为edit（有edit和create两种模式）
-    caseInfoFormMode.value = "edit";
-}
 
-function handledeleteData(val) {
-    // console.log("当前要输出的案件id为" + val.caseId);
-    dialogDeleteDataVisible.value = true;
-    // 将当前要删除的案件的对象传递给currentDeleteRow，便于接下来的组件调用
-    currentDeleteRow.value = val;
-    // console.log(currentDeleteRow.value);
-}
-
+// 输出数据的前置函数，作用是打开对话框，随后，再根据在对话框中的选择调用下面的outputToExcel或outputToTxt
 function handleOutputData(val) {
     // console.log("当前要输出的案件id为" + val.caseId);
     dialogOutputDataVisible.value = true;
     // 将当前要输出的案件的对象传递给currentOutputRow，便于接下来的组件调用
     currentOutputRow.value = val;
 }
-
-
+// 输出数据到excel
 function outputToExcel(val) {
     // 将对话框隐藏
     dialogOutputDataVisible.value = false;
@@ -435,13 +437,13 @@ function outputToExcel(val) {
     if (typeof pywebview === 'undefined') {
         console.log("outputToExcel()：未连接后端，目前只测试前端");
     }
-    // 如果连接了后端，则调用后端的函数
+    // 如果连接了后端，则调用后端的函数(实际运行环境)
     else {
         pywebview.api.OutputCaseInfoToExcel(val.caseId);
     }
 }
 
-
+// 输出数据到txt
 function outputToTxt(val) {
     // 将对话框隐藏
     dialogOutputDataVisible.value = false;
@@ -451,11 +453,31 @@ function outputToTxt(val) {
     if (typeof pywebview === 'undefined') {
         console.log("outputToTxt()：未连接后端，目前只测试前端");
     }
-    // 如果连接了后端，则调用后端的函数
+    // 如果连接了后端，则调用后端的函数(实际运行环境)
     else {
         pywebview.api.OutputCaseInfoToTxt(val.caseId);
     }
 }
+
+
+// 生成文书
+async function handleDocumentsGenerate(val) {
+    console.log("文书生成");
+    console.log("当前要生成文书的案件id为" + val.caseId)
+    // 如果未连接后端，则只测试前端
+    if (typeof pywebview === 'undefined') {
+        console.log("handleDocumentGenerate()：未连接后端，目前只测试前端");
+    }
+    // 如果连接了后端，则调用后端的函数,将当前案件id传到后端(实际运行环境)
+    else {
+         let result = await pywebview.api.DocumentsGenerate(val.caseId);
+         if (result == 0) {
+             console.log("文书生成成功");
+         }
+    }
+}
+
+
 
 
 // 加载页面时先调用一次getTableData()获取数据
