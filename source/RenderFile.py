@@ -156,7 +156,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
                     continue
             # 填入context
             context['我方当事人名称'] = client.GetName()
-            context['我方当事人身份号码'] = client.GetIDCode()
+            context['我方当事人身份号码'] = client.GetIdCode()
             context['我方当事人地址'] = client.GetLocation()
             context['我方当事人电话'] = client.GetContactNumber()
             
@@ -192,7 +192,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
                     continue
             # 填入context
             context['对方当事人名称'] = opposlitigant.GetName()
-            context['对方当事人身份号码'] = opposlitigant.GetIDCode()
+            context['对方当事人身份号码'] = opposlitigant.GetIdCode()
             context['对方当事人地址'] = opposlitigant.GetLocation()
             context['对方当事人电话'] = opposlitigant.GetContactNumber()
 
@@ -281,9 +281,9 @@ def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
                     else:
                         plaintiffinfo = "原告" + str(Case.GetPlaintiffList().index(plaintiff)+1) + ":" + plaintiff.GetName() + "，"
                     if plaintiff.GetLitigantType() == 1:
-                        plaintiffinfo +=  "身份证号码：" + plaintiff.GetIDCode() + "，" 
+                        plaintiffinfo +=  "身份证号码：" + plaintiff.GetIdCode() + "，" 
                     elif plaintiff.GetLitigantType() == 2 or plaintiff.GetLitigantType() == 3:
-                        plaintiffinfo += "统一社会信用代码：" + plaintiff.GetIDCode() + "，"
+                        plaintiffinfo += "统一社会信用代码：" + plaintiff.GetIdCode() + "，"
                         plaintiffinfo += "法定代表人/负责人：" + plaintiff.GetLegalRepresentative() + "，"
                     # 地址和联系方式
                     if plaintiff.GetLocation() != None:
@@ -306,9 +306,9 @@ def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
                     else:    
                         defendantinfo = "被告" + str(Case.GetDefendantList().index(defendant)+1) + ":" + defendant.GetName() + "，"
                     if defendant.GetLitigantType() == 1:
-                        defendantinfo +=  "身份证号码：" + defendant.GetIDCode() + "，" 
+                        defendantinfo +=  "身份证号码：" + defendant.GetIdCode() + "，" 
                     elif defendant.GetLitigantType() == 2 or defendant.GetLitigantType() == 3:
-                        defendantinfo += "统一社会信用代码：" + defendant.GetIDCode() + "，"
+                        defendantinfo += "统一社会信用代码：" + defendant.GetIdCode() + "，"
                         defendantinfo += "法定代表人/负责人：" + defendant.GetLegalRepresentative() + "，"
                     # 地址和联系方式
                     if defendant.GetLocation() != None:
@@ -396,12 +396,12 @@ def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
                     # 如果是自然人
                     if client.GetLitigantType() == 1:
                         para.add_run( "身份证号码：" )
-                        run = para.add_run(client.GetIDCode() + "\n") 
+                        run = para.add_run(client.GetIdCode() + "\n") 
                         run.underline = True
                     # 如果是法人或者其他组织
                     elif client.GetLitigantType() == 2 or client.GetLitigantType() == 3:
                         para.add_run( "统一社会信用代码：" )
-                        run = para.add_run(client.GetIDCode() + "\n")
+                        run = para.add_run(client.GetIdCode() + "\n")
                         
                         run.underline = True
                     # 将该run设置为宋体
