@@ -1106,8 +1106,31 @@ class Case():
             OutputDict["riskAgentPostFeeRate"] = ""
             OutputDict["agentFixedFee"] = self.GetAgentFixedFee()
 
+        # 原告主体列表（列表归零）
+        LitigantList = []
+        for plaintiff in self.GetPlaintiffList():
+            LitigantList.append(plaintiff.OutputLitigantInfoToFrontEnd())
+        OutputDict["plaintiffs"] = LitigantList
+
+        # 被告主体列表（列表重新归零）
+        LitigantList = []
+        for defendant in self.GetDefendantList():
+            LitigantList.append(defendant.OutputLitigantInfoToFrontEnd())
+        OutputDict["defendants"] = LitigantList
+
+        # 第三人主体列表（列表重新归零）
+        LitigantList = []
+        for thirdparty in self.GetLegalThirdPartyList():
+            LitigantList.append(thirdparty.OutputLitigantInfoToFrontEnd())
+        OutputDict["thirdParties"] = LitigantList
+
+        # 原告名字字符串
+        OutputDict["plaintiffNames"] = self.GetAllPlaintiffNames()
+        # 被告名字字符串
+        OutputDict["defendantNames"] = self.GetAllDefendantNames()
+
         # 测试
-        # print(OutputDict)
+        print(OutputDict)
         # 返回字典
         return OutputDict
     

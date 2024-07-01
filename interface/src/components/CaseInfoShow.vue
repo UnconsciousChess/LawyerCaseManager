@@ -7,9 +7,9 @@
             </template>
         </el-table-column>
         <el-table-column prop="index" label="序号" width="55" />
-        <!-- <el-table-column prop="causeOfAction" label="案由" width="180" /> -->
-        <el-table-column prop="caseCourtCode" label="案号" width="200" />
-        <el-table-column prop="caseCourtCode" label="当事人" width="450" />
+        <el-table-column prop="causeOfAction" label="案由" width="180" />
+        <!-- <el-table-column prop="caseCourtCode" label="案号" width="200" /> -->
+        <el-table-column prop="litigantsName" label="当事人" width="350" />
         <el-table-column fixed="right" label="操作" width="400">
             <template #default="{ row }">
                 <el-button type="primary" size="small" @click="handleEditData(row)">编辑</el-button>
@@ -310,12 +310,16 @@ function getTableData() {
                     rejectMediationReasonText: cases[i].rejectMediationReasonText,
                     agentFixedFee: cases[i].agentFixedFee,
                     caseId: cases[i].caseId,
+                    plaintiffs: cases[i].plaintiffs,
+                    defendants: cases[i].defendants,
+                    thirdParties: cases[i].thirdParties,
 
+                    litigantsName : cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames ,
                     // 测试title的数据
                     title: cases[i].causeOfAction + "一案，编号：" + cases[i].caseId,
 
                 });
-                // console.log(tableData.value)
+                console.log(tableData.value)
 
             }
 
@@ -327,7 +331,6 @@ function getTableData() {
     }
 
 }
-
 
 // 批量加载案件到后端,其中需要调用后端的函数
 async function handleBulkLoadingData() {
