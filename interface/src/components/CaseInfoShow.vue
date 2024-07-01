@@ -6,10 +6,11 @@
                 <CaseInfoShowDescription :propShowTextList="showTextList" :propId="caseId" />
             </template>
         </el-table-column>
-        <el-table-column prop="index" label="序号" width="80" />
-        <el-table-column prop="causeOfAction" label="案由" width="250" />
-        <el-table-column prop="caseCourtCode" label="案号" width="250" />
-        <el-table-column fixed="right" label="操作" width="350">
+        <el-table-column prop="index" label="序号" width="55" />
+        <!-- <el-table-column prop="causeOfAction" label="案由" width="180" /> -->
+        <el-table-column prop="caseCourtCode" label="案号" width="200" />
+        <el-table-column prop="caseCourtCode" label="当事人" width="450" />
+        <el-table-column fixed="right" label="操作" width="400">
             <template #default="{ row }">
                 <el-button type="primary" size="small" @click="handleEditData(row)">编辑</el-button>
                 <el-button type="danger" size="small" @click="handledeleteData(row)">删除</el-button>
@@ -94,10 +95,10 @@ const caseInfoFormMode = ref(null);
 const testCase1 = {
     index: 1,
     title: "案件1",
-    causeOfAction: "案由1",
+    causeOfAction: "信息网络买卖合同纠纷",
     litigationAmount: "1000",
     courtName: "法院1",
-    caseCourtCode: "案号1",
+    caseCourtCode: "（2024）粤0303民初12507号",
     mediationIntention: false,
     riskAgentUpfrontFee: "100",
     caseType: 1,

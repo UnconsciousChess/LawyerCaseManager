@@ -44,9 +44,8 @@ def FolderNameCreator(case) -> str:
     return FolderName
 
 
-
+# 生成文件夹，同时调用source.RenderFile中的方法生成对应的文书   
 def FolderCreator(case,OutputDir,TemplateListDir) -> None: 
-
 
     def ReadTemplateList(TemplateListDir):   # 读取模板列表的子函数
         # 设定一个字典，是模板类型和模板文件列表的关系
@@ -96,12 +95,13 @@ def FolderCreator(case,OutputDir,TemplateListDir) -> None:
             
         return TemplateFilesDict
     
+
     # 如果TemplateListDir存在，则读取模板列表
     if os.path.exists(TemplateListDir):
         TemplateFilesDict = ReadTemplateList(TemplateListDir)
     else:
         print("模板列表文件不存在")
-        return
+        return -1
 
     # 创建案件项目文件夹到指定目录Outputdir下面，其中项目文件夹名称由案件的原告、被告和案由组成
     os.chdir(OutputDir)
@@ -177,6 +177,11 @@ def FolderCreator(case,OutputDir,TemplateListDir) -> None:
             os.chdir("..")
         else:
             print("无须生成%s阶段的文件夹及文档" % stage)
+
+    # 回到之前的目录
+    os.chdir(OutputDir)
+    
+    return 0
 
 
 

@@ -15,27 +15,36 @@ from docx.oxml.ns import qn
 from docx.shared import Pt    # 字体大小转换模块
 
 
-
 # 不要生成字节码
 sys.dont_write_bytecode = True
 
 
+def CheckFolderPath(OutputDir) -> None:
+    # 判断该文件夹路径是否以\结尾，如果不是则加上
+    if OutputDir[-1] != "\\":
+        OutputDir += "\\"
+    return OutputDir
+
+# 遍历文件夹，删除文件夹下与待生成文书同名的文件
 def DeleteFileIfExist(OutputDir,FileName) -> None:
+    # 检查OutputDir是否以\结尾，如果不是则加上
+    OutputDir = CheckFolderPath(OutputDir) 
     # 判断是否存在同名文件，如果存在就删除原文件
-    if os.path.exists(OutputDir + "\\" + FileName):
+    if os.path.exists(OutputDir + FileName):
         # 防止因文件被WINWORD或其他应用打开中而删除失败
         while True:
             try:
-                os.remove(OutputDir + "\\" + FileName)
+                os.remove(OutputDir + FileName)
                 break
             except:
                 time.sleep(3)
                 print("该文件被其他程序占用，删除原同名文件失败,等待3秒后重试")
     return
     
-
+# 用docxtpl库来渲染文书
 def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
-        
+    # 检查OutputDir是否以\结尾，如果不是则加上
+    OutputDir = CheckFolderPath(OutputDir) 
     # 读取模板文件
     doc = DocxTemplate(TemplateFileDir)
     # 获取模板文件名
@@ -68,9 +77,9 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
     context["全部原告名称"] = Case.GetAllPlaintiffNames()
     # 获取全部被告信息
     context["全部被告名称"] = Case.GetAllDefendantNames()
-    # 委托付费信息
 
-    # 先判断是否需要收费,如果status是None，则不需要收费；是True则为风险收费；是False则为固定收费
+    # 读取委托付费信息
+    # 判断是否需要收费,如果status是None，则不需要收费；是True则为风险收费；是False则为固定收费
     if Case.GetRiskAgentStatus() is not None:
         # 先判断是否为风险收费
         if Case.GetRiskAgentStatus() == True:                 # 风险收费
@@ -117,7 +126,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
     context['我方全部当事人'] = Case.GetOurClientNames()
 
     # 判断是否为需要分开不同人做的材料
-           
+
     # 我方当事人需要分开的列表
     OurClientMultipleFileList = ["授权委托书","征求意见表","账户确认书","提交材料清单","地址确认书"]     
     # 对方当事人需要分开的列表
@@ -149,7 +158,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
                 # 下面获取法人代表名称
                 context["我方当事人法定代表人"] = client.GetLegalRepresentative()
                 # 获取法人代表身份证号码
-                context["我方当事人法定代表人身份号码"] = client.GetLegalRepresentativeIDCode()
+                context["我方当事人法定代表人身份号码"] = client.GetLegalRepresentativeIdCode()
             #  如果我方当事人是自然人
             if client.GetLitigantType() == 1:
                 if "法人、其他组织版"  in TemplaterFileName:
@@ -172,7 +181,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
             # 判断是否存在同名文件，如果存在就删除原文件
             DeleteFileIfExist(OutputDir,DocSaveName)
             # 保存文件
-            doc.save(OutputDir + "\\" + DocSaveName)
+            doc.save(OutputDir + DocSaveName)
 
     # 如果当前文书是对方当事人需要分开的文书，则遍历对方当事人列表并分别生成
     if CurrentTemplateFileIsInOppositeMultipleFileList:
@@ -185,7 +194,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
                     # 下面获取法人代表名称
                 context["对方当事人法定代表人"] = opposlitigant.GetLegalRepresentative()
                 # 获取法人代表身份证号码
-                context["对方当事人法定代表人身份号码"] = opposlitigant.GetLegalRepresentativeIDCode()                   
+                context["对方当事人法定代表人身份号码"] = opposlitigant.GetLegalRepresentativeIdCode()                   
                 #  如果我方当事人是自然人
             if opposlitigant.GetLitigantType() == 1:
                 if "法人、其他组织版"  in TemplaterFileName:
@@ -202,13 +211,13 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
             # 判断是否存在同名文件，如果存在就删除原文件
             DeleteFileIfExist(OutputDir,DocSaveName)
             # 保存文件
-            doc.save(OutputDir + "\\" + DocSaveName)
+            doc.save(OutputDir + DocSaveName)
 
 
     # 如果当前文书是法院需要分开的文书，则遍历法院字典并分别生成
     if CurrentTemplateFileIsInCourtMultipleFileList:
         for stage , jurisdictionname in Case.GetJurisdictionDict().items():
-            # 根据情况填入
+            #  根据情况填入
             if stage !="" and jurisdictionname !="":
                 context['管辖法院'] = jurisdictionname
                 context['委托阶段'] = stage
@@ -220,23 +229,25 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
                 # 判断是否存在同名文件，如果存在就删除原文件
                 DeleteFileIfExist(OutputDir,DocSaveName)
                 # 保存文件
-                doc.save(OutputDir + "\\" + DocSaveName)
+                doc.save(OutputDir + DocSaveName)
 
     # 如果当前文书不需要分开，则直接渲染
     if (not CurrentTemplateFileIsInOurClientMultipleFileList and 
-        not CurrentTemplateFileIsInOppositeMultipleFileList):
+        not CurrentTemplateFileIsInOppositeMultipleFileList  and 
+        not CurrentTemplateFileIsInCourtMultipleFileList):
         # 直接渲染模板
         doc.render(context)
         # 判断是否存在同名文件，如果存在就删除原文件
         DeleteFileIfExist(OutputDir,TemplaterFileName)
         # 保存文件
-        doc.save(OutputDir + "\\" + TemplaterFileName)
+        doc.save(OutputDir + TemplaterFileName)
 
     return
               
-
+# 用python-docx库来渲染文书
 def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
-
+    # 检查OutputDir是否以\结尾，如果不是则加上
+    OutputDir = CheckFolderPath(OutputDir) 
     # 下面这些函数是在python-docx库的基础上封装的，用来简化一些常用的操作，增加后面程序可读性
     # 因为python-docx有bug，无法用该库简便的方式设置字体,所以自己另行封装一个函数RunSetFont来设置Run的字体
     def RunSetFont(currentrun,fontname):
@@ -255,9 +266,9 @@ def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
                     run.underline = True
                 return
             
-    def TestRunInPara(para):
-        for run in para.runs:
-            print(run.text)
+    # def TestRunInPara(para):
+    #     for run in para.runs:
+    #         print(run.text)
         
 
     # 获取模板文件名
@@ -354,8 +365,9 @@ def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
         FileName = TemplateFileName.replace(".docx","")
         # 加上原被告双方的名字，中间用"V."隔开，再加上后缀
         FileName += "（" + Case.GetAllPlaintiffNames() + "v." + Case.GetAllDefendantNames() + "）" + ".docx"
+        
         # 检查同名文件并删除
-        DeleteFileIfExist(OutputDir,FileName)           
+        DeleteFileIfExist(OutputDir,FileName)         
         # 保存文件
         Doc.save(OutputDir + FileName)
 
@@ -502,13 +514,15 @@ def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
         # 加上所有Ourclient的名字
         FileName = FileName + "（" + Case.GetOurClientNames() + "）" + ".docx"
         # 检查同名文件并删除
-        DeleteFileIfExist(OutputDir,FileName)           
+        DeleteFileIfExist(OutputDir,FileName)   
         # 保存文件
         Doc.save(OutputDir + FileName)
 
 
 # 归档卷内目录自动生成功能
 def RenderArchiveDirectory(TemplateFileDir,RenderDict,OutputDir) -> None:
+    # 检查OutputDir是否以\结尾，如果不是则加上
+    OutputDir = CheckFolderPath(OutputDir) 
     # 获取模板文件名
     TemplateFileName = TemplateFileDir.split("\\")[-1]
     # 实例化模板文件
@@ -544,5 +558,5 @@ def RenderArchiveDirectory(TemplateFileDir,RenderDict,OutputDir) -> None:
                 
     TemplateFileName += "（" + "已填充完成" + "）.docx"
     # 保存文件
-    Doc.save(OutputDir + "\\" + TemplateFileName)
+    Doc.save(OutputDir + TemplateFileName)
     return

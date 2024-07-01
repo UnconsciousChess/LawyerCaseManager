@@ -3,6 +3,7 @@ import os,sys
 # 不要生成字节码
 sys.dont_write_bytecode = True
 
+
 # 定义一个Api类，用于与前端交互 
 class Api:
     def __init__(self):
@@ -11,11 +12,11 @@ class Api:
         self._case = []
 
     # ===== 下面是获取文件或文件夹路径的方法 =====
-    def GetFilepath(self) -> str:
+    def GetFilepath(self,title) -> str:
         # 下面是用tkinter的方法获取文件的绝对路径
         from tkinter import filedialog
         # #  获取文件路径
-        SelectedFilePath = filedialog.askopenfilename(filetypes=[("Text files", "*.txt"),("Excel files", "*.xlsx")])
+        SelectedFilePath = filedialog.askopenfilename(title=title,filetypes=[("Text files", "*.txt"),("Excel files", "*.xlsx")])
         return SelectedFilePath
 
         # 下面用webview的方法获取文件的绝对路径
@@ -157,7 +158,7 @@ class Api:
         return litigant.OutputLitigantInfoToFrontEnd()
         
     def bulkInputCaseFromTxt(self):
-        GetInputPath = self.GetFilepath()
+        GetInputPath = self.GetFilepath(title="请选择案件信息输入文件")
         # 调用inputAllCaseFromTxt方法将txt导入
         self.inputAllCaseFromTxt(InputPath=GetInputPath)
         return 0
@@ -233,12 +234,18 @@ class Api:
 
         # 导入自写包FolderCreator
         from source.Generator import FolderCreator
-
+        # 读取模板列表文件
+        TemplateListDir = self.GetFilepath(title="请选择模板列表文件")
         # 检验无误后，执行案件文件夹生成的操作
-        FolderCreator(case=TargetCase,              
+        Result = FolderCreator(case=TargetCase,              
                       OutputDir=TargetCase.GetCaseFolderPath(),   
-                      TemplateListDir=r"test\TestData\TemplateFilesList.txt")
+                      TemplateListDir=TemplateListDir)
+        if Result == -1:
+            print("Generator报错")
+            return -1
+        
         print("案件文件夹及对应的文件模板生成成功！")
+        # 返回值为0代表生成成功
         return 0
         
 
@@ -274,7 +281,7 @@ class Api:
                 return 
     
     # ===== 下面是测试方法 =====
-    def test(self):
-        # 直接先调用input方法，生成案件对象
-        self.inputCaseFromTxt(r"test\TestData\测试案件信息输入.txt")
-        self.inputCaseFromTxt(r"test\TestData\测试案件信息输入2.txt")
+    # def test(self):
+    #     # 直接先调用input方法，生成案件对象
+    #     self.inputCaseFromTxt(r"test\TestData\测试案件信息输入.txt")
+    #     self.inputCaseFromTxt(r"test\TestData\测试案件信息输入2.txt")
