@@ -266,22 +266,15 @@ class Api:
         return f"归档目录生成成功,保存路径为{SavedPath}"
     
 
-
-
-
     # ===== 下面是删除方法 =====
     def BackEndDeleteCase(self,CaseId):
         # 测试是否收到了前端传来的案件ID
         print(CaseId)
         # 在案件列表中删除指定案件
         for case in self._case:
-            # 判断案件ID是否相同,如果相同则在后端也删除并返回
+            # 判断案件ID是否相同,如果相同则在后端也删除对应id的案件并返回
             if case.GetCaseId() == CaseId:
                 self._case.remove(case)
                 return 
     
-    # ===== 下面是测试方法 =====
-    # def test(self):
-    #     # 直接先调用input方法，生成案件对象
-    #     self.inputCaseFromTxt(r"test\TestData\测试案件信息输入.txt")
-    #     self.inputCaseFromTxt(r"test\TestData\测试案件信息输入2.txt")
+
