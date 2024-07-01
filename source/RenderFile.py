@@ -1,18 +1,12 @@
 # 导入自带模块-时间
 import time
 # 导入自带模块-系统
-
 import os,sys
-
-
 
 # 导入第三方库docxtpl
 from docxtpl import DocxTemplate
-
-# 导入第三方库python-docx
+# 导入第三方库python-docx(目前还作为RenderArchiveDirectory的依赖库，看后续该函数是否也不要python-docx)
 from docx import Document
-from docx.oxml.ns import qn
-from docx.shared import Pt    # 字体大小转换模块
 
 
 # 不要生成字节码
@@ -55,8 +49,9 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
     CurrentTemplateFileIsInOppositeMultipleFileList = False
     CurrentTemplateFileIsInCourtMultipleFileList = False
 
+    # 自动生成时间信息
     context = {
-        # 自动生成时间信息
+
         '年' : time.strftime("%Y",time.localtime()),
         '月' : time.strftime("%m",time.localtime()),
         '日' : time.strftime("%d",time.localtime()),
@@ -67,16 +62,65 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
     # context["管辖法院"] = Case.GetJurisdiction()
     context["委托阶段"] = Case.GetCaseAgentStageStr()
 
-    # 如果委托阶段包括立案阶段，那么案号不可能存在，应当写作“本案未立案，最终以实际案号为准”
-    if 1 in Case.GetCaseAgentStage():
-        context["案号"] = "本案未立案，最终以实际案号为准"
-    else:
-        context["案号"] = Case.GetCaseCourtCode()
-
     # 获取全部原告信息
     context["全部原告名称"] = Case.GetAllPlaintiffNames()
     # 获取全部被告信息
     context["全部被告名称"] = Case.GetAllDefendantNames()
+
+    # 获取事实和理由
+    context["事实和理由"] = Case.GetFactAndReasonText()
+    # 获取诉讼请求
+    context["诉讼请求"] = Case.GetClaimText()
+
+    # 获取案号
+    if Case.GetCaseCourtCode() == "":
+        context["案号"] = "本案尚未立案，最终以实际案号为准"
+    else:
+        context["案号"] = Case.GetCaseCourtCode()
+
+    # 获取每一原告身份信息的字典，并将其装到一个字典里面
+    PlaintiffIdentityDict = {}
+    # 用i来记录原告的序号
+    i = 0
+    for plaintiff in Case.GetPlaintiffList():
+        i += 1
+        PlaintiffIdentityDict[i] = plaintiff.OutputLitigantInfoToFrontEnd()
+    context["plaintiffList"] = PlaintiffIdentityDict
+    # print(PlaintiffIdentityDict)
+
+    # 获取每一被告身份信息的字典，并将其装到一个字典里面
+    DefendantIdentityDict = {}
+    # 用i来记录被告的序号
+    i = 0
+    for defendant in Case.GetDefendantList():
+        i += 1
+        DefendantIdentityDict[i] = defendant.OutputLitigantInfoToFrontEnd()
+    context["defendantList"] = DefendantIdentityDict
+    # print(DefendantIdentityDict)
+
+    # 获取每一第三人身份信息的字典，并将其装到一个字典里面
+    ThirdPartyIdentityDict = {}
+    # 用i来记录第三人的序号
+    i = 0
+    for thirdparty in Case.GetLegalThirdPartyList():
+        i += 1
+        ThirdPartyIdentityDict[i] = thirdparty.OutputLitigantInfoToFrontEnd()
+    context["thirdpartyList"] = ThirdPartyIdentityDict
+    # print(ThirdPartyIdentityDict)
+
+    # 获取我方当事人列表以及我方代理原告还是被告
+    OurClientList,OurClientSide = Case.GetOurClientListAndSide()
+
+    # 获取我方当事人的字典，将其装到一个字典里面
+    OurClientIdentityDict = {}
+    # 用i来记录我方当事人的序号
+    i = 0
+    for client in OurClientList:
+        i += 1
+        OurClientIdentityDict[i] = client.OutputLitigantInfoToFrontEnd()
+    context["ourClientList"] = OurClientIdentityDict
+    # print(OurClientIdentityDict)
+
 
     # 读取委托付费信息
     # 判断是否需要收费,如果status是None，则不需要收费；是True则为风险收费；是False则为固定收费
@@ -111,8 +155,6 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
             context["固定代理费收费规则"] = FixedFeeRuleStr
 
 
-    # 获取我方当事人列表
-    OurClientList,OurClientSide = Case.GetOurClientListAndSide()
     # 如果代理原告,对方全部当事人则为被告
     if OurClientSide == "p":
         context['对方全部当事人'] = context["全部被告名称"]
@@ -125,7 +167,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
     # 获取我方全部当事人名称
     context['我方全部当事人'] = Case.GetOurClientNames()
 
-    # 判断是否为需要分开不同人做的材料
+    # 判断是否为需要分开不同情况，根据同一模板生成不同的文件
 
     # 我方当事人需要分开的列表
     OurClientMultipleFileList = ["授权委托书","征求意见表","账户确认书","提交材料清单","地址确认书"]     
@@ -235,6 +277,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
     if (not CurrentTemplateFileIsInOurClientMultipleFileList and 
         not CurrentTemplateFileIsInOppositeMultipleFileList  and 
         not CurrentTemplateFileIsInCourtMultipleFileList):
+        context['管辖法院'] = Case.GetJurisdictionDict()["一审"]
         # 直接渲染模板
         doc.render(context)
         # 判断是否存在同名文件，如果存在就删除原文件
@@ -243,282 +286,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
         doc.save(OutputDir + TemplaterFileName)
 
     return
-              
-# 用python-docx库来渲染文书
-def RenderFileInDOCX(TemplateFileDir,Case,OutputDir) -> None:
-    # 检查OutputDir是否以\结尾，如果不是则加上
-    OutputDir = CheckFolderPath(OutputDir) 
-    # 下面这些函数是在python-docx库的基础上封装的，用来简化一些常用的操作，增加后面程序可读性
-    # 因为python-docx有bug，无法用该库简便的方式设置字体,所以自己另行封装一个函数RunSetFont来设置Run的字体
-    def RunSetFont(currentrun,fontname):
-        currentrun.font.name = fontname
-        currentrun.element.rPr.rFonts.set(qn('w:eastAsia'), fontname)
-
-    # 封装一个函数，用来替换指定的run的文字，减少后面写重复的代码
-    def ReplaceSpecificRunInPara(para,replacetext,inputtext,fontname,underlined = False):
-        for run in para.runs:
-            if replacetext in run.text:
-                run.text = run.text.replace(replacetext,inputtext)
-                # 设置字体
-                RunSetFont(run,fontname)
-                # 如果下划线为True，设置下划线
-                if underlined:
-                    run.underline = True
-                return
-            
-    # def TestRunInPara(para):
-    #     for run in para.runs:
-    #         print(run.text)
-        
-
-    # 获取模板文件名
-    TemplateFileName = TemplateFileDir.split("\\")[-1]
-    # 实例化一个Document对象
-    Doc = Document(TemplateFileDir)
-
-    # 如果TemplateFileDir的文件名为起诉状，则用下面的代码
-    if "起诉状" in TemplateFileName:
-        for para in Doc.paragraphs:
-            # 填写诉讼参与人信息
-            if "LitigantInformation" in para.text:
-                # 先删除该行
-                para.text = ""
-                para.style.font.size = Pt(12)
-                # 写入所有原告信息
-                for plaintiff in Case.GetPlaintiffList():
-                    # 如果只有一个原告，就不用写序号
-                    if len(Case.GetPlaintiffList()) == 1:
-                        plaintiffinfo = "原告：" + plaintiff.GetName() + "，"
-                    else:
-                        plaintiffinfo = "原告" + str(Case.GetPlaintiffList().index(plaintiff)+1) + ":" + plaintiff.GetName() + "，"
-                    if plaintiff.GetLitigantType() == 1:
-                        plaintiffinfo +=  "身份证号码：" + plaintiff.GetIdCode() + "，" 
-                    elif plaintiff.GetLitigantType() == 2 or plaintiff.GetLitigantType() == 3:
-                        plaintiffinfo += "统一社会信用代码：" + plaintiff.GetIdCode() + "，"
-                        plaintiffinfo += "法定代表人/负责人：" + plaintiff.GetLegalRepresentative() + "，"
-                    # 地址和联系方式
-                    if plaintiff.GetLocation() != None:
-                        plaintiffinfo += "地址：" + plaintiff.GetLocation() + "，"
-                    if plaintiff.GetContactNumber() != None:
-                        plaintiffinfo += "联系方式：" + plaintiff.GetContactNumber() + "，"
-                    # 删掉最后一个逗号
-                    plaintiffinfo = plaintiffinfo[:-1]
-
-                    run = para.add_run(plaintiffinfo + "\n")
-                
-                #原被告之间空一行
-                para.add_run("\n")
-
-                # 写入所有被告信息
-                for defendant in Case.GetDefendantList():
-                    # 如果只有一个被告，就不用写序号
-                    if len(Case.GetDefendantList()) == 1:
-                        defendantinfo = "被告：" + defendant.GetName() + "，"
-                    else:    
-                        defendantinfo = "被告" + str(Case.GetDefendantList().index(defendant)+1) + ":" + defendant.GetName() + "，"
-                    if defendant.GetLitigantType() == 1:
-                        defendantinfo +=  "身份证号码：" + defendant.GetIdCode() + "，" 
-                    elif defendant.GetLitigantType() == 2 or defendant.GetLitigantType() == 3:
-                        defendantinfo += "统一社会信用代码：" + defendant.GetIdCode() + "，"
-                        defendantinfo += "法定代表人/负责人：" + defendant.GetLegalRepresentative() + "，"
-                    # 地址和联系方式
-                    if defendant.GetLocation() != None:
-                        defendantinfo += "地址：" + defendant.GetLocation() + "，"
-                    if defendant.GetContactNumber() != None:
-                        defendantinfo += "联系方式：" + defendant.GetContactNumber() + "，"
-                    # 删掉最后一个逗号
-                    defendantinfo = defendantinfo[:-1]
-
-                    run = para.add_run(defendantinfo + "\n")
-
-            
-            # 替换案由
-            if "CauseOfAction" in para.text:
-                para.text = para.text.replace("CauseOfAction",Case.GetCauseOfAction())
-                para.style.font.size = Pt(12)
-            # 替换此致后面的管辖法院，因为起诉状只可能是一审法院
-            if "CourtName" in para.text:
-                para.text = para.text.replace("CourtName",Case.GetJurisdictionDict()["一审"])
-                para.style.font.size = Pt(12)
-            # 写每个原告的姓名，每个空一行
-            if "PlaintiffSignature" in para.text:
-                # 把PlaintiffSignature删掉
-                para.text = para.text.replace("PlaintiffSignature","")
-                # 当事人为自然人时，在后面加上（签名）
-                for plaintiff in Case.GetPlaintiffList():
-                    count = 0
-                    if plaintiff.GetLitigantType() == 1:
-                        para.add_run(plaintiff.GetName() + "（签名）" )
-                        count += 1
-                    if plaintiff.GetLitigantType() == 2 or plaintiff.GetLitigantType() == 3:
-                        para.add_run(plaintiff.GetName() + "（盖章）" )
-                        count += 1
-                    # 如果不是最后一个原告，则加一个换行
-                    if count != len(Case.GetPlaintiffList()):
-                        para.add_run("\n")
-            # 落款后写日期
-            if "SignatureDate" in para.text:
-                para.text = para.text.replace("SignatureDate",time.strftime("%Y年%m月%d日",time.localtime())) 
-                para.style.font.size = Pt(12)
-
-        # 去掉文件名后缀
-        FileName = TemplateFileName.replace(".docx","")
-        # 加上原被告双方的名字，中间用"V."隔开，再加上后缀
-        FileName += "（" + Case.GetAllPlaintiffNames() + "v." + Case.GetAllDefendantNames() + "）" + ".docx"
-        
-        # 检查同名文件并删除
-        DeleteFileIfExist(OutputDir,FileName)         
-        # 保存文件
-        Doc.save(OutputDir + FileName)
-
-    # 如果TemplateFileDir的文件名为委托代理合同，则用下面的代码
-    elif "委托代理合同" in TemplateFileName:
-
-        # 获取我方当事人列表及我所代理的一方
-        OurClientList,OurClientSide = Case.GetOurClientListAndSide()
-        # 如果代理原告,对方全部当事人则为被告
-        if OurClientSide == "p":
-            OppositeSideLitigantNames = Case.GetAllDefendantNames()
-        # 如果代理被告，对方全部当事人则为原告
-        if OurClientSide == "d":
-            OppositeSideLitigantNames = Case.GetAllPlaintiffNames()
-
-        # 获取时间
-        year = str(time.strftime("%Y",time.localtime()))
-        month = str(time.strftime("%m",time.localtime()))
-        day = str(time.strftime("%d",time.localtime()))
-
-
-        for para in Doc.paragraphs:
-
-            # 填写诉讼参与人信息
-            if "ClientInformation" in para.text:
-                # 先删除该行
-                para.text = ""
-                para.style.font.size = Pt(12)
-                # 写入所有委托人信息
-                for client in OurClientList:
-                    run = para.add_run("委托人（甲方）：" )
-                    RunSetFont(run,u'黑体')
-                    run = para.add_run(client.GetName() + "\n")
-                    RunSetFont(run,u'黑体')
-                    # 加下划线
-                    run.underline = True
-
-                    # 如果是自然人
-                    if client.GetLitigantType() == 1:
-                        para.add_run( "身份证号码：" )
-                        run = para.add_run(client.GetIdCode() + "\n") 
-                        run.underline = True
-                    # 如果是法人或者其他组织
-                    elif client.GetLitigantType() == 2 or client.GetLitigantType() == 3:
-                        para.add_run( "统一社会信用代码：" )
-                        run = para.add_run(client.GetIdCode() + "\n")
-                        
-                        run.underline = True
-                    # 将该run设置为宋体
-                    RunSetFont(run,u'宋体')
-
-                    # 地址和联系方式
-                    if client.GetLocation() != None:
-                        para.add_run("联系地址：" )
-                        run = para.add_run(client.GetLocation() + "\n")
-                        run.underline = True
-                    else:
-                        para.add_run("联系地址：")
-
-                    if client.GetContactNumber() != None:
-                        para.add_run("联系方式：" )
-                        run = para.add_run(client.GetContactNumber() + "\n")
-                        RunSetFont(run,u'宋体')
-                        run.underline = True
-                    else:
-                        para.add_run("联系方式：")
-                    # 换行
-                    para.add_run("\n")
-            
-            # 写对方当事人名称
-            if "OppositeLitigantInformation" in para.text:
-                para.style.font.size = Pt(12)
-                # 将OppositeLitigantInformation替换为所有被告的名字OppositeSideLitigantNames
-                para.text = para.text.replace("OppositeLitigantInformation",OppositeSideLitigantNames)
-            if "CauseofAction" in para.text:
-                para.text = para.text.replace("CauseofAction",Case.GetCauseOfAction())
-
-            # 写日期
-            if "Year" in para.text:
-                para.text = para.text.replace("Year",year)
-            if "Month" in para.text:
-                para.text = para.text.replace("Month",month)
-            if "Day" in para.text:
-                para.text = para.text.replace("Day",day)
-
-            # 写案号
-            if "CaseCourtCode" in para.text:
-                # 如果案号为空代表该案未立案
-                if Case.GetCaseCourtCode() == "":
-                    ReplaceSpecificRunInPara(para=para,
-                                             replacetext="CaseCourtCode",
-                                             inputtext="本案尚未立案，最终以实际案号为准",
-                                             fontname = u"宋体",
-                                             underlined=True)
-                # 如果案号不为空代表该案已经立案，有法院的案号    
-                else:
-                    ReplaceSpecificRunInPara(para=para,
-                                             replacetext="CaseCourtCode",
-                                             inputtext=Case.GetCaseCourtCode(),
-                                             fontname = u"宋体",
-                                             underlined=True)
-                
-
-            # 写代理阶段
-            if "CaseAgentStage" in para.text:
-                ReplaceSpecificRunInPara(para=para,
-                                         replacetext="CaseAgentStage",
-                                         inputtext=Case.GetCaseAgentStageStr(),
-                                         fontname = u"宋体",
-                                         underlined=True)
-
-
-            # 写风险代理收费信息
-            # 后期代理费分情况讨论
-            if OurClientSide == "p":   #代理被告按照实现债权的金额来算
-                RiskAgentPostFeeStr = '以对方当事人最终向甲方实际支付的金额的'+ str(Case.GetRiskAgentPostFeeRate()) +'%，向乙方支付后期律师费。'
-
-            if OurClientSide == "d":     #代理被告按照减免债务的金额来算
-                RiskAgentPostFeeStr = '以对方当事人起诉的合计金额为基数，按最终减免支付债务金额的'+ str(Case.GetRiskAgentPostFeeRate()) +'%，向乙方支付后期律师费。'
-            
-            # 风险代理前期律师费
-            if "RiskAgentUpfrontFee" in para.text:
-                ReplaceSpecificRunInPara(para=para,
-                                         replacetext="RiskAgentUpfrontFee",
-                                         inputtext=str(Case.GetRiskAgentUpfrontFee()),
-                                         fontname = u"宋体",
-                                         underlined=True)
-                run = para.add_run("\n甲方应在收到每一笔金额起，三日内支付对应的后期律师费，逾期支付按照逾期支付金额日万分之五计付违约金。")
-                RunSetFont(run,u'宋体')
-               
-            # 风险代理后期律师费
-            if "RiskAgentPostFee" in para.text:
-                ReplaceSpecificRunInPara(para=para,
-                                         replacetext="RiskAgentPostFee",
-                                         inputtext=RiskAgentPostFeeStr,
-                                         fontname = u"宋体",
-                                         underlined=True)
-                run = para.add_run("\n甲方应在生效判决或签订调解协议、和解协议、调解书之日起，三日内支付全部后期律师费，逾期支付按照逾期支付金额日万分之五计付违约金。")
-                RunSetFont(run,u'宋体')
-        
-
-        # 去掉文件名后缀
-        FileName = TemplateFileName.replace(".docx","")
-        # 加上所有Ourclient的名字
-        FileName = FileName + "（" + Case.GetOurClientNames() + "）" + ".docx"
-        # 检查同名文件并删除
-        DeleteFileIfExist(OutputDir,FileName)   
-        # 保存文件
-        Doc.save(OutputDir + FileName)
-
-
+    
 # 归档卷内目录自动生成功能
 def RenderArchiveDirectory(TemplateFileDir,RenderDict,OutputDir) -> None:
     # 检查OutputDir是否以\结尾，如果不是则加上
