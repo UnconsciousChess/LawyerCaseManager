@@ -8,40 +8,8 @@ sys.path.append(os.getcwd())
 # 不要生成字节码
 sys.dont_write_bytecode = True
 
-
-# 导入案件类
-from library.CaseClass import Case
-
 # 导入自写库
-from source.RenderFile import RenderFileInDocxtpl,RenderFileInDOCX
-
-# 将当前文件夹加入sys.path
-sys.path.append(os.path.split(sys.path[0])[0])
-# 不产生字节码文件
-sys.dont_write_bytecode = True
-
-
-def FolderNameCreator(case) -> str:
-    # 递归原告名称
-    Plaintiffs = ""
-    for litigant in case.GetPlaintiffList():
-        Plaintiffs += litigant.GetName() + "、"
-    # 递归被告名称
-    Defendants = ""
-    for litigant in case.GetDefendantList():
-        Defendants += litigant.GetName() + "、"
-
-    # 去掉原被告最后的顿号
-    Plaintiffs = Plaintiffs[:-1]
-    Defendants = Defendants[:-1]
-
-    # 得到案由
-    Cause = case.GetCauseOfAction()
-
-    # 合并文件夹名称
-    FolderName = Plaintiffs + "诉" + Defendants + Cause + "一案"
-    
-    return FolderName
+from source.RenderFile import RenderFileInDocxtpl
 
 
 # 生成文件夹，同时调用source.RenderFile中的方法生成对应的文书   
@@ -82,15 +50,15 @@ def FolderCreator(case,OutputDir,TemplateListDir) -> None:
                         Filedir = line.split("@")[0].strip()
                         FileType = line.split("@")[1].strip()
                         # 判断FileType 是否为0和1，0代表该文件直接复制，1代表该文件后续需要替换填充
-                        if FileType != "0" and FileType != "1" and FileType != "2":
-                            print("ReadTemplateList函数报错：FileType错误，该行不符合规则，模板文件【%s】无法被添加到待生成的文件列表中"  % Filedir.split("\\")[-1])
+                        if FileType != "directCopy" and FileType != "docxtpl" :
+                            print("ReadTemplateList函数报错:FileType错误,该行不符合规则，模板文件【%s】无法被添加到待生成的文件列表中"  % Filedir.split("\\")[-1])
                             continue
                         # 检查该行对应的文件是否存在，不存在则报错并跳过
                         if not os.path.exists(Filedir):
-                            print("ReadTemplateList函数报错：%s文件不存在或路径错误" % Filedir.split("\\")[-1])
+                            print("ReadTemplateList函数报错:%s文件不存在或路径错误" % Filedir.split("\\")[-1])
                             continue
                         # 将文件路径和FileType组成元组，加入到字典中
-                        TemplateFilesDict[CurrentTemplateType].append((Filedir,int(FileType)))
+                        TemplateFilesDict[CurrentTemplateType].append((Filedir,FileType))
 
             
         return TemplateFilesDict
@@ -105,7 +73,7 @@ def FolderCreator(case,OutputDir,TemplateListDir) -> None:
 
     # 创建案件项目文件夹到指定目录Outputdir下面，其中项目文件夹名称由案件的原告、被告和案由组成
     os.chdir(OutputDir)
-    FolderName = FolderNameCreator(case)
+    FolderName = case.GetAllPlaintiffNames() + "诉" + case.GetAllDefendantNames() + "-" + case.GetCauseOfAction() + "一案"
     # 如果文件夹已经存在，则不创建；如果不存在，则创建
     if os.path.exists(FolderName):
         print("名称为【%s】的文件夹已经存在，不再创建。" % FolderName)
@@ -154,26 +122,24 @@ def FolderCreator(case,OutputDir,TemplateListDir) -> None:
             # 进入对应阶段文件夹
             os.chdir(RestainStage)
 
-            # 读取对应阶段的文件模板,fileandtype[0]为文件路径，fileandtype[1]为FileType
+            # 读取对应阶段的文件模板列表，根据FileType的不同，调用不同的函数进行文书生成
             for fileandtype in TemplateFilesDict[stage]:
-                # 如果FileType为0，则直接复制该文件到这个文件夹下
-                if fileandtype[1] == 0:
-                    shutil.copy(fileandtype[0],os.getcwd())
-                # 如果FileType为1，调用docxtpl库，直接用模板来进行文书生成
-                elif fileandtype[1] == 1:
-                    RenderFileInDocxtpl(TemplateFileDir=fileandtype[0],
+                # fileandtype[0]为文件路径FileDir，fileandtype[1]为FileType
+                FileDir = fileandtype[0]
+                FileType = fileandtype[1]
+
+                # 如果FileType为directCopy，则直接调用shutil，复制该文件到这个文件夹下
+                if FileType == "directCopy":
+                    shutil.copy(FileDir,os.getcwd())
+                # 如果FileType为docxtpl，则调用RenderFileInDocxtpl函数，用模板来进行文书生成
+                elif FileType == "docxtpl":
+                    RenderFileInDocxtpl(TemplateFileDir=FileDir,
                                         Case=case,
                                         OutputDir=os.getcwd())
-                # 如果FileType为2，调用docx库，进行文书生成（更复杂一些）
-                elif fileandtype[1] == 2:
-                    RenderFileInDOCX(TemplateFileDir=fileandtype[0],
-                                     Case=case,
-                                     OutputDir=os.getcwd())
-                else:
-                    print("文件[%s]对应的FileType不是0/1/2,无法识别" % fileandtype[0])
-            # 文件夹序号+1
+                    
+            # 完成一个阶段的文件生成，下一文件夹序号+1
             FolderNum += 1
-            # 随后返回上一级目录
+            # 返回上一级目录
             os.chdir("..")
         else:
             print("无须生成%s阶段的文件夹及文档" % stage)
