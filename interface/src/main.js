@@ -15,6 +15,7 @@ import CaseInfoForm from './components/CaseInfoForm.vue'
 import Caculator from './components/Caculator.vue'
 import Blank from './components/Blank.vue'
 import CaseInfoShow from './components/CaseInfoShow.vue'
+import TemplateFileForm from './components/TemplateFileForm.vue'
 
 // 设置路由
 const routes = [
@@ -22,6 +23,7 @@ const routes = [
   {path: '/case-info-form', component: CaseInfoForm},
   {path: '/caculator', component:Caculator},
   {path: '/case-info-list', component: CaseInfoShow},
+  {path: '/template-file', component: TemplateFileForm},
 ]
 
 // 创建router的实例

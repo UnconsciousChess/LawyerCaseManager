@@ -18,7 +18,7 @@ const aboutDialog = ref({
 			<template #title>文书生成器</template>
 			<el-menu-item index="/case-info-list">案件列表</el-menu-item>
 			<el-menu-item index="/case-info-form">案件信息录入</el-menu-item>
-			<el-menu-item disabled>模板文件选择</el-menu-item>
+			<el-menu-item index="/template-file">模板文件选择</el-menu-item>
 			<el-menu-item disabled>归档材料生成</el-menu-item>
 			<el-menu-item disabled>还没有想好的功能2</el-menu-item>
 		</el-sub-menu>
