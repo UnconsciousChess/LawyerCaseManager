@@ -1,5 +1,8 @@
 import os,sys
 
+# 导入nanoid模块
+from nanoid import generate
+
 # 将当前工作目录添加到系统路径中
 sys.path.append(os.getcwd())
 
@@ -10,12 +13,21 @@ sys.dont_write_bytecode = True
 class TemplateFile():
 
     def __init__(self):
+        # 模板文件的id
+        self._TemplateFileId = ""
+        # 模板文件的名称
         self._TemplateFileName = ""
+        # 模板文件的路径
         self._TemplateFileDir = ""
+        # 模板文件的类型（直接复制或者docxtpl）
         self._TemplateFileType = ""
+        # 模板文件的阶段（委托、立案、审理、执行、归档）
         self._TemplateFileStage = ""
 
     # ======= Get方法 ======= #
+    def GetTemplateFileId(self):
+        return self._TemplateFileId
+    
     def GetTemplateFileName(self):
         return self._TemplateFileName
 
@@ -29,6 +41,19 @@ class TemplateFile():
         return self._TemplateFileStage
     
     # ======= Set方法 ======= #
+    def SetTemplateFileId(self,TemplateFileId,Debug=False) -> int:
+            
+        # 输入检查
+        # 检查id是否为字符串
+        if not isinstance(TemplateFileId,str):
+            if Debug:
+                print("TemplateFileId should be a string.")
+            return -1
+        
+        # 经过检查后，赋值
+        self._TemplateFileId = TemplateFileId
+        return 0
+    
     def SetTemplateFileName(self,TemplateFileName,Debug=False) -> int:
 
         # 输入检查
@@ -41,7 +66,6 @@ class TemplateFile():
         # 经过检查后，赋值
         self._TemplateFileName = TemplateFileName
         return 0
- 
     
     def SetTemplateFileDir(self,TemplateFileDir,Debug=False) -> int:
 
@@ -147,6 +171,9 @@ class TemplateFile():
         # 将文件名从路径中提取出来
         if self.SetTemplateFileName(Filedir.split("\\")[-1]) == -1: 
             return "Error"
+        # 生成id
+        if self.SetTemplateFileId(generate(alphabet='ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz', size=8)) == -1:
+            return "Error"
 
         # 全部正常运行，返回Success
         return "Success"
@@ -154,7 +181,7 @@ class TemplateFile():
 
     # ======= Output方法 ======= #
 
-    # 输出为该模板文件的字符串，方便写入txt文件
+    # 输出为该模板文件的字符串，方便写入txt文件(只输出3个属性)
     def OutputTemplateFileToString(self) -> str:
         return self.GetTemplateFileStage() + "|" + self.GetTemplateFileDir() + "@" + self.GetTemplateFileType()
 
@@ -163,5 +190,6 @@ class TemplateFile():
         return {"templateFileName":self.GetTemplateFileName(),
                 "templateFileDir":self.GetTemplateFileDir(),
                 "templateFileType":self.GetTemplateFileType(),
-                "templateFileStage":self.GetTemplateFileStage()
+                "templateFileStage":self.GetTemplateFileStage(),
+                "templateFileId":self.GetTemplateFileId()
                 }
