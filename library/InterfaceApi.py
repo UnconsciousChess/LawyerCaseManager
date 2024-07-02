@@ -8,8 +8,10 @@ sys.dont_write_bytecode = True
 class Api:
     def __init__(self):
 
-        # case属性是一个列表，用于存放案件对象
-        self._case = []
+        # cases属性是一个列表，用于存放案件对象
+        self._cases = []
+        # templateFiles属性是一个列表，用于存放模板文件对象
+        self._templateFiles = []
 
     # ===== 下面是获取文件或文件夹路径的方法 =====
     def GetFilepath(self,title) -> str:
@@ -49,7 +51,7 @@ class Api:
         # 将CaseFormDict中的数据，调用InputCaseInfoFromFrontEnd方法导入到当前case对象中
         case.InputCaseInfoFromFrontEnd(CaseFormDict)
         # 将案件对象添加到案件列表中
-        self._case.append(case)
+        self._cases.append(case)
 
         return 0
     
@@ -70,7 +72,7 @@ class Api:
         # 将CaseFormDict中的数据，调用InputCaseInfoFromTxt方法将txt导入到当前case对象中
         case.InputCaseInfoFromTxt(TxtPath)
         # 将案件对象添加到案件列表中
-        self._case.append(case)
+        self._cases.append(case)
         print("案件导入成功！")
 
         return 0
@@ -126,8 +128,8 @@ class Api:
                 # 将案件内容调用InputCaseInfoFromTxt方法导入到当前case对象中
                 case.InputCaseInfoFromStringList(CaseContent)
                 # 如果该案件的案件Id与列表中的案件均不相同，则将案件对象添加到self._case中
-                if case.GetCaseId() not in [case.GetCaseId() for case in self._case]:
-                    self._case.append(case)
+                if case.GetCaseId() not in [case.GetCaseId() for case in self._cases]:
+                    self._cases.append(case)
                 else:
                     print(f"编号为{case.GetCaseId()}的案件已存在，无需重复导入！")
 
@@ -167,20 +169,20 @@ class Api:
     # ===== 下面是output方法 =====
     def OutputCaseInfoToExcel(self,caseId):
         # 判断案件列表是否为空
-        if len(self._case) == 0:
+        if len(self._cases) == 0:
             return 1
         # 如果案件列表不为空，则根据caseId找到对应案件
-        for case in self._case:
+        for case in self._cases:
             if case.GetCaseId() == caseId:
                 case.OutputCaseInfoToExcel()
                 return 0
             
     def OutputCaseInfoToTxt(self,caseId):
         # 判断案件列表是否为空
-        if len(self._case) == 0:
+        if len(self._cases) == 0:
             return 1
         # 如果案件列表不为空，则根据caseId找到对应案件
-        for case in self._case:
+        for case in self._cases:
             if case.GetCaseId() == caseId:
                 case.OutputCaseInfoToTxt()
                 return 0
@@ -188,11 +190,11 @@ class Api:
     def OutputAllCaseInfoToFrontEnd(self):
 
         # 如果案件列表为空，则生成案件对象，测试阶段使用
-        # if len(self._case) == 0:
+        # if len(self._cases) == 0:
         #     # 生成测试案件对象
         #     self.test()
         Result = []
-        for case in self._case:
+        for case in self._cases:
             Result.append(case.OutputCaseInfoToFrontEnd())
         # 返回案件列表
         return Result
@@ -210,7 +212,7 @@ class Api:
         OutputFolderPath = OutputFolderPath + "\\"
         OutputName = "所有案件信息输出.txt"
         with open(OutputFolderPath+OutputName,"w",encoding='utf-8') as f:
-            for case in self._case:
+            for case in self._cases:
                 f.write("$CaseStart$\n")
                 f.write(case.OutputCaseInfoToStr())
                 f.write("$CaseEnd$\n\n")
@@ -227,7 +229,7 @@ class Api:
     # 该方法未完善
     def DocumentsGenerate(self,caseId):
         # 先将对应caseId的案件对象找到，赋值给TargetCase
-        for case in self._case:
+        for case in self._cases:
             if case.GetCaseId() == caseId:
                 TargetCase = case
                 break
@@ -271,10 +273,72 @@ class Api:
         # 测试是否收到了前端传来的案件ID
         print(CaseId)
         # 在案件列表中删除指定案件
-        for case in self._case:
+        for case in self._cases:
             # 判断案件ID是否相同,如果相同则在后端也删除对应id的案件并返回
             if case.GetCaseId() == CaseId:
-                self._case.remove(case)
+                self._cases.remove(case)
                 return 
     
 
+
+    # =====  下面是与 TemplateFileForm组件交互的方法  =====
+    def BackEndAddTemplateFileData(self) -> str:
+
+        # 调用GetFilepath方法获取文件路径
+        TemplateFilePath = self.GetFilepath(title="请选择模板列表文件")
+        # 导入模板文件类TemplateFile
+        from source.Generator import ReadTemplateList
+
+        if TemplateFilePath == "":
+            return "Cancel"
+        else:
+            TemplateFileList = ReadTemplateList(TemplateFilePath)
+
+        # 如果没有重复的模板文件，则将模板文件添加到self._templateFiles中
+        for templateFile in TemplateFileList:
+            if templateFile.GetTemplateFileId() not in [File.GetTemplateFileId() for File in self._templateFiles]:
+                # 将TemplateFile对象添加到self._templateFiles中
+                self._templateFiles.append(templateFile)
+
+        return "Success"
+
+
+    def BackEndGetTemplateFileData(self) -> list:
+        # 如果self._templateFiles为空，则返回空
+        if len(self._templateFiles) == 0:
+            return []
+
+        # 如果self._templateFiles不为空，则将模板文件列表返回
+        templateFiles = []
+        for templateFile in self._templateFiles:
+            templateFiles.append(templateFile.OutputTemplateFileToDict())
+
+        return templateFiles
+
+    def BackEndDeleteTemplateFileData(self,TemplateFileId) -> str:
+        # 测试是否收到了前端传来的案件ID
+        print(TemplateFileId)
+        # 在案件列表中删除指定模板文件
+        for templateFile in self._templateFiles:
+            # 判断模板文件ID是否相同,如果相同则在后端也删除对应id的模板文件并返回
+            if templateFile.GetTemplateFileId() == TemplateFileId:
+                self._templateFiles.remove(templateFile)
+                return "Success"
+            
+        # 如果遍历完，没有找到对应的模板文件，则返回Fail
+        return "Fail"
+
+    def BackEndOutputTemplateFileData(self) -> str:
+        import time
+        # 调用GetFolderpath方法获取文件夹路径
+        OutputFolderPath = self.GetFolderpath()
+        # 判断OutputPath是否存在,如果不存在则返回错误
+        if OutputFolderPath == "":
+            return "Cancel"
+        # 写入模板列表文件，名字为“模板列表+当前时间.txt”
+        FileName = "模板列表"+time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())+".txt"  
+        with open(OutputFolderPath + "\\" + FileName, "w" , encoding='utf-8') as f:
+            for templateFile in self._templateFiles:
+                f.write(templateFile.OutputTemplateFileToString())
+                f.write("\n")
+            return "Success"
