@@ -70,7 +70,7 @@ class Litigant():
         if hasattr(self,"_BankAccount"):
             return self._BankAccount
         else:
-            print("该诉讼参与人没有设置银行账户属性")
+            # print("该诉讼参与人没有设置银行账户属性")
             return None
     # 定义外部获取是否为我方当事人的方法
     def IsOurClient(self):
