@@ -13,7 +13,7 @@
         <el-table-column fixed="right" label="操作" width="400">
             <template #default="{ row }">
                 <el-button type="primary" size="small" @click="handleEditData(row)">编辑</el-button>
-                <el-button type="danger" size="small" @click="handledeleteData(row)">删除</el-button>
+                <el-button type="danger" size="small" @click="handleDeleteData(row)">删除</el-button>
                 <el-button type="success" size="small" @click="handleOutputData(row)">导出</el-button>
                 <el-button color="#626aef" size="small" disabled>上传</el-button>
                 <el-button type="warning" size="small" plain @click="handleDocumentsGenerate(row)">文书生成</el-button>
@@ -374,7 +374,7 @@ function handleEditData(val) {
 }
 
 // 删除数据的前置函数，作用是打开对话框，提示是否删除，最终确认后调用下面的deleteData
-function handledeleteData(val) {
+function handleDeleteData(val) {
     // console.log("当前要输出的案件id为" + val.caseId);
     dialogDeleteDataVisible.value = true;
     // 将当前要删除的案件的对象传递给currentDeleteRow，便于接下来的组件调用
@@ -401,9 +401,6 @@ function deleteData(val) {
     else {
         pywebview.api.BackEndDeleteCase(val.caseId);
     }
-
-
-
 
     // 删除tableData中对应数组index的数据
     tableData.value.splice(deleteItemIndex, 1);
@@ -451,8 +448,8 @@ function outputToExcel(val) {
 function outputToTxt(val) {
     // 将对话框隐藏
     dialogOutputDataVisible.value = false;
-    console.log("输出案件信息到txt");
-    console.log(val.caseId)
+    // console.log("输出案件信息到txt");
+    // console.log(val.caseId)
     // 如果未连接后端，则只测试前端
     if (typeof pywebview === 'undefined') {
         console.log("outputToTxt()：未连接后端，目前只测试前端");
