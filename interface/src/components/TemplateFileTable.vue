@@ -16,6 +16,7 @@ const templateFilesData = ref([]);
 
 const currentDeleteRow = ref(null);
 const dialogDeleteDataVisible = ref(false);
+const dialogEditDataVisible = ref(false);
 
 async function GetTemplateFileData() {
     // 如果未连接后端，则只测试前端
@@ -104,6 +105,8 @@ async function handleOutputData() {
 // 编辑数据
 function handleEditData(val) {
     console.log("handleEditData()：编辑模板文件");
+    // 打开编辑数据的对话框
+    dialogEditDataVisible.value = true;
 }
 
 // 删除数据的前置函数，作用是打开对话框，提示是否删除，最终确认后调用下面的deleteData
@@ -173,6 +176,12 @@ onMounted(() => {
 
     <!-- 下面是操作按钮以后的对话框 -->
 
+
+    <!-- 编辑对话框 -->
+    <el-dialog title="编辑" v-model="dialogEditDataVisible" width="500" align-center>
+        
+        
+    </el-dialog>
     <!-- 删除对话框 -->
     <el-dialog title="注意" v-model="dialogDeleteDataVisible" width="400" align-center>
         <span>确认删除当前模板吗？</span>
