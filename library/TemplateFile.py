@@ -169,7 +169,10 @@ class TemplateFile():
         if self.SetTemplateFileType(FileType) == -1:
             return "Error"
         # 将文件名从路径中提取出来
-        if self.SetTemplateFileName(Filedir.split("\\")[-1]) == -1: 
+        FileName = Filedir.split("\\")[-1]
+        # 去掉后缀名
+        FileName = FileName.split(".")[0]
+        if self.SetTemplateFileName(FileName) == -1:     
             return "Error"
         # 生成id
         if self.SetTemplateFileId(generate(alphabet='ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz', size=8)) == -1:
