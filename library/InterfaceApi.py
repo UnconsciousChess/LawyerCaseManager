@@ -28,11 +28,11 @@ class Api:
         # print(result)
         # return result
 
-    def GetFolderpath(self) -> str:
+    def GetFolderpath(self,title) -> str:
         # 下面是用tkinter的方法获取文件夹的绝对路径
         from tkinter import filedialog
         # 获取文件夹路径
-        SelectedFolderPath = filedialog.askdirectory()
+        SelectedFolderPath = filedialog.askdirectory(title=title)
         return SelectedFolderPath
 
         # 下面用webview的方法获取文件夹的绝对路径
@@ -220,7 +220,7 @@ class Api:
             return 0
 
     def bulkOutputCaseInfoToTxt(self):
-        GetOutputFolderPath = self.GetFolderpath()
+        GetOutputFolderPath = self.GetFolderpath(title="请选择案件信息保存的文件夹")
         # 调用OutputAllCaseInfoToTxt方法输出
         self.OutputAllCaseInfoToTxt(OutputFolderPath=GetOutputFolderPath)
     
@@ -236,21 +236,26 @@ class Api:
 
         # 导入自写包FolderCreator
         from source.Generator import FolderCreator
-        # 读取模板列表文件
-        TemplateListDir = self.GetFilepath(title="请选择模板列表文件")
+
+        # 检查templateFiles是否为空
+        if len(self._templateFiles) == 0:
+            print("Error: The templateFiles is empty!")
+            return -1
+        
         # 检验无误后，执行案件文件夹生成的操作
         Result = FolderCreator(case=TargetCase,              
                       OutputDir=TargetCase.GetCaseFolderPath(),   
-                      TemplateListDir=TemplateListDir)
-        if Result == -1:
+                      TemplateListOrTemplateListDir=self._templateFiles)
+        
+        # 检查FolderCreator是否执行成功
+        if Result != "Success":
             print("Generator报错")
             return -1
+        else:
+            print("案件文件夹及对应的文件模板生成成功！")
+            # 返回值为0代表生成成功
+            return 0
         
-        print("案件文件夹及对应的文件模板生成成功！")
-        # 返回值为0代表生成成功
-        return 0
-        
-
 
 
     # 该方法用于生成案件归档目录
@@ -280,7 +285,6 @@ class Api:
                 return 
     
 
-
     # =====  下面是与 TemplateFileForm组件交互的方法  =====
     def BackEndAddTemplateFileData(self) -> str:
 
@@ -293,12 +297,20 @@ class Api:
             return "Cancel"
         else:
             TemplateFileList = ReadTemplateList(TemplateFilePath)
-
+        
         # 如果没有重复的模板文件，则将模板文件添加到self._templateFiles中
+
+        # 遍历模板文件列表
         for templateFile in TemplateFileList:
-            if templateFile.GetTemplateFileId() not in [File.GetTemplateFileId() for File in self._templateFiles]:
-                # 将TemplateFile对象添加到self._templateFiles中
-                self._templateFiles.append(templateFile)
+            # 如果模板文件ID相同，则跳过
+            if templateFile.GetTemplateFileId() in [File.GetTemplateFileId() for File in self._templateFiles]:
+                continue
+            # 如果模板文件名相同，则跳过
+            if templateFile.GetTemplateFileName() in [File.GetTemplateFileName() for File in self._templateFiles]:
+                continue
+
+            # 如果文件ID相同，则将TemplateFile对象添加到self._templateFiles中
+            self._templateFiles.append(templateFile)
 
         return "Success"
 
@@ -331,7 +343,7 @@ class Api:
     def BackEndOutputTemplateFileData(self) -> str:
         import time
         # 调用GetFolderpath方法获取文件夹路径
-        OutputFolderPath = self.GetFolderpath()
+        OutputFolderPath = self.GetFolderpath(title="请选择模板文件保存的文件夹")
         # 判断OutputPath是否存在,如果不存在则返回错误
         if OutputFolderPath == "":
             return "Cancel"

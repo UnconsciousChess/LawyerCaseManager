@@ -41,16 +41,25 @@ def ReadTemplateList(TemplateListDir) -> list[TemplateFile]:
 
 
 # 生成文件夹，同时调用source.RenderFile中的方法生成对应的文书   
-def FolderCreator(case,OutputDir,TemplateListDir) -> None: 
+def FolderCreator(case,OutputDir,TemplateListOrTemplateListDir) -> str: 
 
-    # 如果TemplateListDir存在，则读取模板列表
-    if not os.path.exists(TemplateListDir):
-        print("模板列表文件不存在！")
-    if not os.path.isfile(TemplateListDir):
-        print("模板列表文件应该是一个文件！")
+    # 传入参数判断
+    # 如果TemplateListOrTemplateListDir是一个字符串，则认为是模板列表文件的路径,则进行读取模板列表的操作
+    if isinstance(TemplateListOrTemplateListDir,str):
+        # 如果TemplateListDir存在，则读取模板列表
+        if not os.path.exists(TemplateListOrTemplateListDir):
+            print("模板列表文件不存在！")
+        if not os.path.isfile(TemplateListOrTemplateListDir):
+            print("模板列表文件应该是一个文件！")
 
-    # 确定路径无误以后，调用ReadTemplateList函数读取模板列表
-    TemplateFilesList = ReadTemplateList(TemplateListDir)
+        # 确定路径无误以后，调用ReadTemplateList函数读取模板列表
+        TemplateFilesList = ReadTemplateList(TemplateListOrTemplateListDir)
+    # 如果TemplateListOrTemplateListDir是一个列表，则认为是模板列表，直接赋值给TemplateFilesList
+    elif isinstance(TemplateListOrTemplateListDir,list):
+        TemplateFilesList = TemplateListOrTemplateListDir
+    else:
+        print("模板列表参数类型错误！")
+
 
     # 创建案件项目文件夹到指定目录Outputdir下面，其中项目文件夹名称由案件的原告、被告和案由组成
     os.chdir(OutputDir)
@@ -129,7 +138,7 @@ def FolderCreator(case,OutputDir,TemplateListDir) -> None:
     # 回到之前的目录
     os.chdir(OutputDir)
     
-    return 0
+    return "Success"
 
 
 
