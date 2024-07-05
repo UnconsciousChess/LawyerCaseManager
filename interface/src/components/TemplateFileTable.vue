@@ -1,5 +1,7 @@
 <script setup>
 import { ref, onMounted } from 'vue';
+import TemplateFileEditForm from './TemplateFileEditForm.vue';
+
 
 // 初始化模板文件数据
 const templateFilesData = ref([]);
@@ -7,9 +9,9 @@ const templateFilesData = ref([]);
 // const templateFilesData = ref([
 //     {
 //         templateFileId: "KCSDHIP",
-//         templateFileName: '民事起诉状.docx',
+//         templateFileName: '民事起诉状',
 //         templateFileDir: '\\test\\TestData\\被告.txt',
-//         templateFileType: 'copyFile',
+//         templateFileType: 'directCopy',
 //         templateFileStage: '立案'
 //     },
 // ]);
@@ -17,6 +19,7 @@ const templateFilesData = ref([]);
 const currentDeleteRow = ref(null);
 const dialogDeleteDataVisible = ref(false);
 const dialogEditDataVisible = ref(false);
+const currentEditTemplate = ref(null);
 
 async function GetTemplateFileData() {
     // 如果未连接后端，则只测试前端
@@ -25,7 +28,7 @@ async function GetTemplateFileData() {
     }
     // 从后端获取数据(实际运行环境)
     else {
-        await pywebview.api.BackEndGetTemplateFileData().then((templateFiles) => {
+        await pywebview.api.BackEndPushTemplateFileDataToFrontEnd().then((templateFiles) => {
             console.log("GetTemplateFileData()：从后端获取数据");
 
             for (let i = 0; i < templateFiles.length; i++) {
@@ -107,6 +110,42 @@ function handleEditData(val) {
     console.log("handleEditData()：编辑模板文件");
     // 打开编辑数据的对话框
     dialogEditDataVisible.value = true;
+    // 将当前要编辑的案件的对象传递给currentEditTemplate，便于接下来的组件调用
+    currentEditTemplate.value = val;
+    // console.log(currentEditTemplate.value);
+}
+
+// 接收从子组件传递过来的数据，更新tableData
+async function updateTemplateFileDataFromEditForm(data){  
+    // console.log("updateTemplateFileData()：更新模板文件数据");
+    // console.log(data);
+    console.log("触发了updateTemplateFileData")
+    // 获取要更新的数据的index
+    var updateItemIndex = templateFilesData.value.findIndex(
+        (item) => item.templateFileId === data.templateFileId
+    );
+
+    // 更新tableData中对应数组index的各项数据
+    templateFilesData.value[updateItemIndex].templateFileId = data.templateFileId;
+    templateFilesData.value[updateItemIndex].templateFileName = data.templateFileName;
+    templateFilesData.value[updateItemIndex].templateFileDir = data.templateFileDir;
+    templateFilesData.value[updateItemIndex].templateFileType = data.templateFileType;
+    templateFilesData.value[updateItemIndex].templateFileStage = data.templateFileStage;
+
+    // 如果未连接后端，则只测试前端
+    if (typeof pywebview === 'undefined') {
+        console.log("updateTemplateFileData()：未连接后端，目前只测试前端");
+    }
+    // 将对应的id及其他数据，传递给后端(实际运行环境)
+    else {
+        let result = await pywebview.api.BackEndUpdateTemplateFileData(data.templateFileId,data);
+        console.log(result);
+    }
+
+    // 关闭对话框
+    dialogEditDataVisible.value = false;
+
+
 }
 
 // 删除数据的前置函数，作用是打开对话框，提示是否删除，最终确认后调用下面的deleteData
@@ -144,7 +183,20 @@ async function deleteData(val) {
 }
 
 
-// 加载页面时先调用一次GetTemplateFileData()获取数据
+// 测试后端输出函数
+// function test(){
+//     console.log("test()：测试删除")
+//     // 如果未连接后端，则只测试前端
+//     if (typeof pywebview === 'undefined') {
+//         console.log("test()：未连接后端，目前只测试前端");
+//     }
+//     // 从后端获取数据(测试环境)
+//     else {
+//         pywebview.api.BackEndTestOutput()
+//     }
+// }
+
+// 加载页面时先调用一次GetTemplateFileData()获取初始数据
 onMounted(() => {
     GetTemplateFileData();
 });
@@ -174,15 +226,25 @@ onMounted(() => {
         <el-button color="#48C9B0" @click="handleOutputData">导出当前文件列表</el-button>
     </div>
 
+    <!-- 测试后端输出的代码 -->
+    <!-- 
+    <el-divider></el-divider>
+
+    <div>
+        <el-button type="primary" @click="test">测试后端输出</el-button>
+    </div> -->
+    <!-- 测试代码结束 -->
+
     <!-- 下面是操作按钮以后的对话框 -->
 
-
     <!-- 编辑对话框 -->
-    <el-dialog title="编辑" v-model="dialogEditDataVisible" width="500" align-center>
-        
-        
+
+    <el-dialog title="编辑模板文件属性" v-model="dialogEditDataVisible" width="500" align-center>
+        <TemplateFileEditForm :templateFile="currentEditTemplate" @updateTemplateFileData="updateTemplateFileDataFromEditForm"/>
     </el-dialog>
+
     <!-- 删除对话框 -->
+
     <el-dialog title="注意" v-model="dialogDeleteDataVisible" width="400" align-center>
         <span>确认删除当前模板吗？</span>
         <template #footer>

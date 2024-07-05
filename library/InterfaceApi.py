@@ -18,7 +18,11 @@ class Api:
         # 下面是用tkinter的方法获取文件的绝对路径
         from tkinter import filedialog
         # #  获取文件路径
-        SelectedFilePath = filedialog.askopenfilename(title=title,filetypes=[("Text files", "*.txt"),("Excel files", "*.xlsx")])
+        SelectedFilePath = filedialog.askopenfilename(title=title,filetypes=[
+            ("Text files", "*.txt"),
+            ("Excel files", "*.xlsx"),
+            ("Word files", "*.docx"),
+            ("All files", "*.*")])
         return SelectedFilePath
 
         # 下面用webview的方法获取文件的绝对路径
@@ -226,7 +230,7 @@ class Api:
     
 
     # ===== 下面是其他方法 =====
-    # 该方法未完善
+    # 该方法用于对接前端的文书生成按钮
     def DocumentsGenerate(self,caseId):
         # 先将对应caseId的案件对象找到，赋值给TargetCase
         for case in self._cases:
@@ -256,7 +260,6 @@ class Api:
             # 返回值为0代表生成成功
             return 0
         
-
 
     # 该方法用于生成案件归档目录
     def generateArchiveDirectoryDocument(self,TemplateFilePath,SavedPath):
@@ -314,8 +317,7 @@ class Api:
 
         return "Success"
 
-
-    def BackEndGetTemplateFileData(self) -> list:
+    def BackEndPushTemplateFileDataToFrontEnd(self) -> list:
         # 如果self._templateFiles为空，则返回空
         if len(self._templateFiles) == 0:
             return []
@@ -326,6 +328,16 @@ class Api:
             templateFiles.append(templateFile.OutputTemplateFileToDict())
 
         return templateFiles
+
+    def BackEndUpdateTemplateFileData(self,TemplateFileId,data) -> str:
+        # 遍历模板文件列表
+        for templateFile in self._templateFiles:
+            # 如果模板文件ID相同，则更新模板文件信息
+            if templateFile.GetTemplateFileId() == TemplateFileId:
+                # 如果赋值成功，则返回Success
+                if templateFile.SetTemplateFileFromDict(data) == "Success":
+                    return "Success"
+        return "Fail"
 
     def BackEndDeleteTemplateFileData(self,TemplateFileId) -> str:
         # 测试是否收到了前端传来的案件ID
@@ -354,3 +366,35 @@ class Api:
                 f.write(templateFile.OutputTemplateFileToString())
                 f.write("\n")
             return "Success"
+        
+
+    def BackEndTestOutput(self):
+        # 输出templateFiles
+        for templateFile in self._templateFiles:
+            print(templateFile.OutputTemplateFileToDict())  
+
+    # =====  下面是和TemplateFileEditForm交互的方法  =====
+    def BackEndChooseTemplateFile(self) -> dict:
+        result = {
+            "res" : "",
+            "templateFileDir" : "",
+            "templateFileName" : "",
+        }
+
+        # 调用GetFilepath方法获取文件路径
+        NewTemplateFileDir = self.GetFilepath(title="请选择新的模板文件")
+        # 如果NewTemplateFile为空，则返回Cancel
+        if NewTemplateFileDir == "":
+            result["res"] = "Cancel"
+            return result
+        else:
+            result["templateFileDir"] = NewTemplateFileDir
+            # 将文件名从路径中提取出来
+            FileName = os.path.basename(NewTemplateFileDir)
+            # 去掉后缀名后，赋值给templateFileName
+            result["templateFileName"] = FileName.split(".")[0]
+            # 全部正常运行，返回Success
+            result["res"] = "Success"
+            return result
+
+
