@@ -119,9 +119,9 @@ const showText = ref({});
 
 function showTextInitialize(prop) {
 	// 遍历propData.propShowTextList，找到对应的案件信息
-	let Index = propData.propShowTextList.findIndex((item) => item.caseId == propData.propId);
+	let Index = prop.propShowTextList.findIndex((item) => item.caseId == prop.propId);
 	// 将对应的案件信息赋值给showText
-	showText.value = propData.propShowTextList[Index];
+	showText.value = prop.propShowTextList[Index];
 }
 
 // 在挂载时调用showTextInitialize来初始化showText
