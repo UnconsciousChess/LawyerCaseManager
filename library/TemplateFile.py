@@ -181,6 +181,54 @@ class TemplateFile():
         # 全部正常运行，返回Success
         return "Success"
 
+    # 下面对于读入字典进行处理
+    def SetTemplateFileFromDict(self,InputDict,Debug=False) -> str:
+        # 检查是否为字典
+        if not isinstance(InputDict,dict):
+            if Debug:
+                print("SetTemplateFileFromDict函数报错:输入不是字典")
+            return "Error"
+        
+        # 检查是否有templateFileName键
+        if "templateFileName" not in InputDict:
+            if Debug:
+                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileName】")
+            return "Error"
+        # 检查是否有templateFileDir键
+        if "templateFileDir" not in InputDict:
+            if Debug:
+                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileDir】")
+            return "Error"
+        # 检查是否有templateFileType键
+        if "templateFileType" not in InputDict:
+            if Debug:
+                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileType】")
+            return "Error"
+        # 检查是否有templateFileStage键
+        if "templateFileStage" not in InputDict:
+            if Debug:
+                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileStage】")
+            return "Error"
+        # 检查是否有templateFileId键
+        if "templateFileId" not in InputDict:
+            if Debug:
+                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileId】")
+            return "Error"
+        
+        # 调用Set方法分别赋值
+        if self.SetTemplateFileName(InputDict["templateFileName"]) == -1:
+            return "Error"
+        if self.SetTemplateFileDir(InputDict["templateFileDir"]) == -1:
+            return "Error"
+        if self.SetTemplateFileType(InputDict["templateFileType"]) == -1:
+            return "Error"
+        if self.SetTemplateFileStage(InputDict["templateFileStage"]) == -1:
+            return "Error"
+        if self.SetTemplateFileId(InputDict["templateFileId"]) == -1:
+            return "Error"
+        
+        # 全部正常运行，返回Success
+        return "Success"
 
     # ======= Output方法 ======= #
 
