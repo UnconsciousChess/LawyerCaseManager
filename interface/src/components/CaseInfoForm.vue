@@ -1,5 +1,5 @@
 <script setup>
-import { ref, provide, onMounted, onUpdated } from "vue";
+import { ref, provide, onMounted, onUpdated} from "vue";
 
 // 局部注册LitigantForm组件
 import LitigantForm from "./LitigantForm.vue";
@@ -88,6 +88,14 @@ const propData = defineProps({
 	propCaseData: Object,
 	propMode: String,
 })
+
+
+// 向父组件传递数据的事件
+const emit = defineEmits([
+	"updateCaseData"
+]) 
+
+
 
 // 监听案件信息的输入方式是否发生变化，文件/前端输入
 function ChangeInputStatus() {
@@ -197,10 +205,14 @@ async function promptFileSelection() {
 
 // 提交案件信息到后端的方法
 function onSubmit() {
-	// 先判断目前是采取何种形式上传
+	// 先判断目前是采取何种形式提交信息
+
 	// 如果采取的是文件上传
 	if (componentsConfig.value.inputInfoByFile == true) {
 		console.log("onSubmit()：当前导入模式为-从文件中导入案件信息");
+		// 将案件信息传递给父组件
+		emit("updateCaseData", caseForm.value);
+
 		// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端，如果没有就提示未链接到后端
 		if (typeof pywebview === "undefined") {
 			console.log("onSubmit()：未链接到后端");
@@ -220,6 +232,27 @@ function onSubmit() {
 		caseFormRef.value.validate((valid) => {
 			if (valid) {	//如果表单校验通过
 				console.log("onSubmit()：表单校验通过");
+				// 遍历原告列表，将原告的名字连接为一个字符串
+				let plaintiffsName = "";
+				for (let i = 0; i < caseForm.value.plaintiffs.length; i++) {
+					plaintiffsName += caseForm.value.plaintiffs[i].litigantName + "、";
+				}
+				// 去掉最后一个顿号
+				plaintiffsName = plaintiffsName.substring(0, plaintiffsName.length - 1);
+
+				// 遍历被告列表，将被告的名字连接为一个字符串
+				let defendantsName = "";
+				for (let i = 0; i < caseForm.value.defendants.length; i++) {
+					defendantsName += caseForm.value.defendants[i].litigantName + "、";
+				}
+				// 去掉最后一个顿号
+				defendantsName = defendantsName.substring(0, defendantsName.length - 1);
+
+				// 将原告和被告的名字赋值给案件信息的字典
+				caseForm.value.litigantsName = plaintiffsName + " vs " + defendantsName;
+
+				// 将案件信息的字典传递给父组件
+				emit("updateCaseData", caseForm.value);
 
 				// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端，如果没有就提示未链接到后端
 				if (typeof pywebview === "undefined") {
@@ -245,7 +278,6 @@ function caseFormInfoInitiation(prop) {
 
 	// 已有案件内容以后的编辑模式
 	if (propData.propMode == "edit") {
-
 		console.log("当前CaseInfoform为编辑模式")
 
 		if (propData.propCaseData == null) {
@@ -283,6 +315,8 @@ function caseFormInfoInitiation(prop) {
 		componentsConfig.value.inputInfoByFileSwitchStatus = false;
 		// 因为是编辑模式，所以默认打开前端输入状态
 		inputInfoByFrontEndStatus.value = true;
+		// 因为是编辑模式，所以默认不需要文件导入
+		componentsConfig.value.inputInfoByFile = false;
 
 		console.log("案件信息已经传递过来了");
 		console.log(caseForm.value);
@@ -295,6 +329,9 @@ function caseFormInfoInitiation(prop) {
 		componentsConfig.value.inputInfoByFileSwitchStatus = true;
 		// 因为是编辑模式，所以默认关闭前端输入状态，
 		inputInfoByFrontEndStatus.value = false;
+		// 因为是编辑模式，所以默认需要文件导入
+		componentsConfig.value.inputInfoByFile = true;
+
 		// 所有信息回归初始值（似乎引起了bug）
 		caseForm.value.caseId = "";
 		caseForm.value.caseCourtCode = "";
@@ -314,8 +351,8 @@ function caseFormInfoInitiation(prop) {
 		caseForm.value.claimText = "";
 		caseForm.value.rejectMediationReasonText = "";
 
-		// caseForm.value.plaintiffs = [];
-		// caseForm.value.defendants = [];
+		caseForm.value.plaintiffs = [];
+		caseForm.value.defendants = [];
 
 	}
 }
@@ -434,11 +471,13 @@ onUpdated(() => {
 
 	</el-form>
 
-	<!-- 导入当事人表格部件 -->
+	<!-- 当事人表格组件 -->
+
 	<!-- 原告部分 -->
 	<div v-for="plaintiff in caseForm.plaintiffs" :key="plaintiff.id">
 		<LitigantForm ref="litigantFormPlaintiff" :litigantPosition="plaintiff.litigantPosition" :id="plaintiff.id" />
 	</div>
+
 	<!-- 被告部分 -->
 	<div v-for="defendant in caseForm.defendants" :key="defendant.id">
 		<LitigantForm ref="litigantFormDefendant" :litigantPosition="defendant.litigantPosition" :id="defendant.id" />

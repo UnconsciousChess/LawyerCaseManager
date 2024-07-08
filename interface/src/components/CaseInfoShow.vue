@@ -29,13 +29,18 @@
         <el-button color="#CEECAB" @click="handleBulkLoadingData">批量加载案件</el-button>
         <el-button color="#FDC3D6" @click="handleBulkOutputData">批量导出案件</el-button>
     </div>
+    <el-divider></el-divider>
+    <!-- 测试按钮 -->
+     <div>
+        <el-button type="primary" @click="testOutputCase">后端输出案件信息</el-button>
+     </div>
 
 
-    <!-- 下面是操作按钮以后的对话框 -->
+    <!-- 下面是按下按钮以后弹出的对话框 -->
 
     <!-- 编辑对话框 -->
     <el-dialog title="编辑案件信息" width="700" align-center v-model="dialogEditDataVisible">
-        <CaseInfoForm :propCaseData="currentEditRow" :propMode="caseInfoFormMode" />
+        <CaseInfoForm :propCaseData="currentEditRow" :propMode="caseInfoFormMode" @updateCaseData="updateCaseDataFromCaseInfoForm" />
     </el-dialog>
 
     <!-- 删除对话框 -->
@@ -80,7 +85,7 @@ const currentExpandedRow = ref(0);
 // 这个列表是存放展开的行的caseId（即rowkey
 const expandRowKeys = ref([]);
 
-// 以下变量是用于控制输出对话框的显示
+// 以下变量是用于控制输出对话框的显示的布尔值
 const dialogOutputDataVisible = ref(false);
 const dialogDeleteDataVisible = ref(false);
 const dialogEditDataVisible = ref(false);
@@ -109,7 +114,8 @@ const testCase1 = {
     factAndReason: "事实与理由1",
     rejectMediationReasonText: "拒绝调解理由1",
     agentFixedFee: "一审3000元，二审5000元，执行1000元，再审2000元",
-    caseId: "1.1"
+    caseId: "1.1",
+    litigantsName: "张三 诉 李四"
 };
 const testCase2 = {
     index: 2,
@@ -128,7 +134,8 @@ const testCase2 = {
     factAndReason: "事实与理由2",
     rejectMediationReasonText: "拒绝调解理由2",
     agentFixedFee: "",
-    caseId: "2.3"
+    caseId: "2.3",
+    litigantsName: "王五 诉 赵六"
 };
 const testCase3 = {
     index: 3,
@@ -147,7 +154,8 @@ const testCase3 = {
     factAndReason: "事实与理由3",
     rejectMediationReasonText: "拒绝调解理由3",
     agentFixedFee: "一审3000元，二审5000元，执行1000元，再审1000元",
-    caseId: "3.4"
+    caseId: "3.4",
+    litigantsName: "赵六 诉 王五",
 };
 
 
@@ -283,7 +291,7 @@ function getTableData() {
     }
     // 如果连接了后端，则从后端获取数据(实际工作流程)
     else {
-        pywebview.api.OutputAllCaseInfoToFrontEnd().then((cases) => {
+        pywebview.api.outputAllCaseInfoToFrontEnd().then((cases) => {
             // 遍历cases，将数据根据一定的规则添加到tableData中
             for (let i = 0; i < cases.length; i++) {
                 // 对比案件的id，如果相同则不添加
@@ -313,7 +321,6 @@ function getTableData() {
                     plaintiffs: cases[i].plaintiffs,
                     defendants: cases[i].defendants,
                     thirdParties: cases[i].thirdParties,
-
                     litigantsName : cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames ,
                     // 测试title的数据
                     title: cases[i].causeOfAction + "一案，编号：" + cases[i].caseId,
@@ -341,9 +348,13 @@ async function handleBulkLoadingData() {
     }
     // 如果连接了后端，则调用后端的函数
     else {
-        let backendResult = await pywebview.api.bulkInputCaseFromTxt();
-        if (backendResult == 0) {   // 如果后端返回成功，则刷新数据
+        let backendResult = await pywebview.api.inputAllCasesFromTxt();
+        if (backendResult == "Success") {   // 如果后端返回成功，则刷新数据
+            console.log("后端批量加载案件成功");
             getTableData();
+        }
+        else if (backendResult == "Fail") {
+            console.log("后端批量加载案件失败");
         }
 
     }
@@ -356,9 +367,9 @@ async function handleBulkOutputData() {
     if (typeof pywebview === 'undefined') {
         console.log("handleBulkOutputData()：未连接后端，目前只测试前端");
     }
-    // 如果连接了后端，则调用后端的函数
+    // 如果连接了后端，则调用后端的函数outputAllCasesInfoToTxt
     else {
-        pywebview.api.bulkOutputCaseInfoToTxt();
+        pywebview.api.outputAllCasesInfoToTxt();
     }
 }
 
@@ -372,6 +383,51 @@ function handleEditData(val) {
     // 改变caseInfoFormMode为edit（有edit和create两种模式）
     caseInfoFormMode.value = "edit";
 }
+
+// 收到编辑数据以后，父组件中的数据进行更新
+async function updateCaseDataFromCaseInfoForm(data) {
+    console.log("更新案件信息");
+    console.log(data);
+    // 将对话框隐藏
+    dialogEditDataVisible.value = false;
+    // 前端的父组件更新数据
+    // 获取要更新的数据的index
+    var updateItemIndex = tableData.value.findIndex(
+        (item) => item.caseId === data.caseId
+    );
+    // 对应的tableData更新数据
+    tableData.value[updateItemIndex].causeOfAction = data.causeOfAction;
+    tableData.value[updateItemIndex].courtName = data.courtName;
+    tableData.value[updateItemIndex].litigationAmount = data.litigationAmount;
+    tableData.value[updateItemIndex].caseCourtCode = data.caseCourtCode;
+    tableData.value[updateItemIndex].mediationIntention = data.mediationIntention;
+    tableData.value[updateItemIndex].caseType = data.caseType;
+    tableData.value[updateItemIndex].riskAgentStatus = data.riskAgentStatus;
+    tableData.value[updateItemIndex].riskAgentUpfrontFee = data.riskAgentUpfrontFee;
+    tableData.value[updateItemIndex].riskAgentPostFeeRate = data.riskAgentPostFeeRate;
+    tableData.value[updateItemIndex].caseAgentStage = data.caseAgentStage;
+    tableData.value[updateItemIndex].claimText = data.claimText;
+    tableData.value[updateItemIndex].factAndReason = data.factAndReason;
+    tableData.value[updateItemIndex].rejectMediationReasonText = data.rejectMediationReasonText;
+    tableData.value[updateItemIndex].agentFixedFee = data.agentFixedFee;
+    tableData.value[updateItemIndex].plaintiffs = data.plaintiffs;
+    tableData.value[updateItemIndex].defendants = data.defendants;
+    tableData.value[updateItemIndex].thirdParties = data.thirdParties;
+    tableData.value[updateItemIndex].litigantsName = data.litigantsName;
+    tableData.value[updateItemIndex].title = data.causeOfAction + "一案，编号：" + data.caseId;
+
+    // 下面是将信息传递给后端的部分
+    // // 如果未连接后端，则只测试前端
+    // if (typeof pywebview === 'undefined') {
+    //     console.log("updateCaseDataFromCaseInfoForm()：未连接后端，目前只测试前端");
+    // }
+    // // 将对应的id及其他数据，传递给后端(实际运行环境)
+    // else {
+    //     let result = await pywebview.api.backEndUpdateCaseData(data.caseId, data);
+    //     console.log(result);
+    // }
+}
+
 
 // 删除数据的前置函数，作用是打开对话框，提示是否删除，最终确认后调用下面的deleteData
 function handleDeleteData(val) {
@@ -399,7 +455,7 @@ function deleteData(val) {
     }
     // 将对应的id传递给后端(实际运行环境)
     else {
-        pywebview.api.BackEndDeleteCase(val.caseId);
+        pywebview.api.backEndDeleteCase(val.caseId);
     }
 
     // 删除tableData中对应数组index的数据
@@ -440,7 +496,7 @@ function outputToExcel(val) {
     }
     // 如果连接了后端，则调用后端的函数(实际运行环境)
     else {
-        pywebview.api.OutputCaseInfoToExcel(val.caseId);
+        pywebview.api.outputCaseInfoToExcel(val.caseId);
     }
 }
 
@@ -456,7 +512,7 @@ function outputToTxt(val) {
     }
     // 如果连接了后端，则调用后端的函数(实际运行环境)
     else {
-        pywebview.api.OutputCaseInfoToTxt(val.caseId);
+        pywebview.api.outputCaseInfoToTxt(val.caseId);
     }
 }
 
@@ -471,13 +527,24 @@ async function handleDocumentsGenerate(val) {
     }
     // 如果连接了后端，则调用后端的函数,将当前案件id传到后端(实际运行环境)
     else {
-         let result = await pywebview.api.DocumentsGenerate(val.caseId);
+         let result = await pywebview.api.documentsGenerate(val.caseId);
          if (result == 0) {
              console.log("文书生成成功");
          }
     }
 }
 
+
+// 测试的代码
+function testOutputCase(){
+    if (typeof pywebview === 'undefined') {
+        console.log("testOutputCase()：未连接后端，目前只测试前端");
+    }
+    else{
+        console.log("测试函数，后端输出案件信息");
+        pywebview.api.testCasesOutput();
+    }
+}
 
 
 
