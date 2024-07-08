@@ -3,6 +3,7 @@ import os,sys
 # 不要生成字节码
 sys.dont_write_bytecode = True
 
+# api类中暴露给前端的函数名称，命名保持与前端一致（小驼峰），方便前后端对接
 
 # 定义一个Api类，用于与前端交互 
 class Api:
@@ -13,7 +14,7 @@ class Api:
         # templateFiles属性是一个列表，用于存放模板文件对象
         self._templateFiles = []
 
-    # ===== 下面是获取文件或文件夹路径的方法 =====
+    # ===== 下面是获取文件或文件夹路径的方法，方便后面的方法复用（该组方法不对接前端） =====
     def GetFilepath(self,title) -> str:
         # 下面是用tkinter的方法获取文件的绝对路径
         from tkinter import filedialog
@@ -46,9 +47,12 @@ class Api:
         # return result
 
 
-    # ===== 下面是input方法 =====
-    # 该方法用于生成案件文件夹及依据模板生成对应的文件
-    def inputCaseFromFrontEndForm(self,CaseFormDict):
+    # ===== 下面是和 CaseInfoForm 组件交互的方法 =====
+
+    # ==输入类==
+
+    # 该方法用于根据前端输入的案件信息，生成一个新的案件
+    def inputCaseFromFrontEndForm(self,CaseFormDict) -> str:
         # 导入案件类Case
         from library.CaseClass import Case
         case = Case()
@@ -57,18 +61,20 @@ class Api:
         # 将案件对象添加到案件列表中
         self._cases.append(case)
 
-        return 0
+        return "Success"
     
-    # 该方法用于前端输入一个txt文件的路径，然后生成案件文件夹及依据模板生成对应的文件
-    def inputCaseFromTxt(self,TxtPath):
+    # 该方法用于前端输入一个txt文件的路径，然后生成对应的新的案件
+    def inputCaseFromTxt(self,TxtPath) -> str:
+
         # 判断输入的两个路径是否存在
         if not os.path.exists(TxtPath):
             print("Error: The path is not exist!")
-            return 1
+            return "PathNotExist"
+        
         # 判断输入的文件是否是txt文件
         if not TxtPath.endswith(".txt"):
             print("Error: The file is not a txt file!")
-            return 2
+            return "NotTxtFile"
         
         # 导入案件类Case
         from library.CaseClass import Case
@@ -79,17 +85,19 @@ class Api:
         self._cases.append(case)
         print("案件导入成功！")
 
-        return 0
+        return "Success"
     
-    def inputAllCaseFromTxt(self,InputPath):
+    # 该方法用于读入一个包含多个案件信息的txt文件，批量生成新的案件信息
+    def inputAllCasesFromTxt(self) -> str:
+        InputPath = self.GetFilepath(title="请选择案件信息输入文件")
         # 判断输入的路径是否存在
         if not os.path.exists(InputPath):
             print("Error: The path is not exist!")
-            return 1
+            return "Fail"
         # 判断输入的文件是否是txt文件
         if not InputPath.endswith(".txt"):
             print("Error: The file is not a txt file!")
-            return 2
+            return "Fail"
         
         # 导入案件类Case
         from library.CaseClass import Case
@@ -129,7 +137,7 @@ class Api:
                     continue
                 # 实例化一个Case对象
                 case = Case()
-                # 将案件内容调用InputCaseInfoFromTxt方法导入到当前case对象中
+                # 将案件内容调用case对象的InputCaseInfoFromStringList方法，将信息导入到当前case对象中
                 case.InputCaseInfoFromStringList(CaseContent)
                 # 如果该案件的案件Id与列表中的案件均不相同，则将案件对象添加到self._case中
                 if case.GetCaseId() not in [case.GetCaseId() for case in self._cases]:
@@ -138,40 +146,13 @@ class Api:
                     print(f"编号为{case.GetCaseId()}的案件已存在，无需重复导入！")
 
         print("全部案件导入成功！")
-        return 0
-
-    def inputLitigantFromTxt(self,TxtPath,LitigantType):
-        # 判断输入的路径是否存在
-        if not os.path.exists(TxtPath):
-            print("Error: The path is not exist!")
-            return 1
-        # 判断输入的文件是否是txt文件
-        if not TxtPath.endswith(".txt"):
-            print("Error: The file is not a txt file!")
-            return 2
-        
-        # 导入案件类litigant
-        from library.LitigantClass import Litigant
-
-        # 实例化一个Litigant对象
-        litigant = Litigant()
-
-        # 调用InputLitigantInfoFromTxt方法将txt导入到当前litigant对象中
-        litigant.InputLitigantInfoFromTxt(TxtPath,LitigantType)
-
-        # 将当事人信息调用OutputLitigantInfoToFrontEnd方法输出到前端
-        # 返回值原本为字典，会被自动pywebview自动转化为js对象
-        return litigant.OutputLitigantInfoToFrontEnd()
-        
-    def bulkInputCaseFromTxt(self):
-        GetInputPath = self.GetFilepath(title="请选择案件信息输入文件")
-        # 调用inputAllCaseFromTxt方法将txt导入
-        self.inputAllCaseFromTxt(InputPath=GetInputPath)
-        return 0
+        return "Success"
 
 
-    # ===== 下面是output方法 =====
-    def OutputCaseInfoToExcel(self,caseId):
+    # ==输出类==
+
+    # 该方法用于输出指定案件的信息到Excel，并保存到案件文件夹中
+    def outputCaseInfoToExcel(self,caseId):
         # 判断案件列表是否为空
         if len(self._cases) == 0:
             return 1
@@ -180,8 +161,9 @@ class Api:
             if case.GetCaseId() == caseId:
                 case.OutputCaseInfoToExcel()
                 return 0
-            
-    def OutputCaseInfoToTxt(self,caseId):
+
+    # 该方法用于输出指定案件的信息到txt，并保存到案件文件夹中        
+    def outputCaseInfoToTxt(self,caseId):
         # 判断案件列表是否为空
         if len(self._cases) == 0:
             return 1
@@ -191,19 +173,9 @@ class Api:
                 case.OutputCaseInfoToTxt()
                 return 0
 
-    def OutputAllCaseInfoToFrontEnd(self):
-
-        # 如果案件列表为空，则生成案件对象，测试阶段使用
-        # if len(self._cases) == 0:
-        #     # 生成测试案件对象
-        #     self.test()
-        Result = []
-        for case in self._cases:
-            Result.append(case.OutputCaseInfoToFrontEnd())
-        # 返回案件列表
-        return Result
-    
-    def OutputAllCaseInfoToTxt(self,OutputFolderPath):
+    # 该方法用于输出所有案件的信息到一个txt
+    def outputAllCasesInfoToTxt(self):
+        OutputFolderPath = self.GetFolderpath(title="请选择案件信息保存的文件夹")
         print(OutputFolderPath)
         # 判断OutputPath是否存在
         if not os.path.exists(OutputFolderPath):
@@ -223,15 +195,16 @@ class Api:
             print("全部案件信息输出成功！")
             return 0
 
-    def bulkOutputCaseInfoToTxt(self):
-        GetOutputFolderPath = self.GetFolderpath(title="请选择案件信息保存的文件夹")
-        # 调用OutputAllCaseInfoToTxt方法输出
-        self.OutputAllCaseInfoToTxt(OutputFolderPath=GetOutputFolderPath)
+    # 该方法用于输出当前所有案件信息成一个列表并推送到前端
+    def outputAllCaseInfoToFrontEnd(self) -> list:
+        Result = []
+        for case in self._cases:
+            Result.append(case.OutputCaseInfoToFrontEnd())
+        # 返回案件列表
+        return Result
     
-
-    # ===== 下面是其他方法 =====
-    # 该方法用于对接前端的文书生成按钮
-    def DocumentsGenerate(self,caseId):
+    # 该方法用于对接前端的文书生成按钮，用于生成案件文件夹及对应的文件模板
+    def documentsGenerate(self,caseId):
         # 先将对应caseId的案件对象找到，赋值给TargetCase
         for case in self._cases:
             if case.GetCaseId() == caseId:
@@ -259,25 +232,10 @@ class Api:
             print("案件文件夹及对应的文件模板生成成功！")
             # 返回值为0代表生成成功
             return 0
-        
-
-    # 该方法用于生成案件归档目录
-    def generateArchiveDirectoryDocument(self,TemplateFilePath,SavedPath):
-        # 导入自写包RenderFile中的RenderArchiveDirectory函数（生成归档目录）
-        from source.RenderFile import RenderArchiveDirectory
-        # 判断输入的路径是否存在
-        if not os.path.exists(SavedPath):
-            return "Error: The path is not exist!"
-        else:
-            # 执行归档目录生成
-            RenderDict = {}      # 用于渲染的字典,格式为{key:(True/False,str)  
-            RenderArchiveDirectory(TemplateFilePath,RenderDict,SavedPath)
-
-        return f"归档目录生成成功,保存路径为{SavedPath}"
     
-
-    # ===== 下面是删除方法 =====
-    def BackEndDeleteCase(self,CaseId):
+    # ==删除类==
+    # 该方法用于后端的数据中删除指定案件
+    def backEndDeleteCase(self,CaseId) -> str:
         # 测试是否收到了前端传来的案件ID
         print(CaseId)
         # 在案件列表中删除指定案件
@@ -285,11 +243,43 @@ class Api:
             # 判断案件ID是否相同,如果相同则在后端也删除对应id的案件并返回
             if case.GetCaseId() == CaseId:
                 self._cases.remove(case)
-                return 
-    
+                return "Success"
+        else:
+            # 如果遍历完，没有找到对应的案件，则返回Fail
+            return "Fail"
+
+
+    # ===== 下面是和CaseInfoEditForm组件交互的方法 =====
+
+    # ==输入类==
+    # 该方法用于从一个txt中读取当事人信息，然后生成对应的新的当事人
+    def inputLitigantFromTxt(self,TxtPath,LitigantType):
+        # 判断输入的路径是否存在
+        if not os.path.exists(TxtPath):
+            print("Error: The path is not exist!")
+            return 1
+        # 判断输入的文件是否是txt文件
+        if not TxtPath.endswith(".txt"):
+            print("Error: The file is not a txt file!")
+            return 2
+        
+        # 导入案件类litigant
+        from library.LitigantClass import Litigant
+
+        # 实例化一个Litigant对象
+        litigant = Litigant()
+
+        # 调用InputLitigantInfoFromTxt方法将txt导入到当前litigant对象中
+        litigant.InputLitigantInfoFromTxt(TxtPath,LitigantType)
+
+        # 将当事人信息调用OutputLitigantInfoToFrontEnd方法输出到前端
+        # 返回值原本为字典，会被自动pywebview自动转化为js对象
+        return litigant.OutputLitigantInfoToFrontEnd()
+
 
     # =====  下面是与 TemplateFileForm组件交互的方法  =====
-    def BackEndAddTemplateFileData(self) -> str:
+    
+    def backEndAddTemplateFileData(self) -> str:
 
         # 调用GetFilepath方法获取文件路径
         TemplateFilePath = self.GetFilepath(title="请选择模板列表文件")
@@ -317,7 +307,7 @@ class Api:
 
         return "Success"
 
-    def BackEndPushTemplateFileDataToFrontEnd(self) -> list:
+    def backEndPushTemplateFileDataToFrontEnd(self) -> list:
         # 如果self._templateFiles为空，则返回空
         if len(self._templateFiles) == 0:
             return []
@@ -329,7 +319,7 @@ class Api:
 
         return templateFiles
 
-    def BackEndUpdateTemplateFileData(self,TemplateFileId,data) -> str:
+    def backEndUpdateTemplateFileData(self,TemplateFileId,data) -> str:
         # 遍历模板文件列表
         for templateFile in self._templateFiles:
             # 如果模板文件ID相同，则更新模板文件信息
@@ -339,7 +329,7 @@ class Api:
                     return "Success"
         return "Fail"
 
-    def BackEndDeleteTemplateFileData(self,TemplateFileId) -> str:
+    def backEndDeleteTemplateFileData(self,TemplateFileId) -> str:
         # 测试是否收到了前端传来的案件ID
         print(TemplateFileId)
         # 在案件列表中删除指定模板文件
@@ -352,7 +342,7 @@ class Api:
         # 如果遍历完，没有找到对应的模板文件，则返回Fail
         return "Fail"
 
-    def BackEndOutputTemplateFileData(self) -> str:
+    def backEndOutputTemplateFileData(self) -> str:
         import time
         # 调用GetFolderpath方法获取文件夹路径
         OutputFolderPath = self.GetFolderpath(title="请选择模板文件保存的文件夹")
@@ -367,14 +357,8 @@ class Api:
                 f.write("\n")
             return "Success"
         
-
-    def BackEndTestOutput(self):
-        # 输出templateFiles
-        for templateFile in self._templateFiles:
-            print(templateFile.OutputTemplateFileToDict())  
-
     # =====  下面是和TemplateFileEditForm交互的方法  =====
-    def BackEndChooseTemplateFile(self) -> dict:
+    def backEndChooseTemplateFile(self) -> dict:
         result = {
             "res" : "",
             "templateFileDir" : "",
@@ -398,3 +382,32 @@ class Api:
             return result
 
 
+    # =====  下面是和其他未开发完成的组件交互的方法  =====
+
+        # 该方法用于生成案件归档目录
+    def generateArchiveDirectoryDocument(self,TemplateFilePath,SavedPath) -> str:
+        # 导入自写包RenderFile中的RenderArchiveDirectory函数（生成归档目录）
+        from source.RenderFile import RenderArchiveDirectory
+        # 判断输入的路径是否存在
+        if not os.path.exists(SavedPath):
+            return "Error: The path is not exist!"
+        else:
+            # 执行归档目录生成
+            RenderDict = {}      # 用于渲染的字典,格式为{key:(True/False,str)  
+            RenderArchiveDirectory(TemplateFilePath,RenderDict,SavedPath)
+
+        return f"归档目录生成成功,保存路径为{SavedPath}"
+    
+    #  =====  下面是测试输出方法  =====
+
+    def testCasesOutput(self) -> None:
+        # 输出案件信息
+        for case in self._cases:
+            print(case.OutputCaseInfoToStr())
+        return 
+    
+    def testTemplateFilesOutput(self) -> None:
+        # 输出templateFiles
+        for templateFile in self._templateFiles:
+            print(templateFile.OutputTemplateFileToDict()) 
+        return 

@@ -28,7 +28,7 @@ async function GetTemplateFileData() {
     }
     // 从后端获取数据(实际运行环境)
     else {
-        await pywebview.api.BackEndPushTemplateFileDataToFrontEnd().then((templateFiles) => {
+        await pywebview.api.backEndPushTemplateFileDataToFrontEnd().then((templateFiles) => {
             console.log("GetTemplateFileData()：从后端获取数据");
 
             for (let i = 0; i < templateFiles.length; i++) {
@@ -63,7 +63,7 @@ async function handleAddData() {
     }
     // 从后端获取数据(实际运行环境)
     else {
-        await pywebview.api.BackEndAddTemplateFileData().then((result) => {
+        await pywebview.api.backEndAddTemplateFileData().then((result) => {
             if (result === "Success") {
                 console.log("handleAddData():添加模板文件成功");
                 // 如果添加成功，重新调用GetTemplateFileData获取数据
@@ -90,7 +90,7 @@ async function handleOutputData() {
     }
     // 从后端获取数据(实际运行环境)
     else {
-        await pywebview.api.BackEndOutputTemplateFileData().then((result) => {
+        await pywebview.api.backEndOutputTemplateFileData().then((result) => {
             if (result === "Success") {
                 console.log("handleOutputData()：导出当前文件列表成功");
             }
@@ -138,7 +138,7 @@ async function updateTemplateFileDataFromEditForm(data){
     }
     // 将对应的id及其他数据，传递给后端(实际运行环境)
     else {
-        let result = await pywebview.api.BackEndUpdateTemplateFileData(data.templateFileId,data);
+        let result = await pywebview.api.backEndUpdateTemplateFileData(data.templateFileId,data);
         console.log(result);
     }
 
@@ -177,7 +177,7 @@ async function deleteData(val) {
     }
     // 将对应的id传递给后端(实际运行环境)
     else {
-        pywebview.api.BackEndDeleteTemplateFileData(val.templateFileId);
+        pywebview.api.backEndDeleteTemplateFileData(val.templateFileId);
     }
 
 }
@@ -192,7 +192,7 @@ async function deleteData(val) {
 //     }
 //     // 从后端获取数据(测试环境)
 //     else {
-//         pywebview.api.BackEndTestOutput()
+//         pywebview.api.backEndTestOutput()
 //     }
 // }
 

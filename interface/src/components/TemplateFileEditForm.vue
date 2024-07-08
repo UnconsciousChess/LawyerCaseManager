@@ -68,7 +68,7 @@ function chooseTemplateFile(){
     }
     // 从后端获取数据(实际运行环境)
     else {
-        pywebview.api.BackEndChooseTemplateFile().then((result) => {
+        pywebview.api.backEndChooseTemplateFile().then((result) => {
             if (result.res === "Success") {
                 console.log("chooseTemplateFile():选择模板文件成功");
                 // 如果返回结果成功，则变更当前表单的路径为新选择的路径,表单的templateFileName也对应变更
