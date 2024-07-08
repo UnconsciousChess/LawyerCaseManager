@@ -807,7 +807,7 @@ class Case():
         if isinstance(CaseInfoDict,dict):
             # 对于字典中的逐个键值对读取，并调用SetCaseInfoWithKeyAndValue方法对键值对进行处理
             for Key,Value in CaseInfoDict.items():
-                self.SetCaseInfoFromWebDict(Key,Value)
+                self.InputCaseInfoFromWebDict(Key,Value)
 
 
     # ===========Output方法：下面定义输出案件信息的方法=============
