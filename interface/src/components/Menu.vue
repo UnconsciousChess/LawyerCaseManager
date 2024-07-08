@@ -17,10 +17,10 @@ const aboutDialog = ref({
 		<el-sub-menu index="2">
 			<template #title>文书生成器</template>
 			<el-menu-item index="/case-info-list">案件列表</el-menu-item>
-			<el-menu-item index="/case-info-form">案件信息录入</el-menu-item>
+			<!-- <el-menu-item index="/case-info-form">案件信息录入</el-menu-item> -->
 			<el-menu-item index="/template-file">模板文件选择</el-menu-item>
 			<el-menu-item disabled>归档材料生成</el-menu-item>
-			<el-menu-item index="/test">测试</el-menu-item>
+			<el-menu-item disabled index="/test">测试</el-menu-item>
 		</el-sub-menu>
 		<el-sub-menu index="3">
 			<template #title>其他工具</template>
