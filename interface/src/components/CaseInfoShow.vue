@@ -3,7 +3,7 @@
         :row-key="row => row.caseId" @expand-change="(row, expandedRows) => generateShowText(row, expandedRows)">
         <el-table-column label="" width="40" type="expand">
             <template #default>
-                <CaseInfoShowDescription :propShowTextList="showTextList" :propId="caseId" />
+                <CaseInfoShowDescription :propShowTextList="tableData" :propId="caseId" />
             </template>
         </el-table-column>
         <el-table-column prop="index" label="序号" width="55" />
@@ -65,24 +65,27 @@
 </template>
 
 <script setup>
-import { ref, onMounted, defineProps } from "vue";
+import { ref, onMounted} from "vue";
 
+// 导入案件信息展示组件
 import CaseInfoShowDescription from "./CaseInfoShowDescription.vue";
+// 导入案件信息编辑表单组件
 import CaseInfoForm from "./CaseInfoForm.vue";
+
+// 导入测试数据
+import { testCase1, testCase2, testCase3 } from "./test/data.js";
 
 
 // 初始化tableData，为空数组，是案件表格的数据
 const tableData = ref([]);
 
-
-const showTextList = ref([]);
-
 // 这个变量是用于传递给子组件的caseId
 const caseId = ref(null);
+
 //一开始展开的行的数量为0
 const currentExpandedRow = ref(0);
 
-// 这个列表是存放展开的行的caseId（即rowkey
+// 这个列表是存放展开的行的caseId（即rowkey）
 const expandRowKeys = ref([]);
 
 // 以下变量是用于控制输出对话框的显示的布尔值
@@ -90,179 +93,34 @@ const dialogOutputDataVisible = ref(false);
 const dialogDeleteDataVisible = ref(false);
 const dialogEditDataVisible = ref(false);
 
-
+// 当前编辑、删除、输出的行的数据
 const currentEditRow = ref(null);
 const currentDeleteRow = ref(null);
 const currentOutputRow = ref(null);
+
+// 这个变量是用于控制编辑表单的模式，有edit和create两种模式
 const caseInfoFormMode = ref(null);
 
-// 测试数据
-const testCase1 = {
-    index: 1,
-    title: "案件1",
-    causeOfAction: "信息网络买卖合同纠纷",
-    litigationAmount: "1000",
-    courtName: "法院1",
-    caseCourtCode: "（2024）粤0303民初12507号",
-    mediationIntention: false,
-    riskAgentUpfrontFee: "100",
-    caseType: 1,
-    riskAgentPostFeeRate: "1",
-    caseAgentStage: ['1', '2'],
-    riskAgentStatus: false,
-    claimText: "诉讼请求1",
-    factAndReason: "事实与理由1",
-    rejectMediationReasonText: "拒绝调解理由1",
-    agentFixedFee: "一审3000元，二审5000元，执行1000元，再审2000元",
-    caseId: "1.1",
-    litigantsName: "张三 诉 李四"
-};
-const testCase2 = {
-    index: 2,
-    title: "案件2",
-    causeOfAction: "案由2",
-    courtName: "法院2",
-    litigationAmount: "2000",
-    caseCourtCode: "案号2",
-    mediationIntention: false,
-    riskAgentUpfrontFee: "200",
-    caseType: 2,
-    riskAgentPostFeeRate: "2",
-    caseAgentStage: ['3', '4'],
-    riskAgentStatus: true,
-    claimText: "诉讼请求2",
-    factAndReason: "事实与理由2",
-    rejectMediationReasonText: "拒绝调解理由2",
-    agentFixedFee: "",
-    caseId: "2.3",
-    litigantsName: "王五 诉 赵六"
-};
-const testCase3 = {
-    index: 3,
-    title: "案件3",
-    causeOfAction: "案由3",
-    courtName: "法院3",
-    litigationAmount: "3000",
-    caseCourtCode: "案号3",
-    mediationIntention: true,
-    riskAgentUpfrontFee: "300",
-    caseType: 3,
-    riskAgentPostFeeRate: "3",
-    caseAgentStage: ['1', '2', '3', '4', '5'],
-    riskAgentStatus: false,
-    claimText: "诉讼请求3",
-    factAndReason: "事实与理由3",
-    rejectMediationReasonText: "拒绝调解理由3",
-    agentFixedFee: "一审3000元，二审5000元，执行1000元，再审1000元",
-    caseId: "3.4",
-    litigantsName: "赵六 诉 王五",
-};
-
-
-
-// 工厂函数，传入tableData的数据，返回可以直接输出的showText
-function showTextCreator(tableData) {
-    // 要返回的对象o
-    var o = new Object();
-    // 下面是直接复制的字段
-    o.title = tableData.title;
-    o.causeOfAction = tableData.causeOfAction;
-    o.litigationAmount = tableData.litigationAmount;
-    o.courtName = tableData.courtName;
-    o.caseCourtCode = tableData.caseCourtCode;
-    o.riskAgentUpfrontFee = tableData.riskAgentUpfrontFee;
-    o.riskAgentPostFeeRate = tableData.riskAgentPostFeeRate;
-    o.claimText = tableData.claimText;
-    o.factAndReason = tableData.factAndReason;
-    o.rejectMediationReasonText = tableData.rejectMediationReasonText;
-    o.agentFixedFee = tableData.agentFixedFee;
-    o.caseId = tableData.caseId;
-
-    // 下面是需要转换的字段
-
-    // 转换调解意向为√或×
-    if (tableData.mediationIntention == true) {
-        o.mediationIntention = "同意调解";
-    } else {
-        o.mediationIntention = "拒绝调解";
-    }
-
-    // 转换风险代理人状态为√或×
-    if (tableData.riskAgentStatus == true) {
-        o.riskAgentStatus = "是";
-    } else {
-        o.riskAgentStatus = "否";
-    }
-
-    // 转换案件类型为文字
-    if (tableData.caseType == 1) {
-        o.caseType = "民事案件";
-    } else if (tableData.caseType == 2) {
-        o.caseType = "行政案件";
-    } else if (tableData.caseType == 3) {
-        o.caseType = "执行案件";
-    }
-
-    if (tableData.caseAgentStage.length == 0) {
-        o.caseAgentStage = "无";
-    } else {
-        o.caseAgentStage = "";
-        // 遍历数组并转换为字符串
-        tableData.caseAgentStage.forEach(stage => {
-            if (stage == '1') {
-                o.caseAgentStage += "一审立案阶段" + "、";
-            }
-            else if (stage == '2') {
-                o.caseAgentStage += "一审诉讼阶段" + "、";
-            }
-            else if (stage == '3') {
-                o.caseAgentStage += "二审阶段" + "、";
-            }
-            else if (stage == '4') {
-                o.caseAgentStage += "执行阶段" + "、";
-            }
-            else if (stage == '5') {
-                o.caseAgentStage += "再审阶段" + "、";
-            }
-        })
-        // 如果最后一个字符是顿号，则去掉最后一个字符
-        if (o.caseAgentStage.charAt(o.caseAgentStage.length - 1) == "、") {
-            o.caseAgentStage = o.caseAgentStage.substring(0, o.caseAgentStage.length - 1);
-        }
-    }
-
-    return o;
-}
 
 function generateShowText(row, expandedRows) {
     // 获取当前展开的行的数量，与currentExpandedRow进行比较
+
+    // 如果expandedRows的长度大于currentExpandedRow,同时认为目前是点选了一下展开的状态
     if (expandedRows.length > currentExpandedRow.value) {
-        // 如果expandedRows的长度大于currentExpandedRow
-        // 则将currentExpandedRow更新为当前展开的行的数量,同时认为目前是点选了一下展开的状态
+        // 将currentExpandedRow更新为当前展开的行的数量
         currentExpandedRow.value = expandedRows.length;
-        // 利用row的数据，运用showTextCreator工厂函数生成showText
-        var showText = showTextCreator(row)
-        // 将当前行的数据推向showTextList
-        showTextList.value.push(showText);
         // 要prop给子组件的caseId为当前行对象的caseId
         caseId.value = row.caseId;
-
         // 将当前行的caseId推向expandRowKeys
         expandRowKeys.value.push(row.caseId);
-        // console.log(expandRowKeys.value)
         // console.log("展开，当前展开行数量为" + currentExpandedRow.value);
 
+    // 如果expandedRows的长度小于currentExpandedRow,同时认为目前是点选了一下收起的状态
     } else {
-        // 如果expandedRows的长度小于currentExpandedRow
-        // 则将currentExpandedRow更新为当前展开的行的数量,同时认为目前是点选了一下收起的状态
+        // 将currentExpandedRow更新为当前展开的行的数量
         currentExpandedRow.value = expandedRows.length;
-
         // 从expandRowKeys中删除对应的caseId
         expandRowKeys.value.splice(expandRowKeys.value.findIndex((item) => item === row.caseId), 1);
-
-        // 从showTextList中删除对应的数据
-        showTextList.value.splice(showTextList.value.findIndex((item) => item.caseid === row.caseid), 1);
-
         // console.log("收起，当前展开行数量为" + currentExpandedRow.value);
     }
 
@@ -278,7 +136,7 @@ function createNewCase() {
 }
 
 // 从后端获取数据
-function getTableData() {
+function getTableData() { 
     // 如果未连接后端，则只测试前端
     if (typeof pywebview === 'undefined') {
         console.log("getTableData()：未连接后端，目前只测试前端");
@@ -464,8 +322,6 @@ function deleteData(val) {
     // 对应的expandRowKeys也要删除
     expandRowKeys.value.splice(expandRowKeys.value.findIndex((item) => item === val.caseId), 1);
 
-    // 对应的showTextList也要删除
-    showTextList.value.splice(showTextList.value.findIndex((item) => item.caseId === val.caseId), 1);
 
     // 对应展开的行数减一
     currentExpandedRow.value -= 1;
@@ -535,7 +391,7 @@ async function handleDocumentsGenerate(val) {
 }
 
 
-// 测试的代码
+// 测试后端输出的代码
 function testOutputCase(){
     if (typeof pywebview === 'undefined') {
         console.log("testOutputCase()：未连接后端，目前只测试前端");

@@ -71,7 +71,7 @@
 			{{ showText.riskAgentPostFeeRate }} %
 		</el-descriptions-item>
 
-		
+
 		<el-descriptions-item v-if="showText.riskAgentStatus == '否'">
 			<template #label>
 				<div class="cell-item">固定收费标准</div>
@@ -121,13 +121,83 @@ function showTextInitialize(prop) {
 	// 遍历propData.propShowTextList，找到对应的案件信息
 	let Index = prop.propShowTextList.findIndex((item) => item.caseId == prop.propId);
 	// 将对应的案件信息赋值给showText
-	showText.value = prop.propShowTextList[Index];
+	showText.value.title = prop.propShowTextList[Index].title;
+	showText.value.causeOfAction = prop.propShowTextList[Index].causeOfAction;
+	showText.value.litigationAmount = prop.propShowTextList[Index].litigationAmount;
+	showText.value.courtName = prop.propShowTextList[Index].courtName;
+	showText.value.caseCourtCode = prop.propShowTextList[Index].caseCourtCode;
+	showText.value.caseAgentStage = prop.propShowTextList[Index].caseAgentStage;
+	showText.value.riskAgentUpfrontFee = prop.propShowTextList[Index].riskAgentUpfrontFee;
+	showText.value.riskAgentPostFeeRate = prop.propShowTextList[Index].riskAgentPostFeeRate;
+	showText.value.claimText = prop.propShowTextList[Index].claimText;
+	showText.value.factAndReason = prop.propShowTextList[Index].factAndReason;
+	showText.value.rejectMediationReasonText = prop.propShowTextList[Index].rejectMediationReasonText;
+	showText.value.agentFixedFee = prop.propShowTextList[Index].agentFixedFee;
+	showText.value.caseId = prop.propShowTextList[Index].caseId;
+
+	// 下面是需要转换的字段
+
+	// 转换调解意愿为【同意调解】或【拒绝调解】
+	if (prop.propShowTextList[Index].mediationIntention == true) {
+		showText.value.mediationIntention = "同意调解";
+	} else {
+		showText.value.mediationIntention = "拒绝调解";
+	}
+
+	// 转换风险代理状态为【是】或【否】
+	if (prop.propShowTextList[Index].riskAgentStatus == true) {
+		showText.value.riskAgentStatus = "是";
+	} else {
+		showText.value.riskAgentStatus = "否";
+	}
+
+	// 转换案件类型为【民事案件】、【行政案件】或【执行案件】
+	if (prop.propShowTextList[Index].caseType == 1) {
+		showText.value.caseType = "民事案件";
+	} else if (prop.propShowTextList[Index].caseType == 2) {
+		showText.value.caseType = "行政案件";
+	} else if (prop.propShowTextList[Index].caseType == 3) {
+		showText.value.caseType = "执行案件";
+	}
+
+
+	// 转换案件阶段为【一审立案阶段】、【一审诉讼阶段】、【二审阶段】、【执行阶段】、【再审阶段】
+	if (prop.propShowTextList[Index].caseAgentStage.length == 0) {
+		showText.value.caseAgentStage = "无";
+	} else {
+		showText.value.caseAgentStage = "";
+		// 遍历数组并转换为字符串
+		prop.propShowTextList[Index].caseAgentStage.forEach(stage => {
+			if (stage == '1') {
+				showText.value.caseAgentStage += "一审立案阶段" + "、";
+			}
+			else if (stage == '2') {
+				showText.value.caseAgentStage += "一审诉讼阶段" + "、";
+			}
+			else if (stage == '3') {
+				showText.value.caseAgentStage += "二审阶段" + "、";
+			}
+			else if (stage == '4') {
+				showText.value.caseAgentStage += "执行阶段" + "、";
+			}
+			else if (stage == '5') {
+				showText.value.caseAgentStage += "再审阶段" + "、";
+			}
+		})
+		// 如果最后一个字符是顿号，则去掉最后一个字符
+		if (showText.value.caseAgentStage.charAt(showText.value.caseAgentStage.length - 1) == "、") {
+			showText.value.caseAgentStage = showText.value.caseAgentStage.substring(0, showText.value.caseAgentStage.length - 1);
+		}
+	}
+
+
 }
 
 // 在挂载时调用showTextInitialize来初始化showText
 onMounted(() => {
 	showTextInitialize(propData);
 });
+
 
 
 </script>
