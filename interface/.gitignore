@@ -35,5 +35,6 @@ coverage
 
 /src/assets
 /src/js/test
+/src/components/test
 
 /temp
