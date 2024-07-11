@@ -40,7 +40,7 @@
 
     <!-- 编辑对话框 -->
     <el-dialog title="编辑案件信息" width="700" align-center v-model="dialogEditDataVisible">
-        <CaseInfoForm :propCaseData="currentEditRow" :propMode="caseInfoFormMode" @updateCaseData="updateCaseDataFromCaseInfoForm" />
+        <CaseInfoForm ref="caseInfoFormRef" :propCaseData="currentEditRow" :propMode="caseInfoFormMode" @updateCaseData="updateCaseDataFromCaseInfoForm" />
     </el-dialog>
 
     <!-- 删除对话框 -->
@@ -100,6 +100,9 @@ const currentOutputRow = ref(null);
 
 // 这个变量是用于控制编辑表单的模式，有edit和create两种模式
 const caseInfoFormMode = ref(null);
+
+// 引用子组件的ref(暂时无用)
+const caseInfoFormRef = ref(null);
 
 
 function generateShowText(row, expandedRows) {
@@ -174,6 +177,7 @@ function getTableData() {
                     claimText: cases[i].claimText,
                     factAndReason: cases[i].factAndReason,
                     rejectMediationReasonText: cases[i].rejectMediationReasonText,
+                    caseFolderGeneratedPath: cases[i].caseFolderGeneratedPath,
                     agentFixedFee: cases[i].agentFixedFee,
                     caseId: cases[i].caseId,
                     plaintiffs: cases[i].plaintiffs,
@@ -240,9 +244,10 @@ function handleEditData(val) {
     currentEditRow.value = val;
     // 改变caseInfoFormMode为edit（有edit和create两种模式）
     caseInfoFormMode.value = "edit";
+    // caseInfoFormRef.value.caseFormInfoInitiation();
 }
 
-// 收到编辑数据以后，父组件中的数据进行更新
+// 收到子组件的编辑数据以后，父组件中的数据进行更新
 async function updateCaseDataFromCaseInfoForm(data) {
     console.log("更新案件信息");
     console.log(data);
@@ -265,6 +270,7 @@ async function updateCaseDataFromCaseInfoForm(data) {
     tableData.value[updateItemIndex].riskAgentPostFeeRate = data.riskAgentPostFeeRate;
     tableData.value[updateItemIndex].caseAgentStage = data.caseAgentStage;
     tableData.value[updateItemIndex].claimText = data.claimText;
+    tableData.value[updateItemIndex].caseFolderGeneratedPath = data.caseFolderGeneratedPath;
     tableData.value[updateItemIndex].factAndReason = data.factAndReason;
     tableData.value[updateItemIndex].rejectMediationReasonText = data.rejectMediationReasonText;
     tableData.value[updateItemIndex].agentFixedFee = data.agentFixedFee;

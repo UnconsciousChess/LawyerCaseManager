@@ -1,5 +1,5 @@
 <script setup>
-import { ref, provide, onMounted, onUpdated} from "vue";
+import { ref, provide, onMounted, onUpdated,watchEffect} from "vue";
 
 // 局部注册LitigantForm组件
 import LitigantForm from "./LitigantForm.vue";
@@ -36,15 +36,12 @@ const caseForm = ref({
 	inputCaseInfoByFilePath: "", //案件信息文件路径（用于文件导入模式）
 });
 
-
-
 const componentsConfig = ref({
 	inputInfoByFile: true,
 	inputCaseInfoByFilePathDisabled: false,
 	inputInfoByFileSwitchStatus: true,
 });
 
-// ===下面是定义的变量 ===
 // 表单引用
 const caseFormRef = ref(null);
 // 通过前端输入案件信息的输入框是否启用的状态，初始为false，即采用文件导入模式
@@ -225,6 +222,7 @@ function onSubmit() {
 		}
 
 	}
+
 	// 如果采取的是前端输入
 	else {
 		console.log("onSubmit()：当前导入模式为-从前端表单中导入案件信息");
@@ -249,7 +247,7 @@ function onSubmit() {
 				defendantsName = defendantsName.substring(0, defendantsName.length - 1);
 
 				// 将原告和被告的名字赋值给案件信息的字典
-				caseForm.value.litigantsName = plaintiffsName + " vs " + defendantsName;
+				caseForm.value.litigantsName = plaintiffsName + " 诉 " + defendantsName;
 
 				// 将案件信息的字典传递给父组件
 				emit("updateCaseData", caseForm.value);
@@ -274,7 +272,7 @@ function onSubmit() {
 }
 
 
-function caseFormInfoInitiation(prop) {
+function caseFormInfoInitiation(propData) {
 
 	// 已有案件内容以后的编辑模式
 	if (propData.propMode == "edit") {
@@ -286,6 +284,7 @@ function caseFormInfoInitiation(prop) {
 		}
 		// 如果有传递过来的案件信息，则将其赋值给表单
 		let caseData = propData.propCaseData
+
 		console.log(caseData);
 		caseForm.value.caseId = caseData.caseId;
 		caseForm.value.caseCourtCode = caseData.caseCourtCode
@@ -297,6 +296,16 @@ function caseFormInfoInitiation(prop) {
 		caseForm.value.mediationIntention = caseData.mediationIntention;
 		caseForm.value.caseFolderGeneratedPath = caseData.caseFolderGeneratedPath;
 		caseForm.value.riskAgentStatus = caseData.riskAgentStatus;
+		
+		// 如果原告不为空，则将其赋值给表单
+		if (caseData.plaintiffs != null) {
+			caseForm.value.plaintiffs = caseData.plaintiffs;
+		}
+		// 如果被告不为空，则将其赋值给表单
+		if (caseData.defendants != null) {
+			caseForm.value.defendants = caseData.defendants;
+
+		}
 
 		// 如果风险代理人状态为true，则将风险代理人的前期风险收费金额和后期风险收费比例赋值给表单
 		if (caseData.riskAgentStatus == true) {
@@ -318,9 +327,10 @@ function caseFormInfoInitiation(prop) {
 		// 因为是编辑模式，所以默认不需要文件导入
 		componentsConfig.value.inputInfoByFile = false;
 
-		console.log("案件信息已经传递过来了");
-		console.log(caseForm.value);
+		// console.log("案件信息已经传递过来了");
+		// console.log(caseForm.value);
 	}
+
 	// 新建案件的创建模式
 	else if  (propData.propMode == "create") {
 		console.log("当前CaseInfoform为新建案件模式")
@@ -361,8 +371,10 @@ function caseFormInfoInitiation(prop) {
 onMounted(() => {
 	caseFormInfoInitiation(propData);
 });
-// ====== 下面是在数据更新时调用的方法 ======
-onUpdated(() => {
+
+// ====== 下面是在更新时调用的方法 ======
+watchEffect(() => {
+	console.log("案件信息表单已经更新");
 	caseFormInfoInitiation(propData);
 });
 
@@ -475,21 +487,21 @@ onUpdated(() => {
 
 	<!-- 原告部分 -->
 	<div v-for="plaintiff in caseForm.plaintiffs" :key="plaintiff.id">
-		<LitigantForm ref="litigantFormPlaintiff" :litigantPosition="plaintiff.litigantPosition" :id="plaintiff.id" />
+		<LitigantForm ref="litigantFormPlaintiff" :litigant="plaintiff"  />
 	</div>
 
 	<!-- 被告部分 -->
 	<div v-for="defendant in caseForm.defendants" :key="defendant.id">
-		<LitigantForm ref="litigantFormDefendant" :litigantPosition="defendant.litigantPosition" :id="defendant.id" />
+		<LitigantForm ref="litigantFormDefendant" :litigant="defendant"  />
 	</div>
 
 	<!-- 下面的是用于测试，直接展示从表格中输入的数据 -->
-	<!-- <div>
+	<div>
 		<ul>
 			<p>案件信息</p>
 			<li v-for="(item, key) in caseForm">{{ key }} - {{ item }}</li>
 		</ul>
-	</div> -->
+	</div>
 </template>
 
 
