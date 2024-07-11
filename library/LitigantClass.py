@@ -3,11 +3,16 @@ import os,sys
 # 导入第三方库，用于验证身份证号码的合法性
 from id_validator import validator
 
+# 导入nanoid模块
+from nanoid import generate
+
 # 导入银行账户类
 from .Property import BankAccount
 
+
 # 不要生成字节码
 sys.dont_write_bytecode = True
+
 
 # 设定诉讼参与人类
 class Litigant():
@@ -37,6 +42,8 @@ class Litigant():
         self._LegalRepresentativeIdCode = None
         # 12.诉讼代理人属性（一个列表）
         self._LawsuitRepresentative = []
+        # 13.id属性，用于标识该诉讼参与人的唯一性
+        self._LitigantId = generate(size=10,alphabet="0123456789")
 
     # ===========下面是Get方法 ===========
 
@@ -87,6 +94,9 @@ class Litigant():
     # 定义外部获取法定代表人身份证号码的方法
     def GetLegalRepresentativeIdCode(self):
         return self._LegalRepresentativeIdCode
+    # 定义外部获取诉讼参与人id的方法
+    def GetLitigantId(self):
+        return self._LitigantId
     
 
     # =========== 下面是Set方法 ===========
@@ -396,10 +406,12 @@ class Litigant():
             else:
                 print(str(self._Name)+"不是我方当事人"+"\n")
 
+            # 输出id
+            print(str(self._Name)+"的id为"+str(self._LitigantId)+"\n")
             return 
 
-    # 定义将当前诉讼参与人各项信息输出到前端json的方法
-    def OutputLitigantInfoToFrontEnd(self):
+    # 定义将当前诉讼参与人各项信息输出到前端的方法
+    def OutputLitigantInfoToFrontEnd(self) -> dict:
         LitigantInfoDict = {}
 
         # 返回的字典中的键值对应的是前端需要的字段
@@ -408,6 +420,15 @@ class Litigant():
         LitigantInfoDict["litigantAddress"] = self.GetLocation()
         LitigantInfoDict["litigantPhoneNumber"] = self.GetContactNumber()
         LitigantInfoDict["litigantIsOurClient"] = self.IsOurClient()
+        LitigantInfoDict["id"] = self.GetLitigantId()
+
+        # 根据诉讼地位设置诉讼地位属性的字符串，分别为plaintiff、defendant、thirdParty
+        if self.GetLitigantPosition() == 1:
+            LitigantInfoDict["litigantPosition"] = "plaintiff"
+        elif self.GetLitigantPosition() == 2:
+            LitigantInfoDict["litigantPosition"] = "defendant"
+        elif self.GetLitigantPosition() == 3:
+            LitigantInfoDict["litigantPosition"] = "thirdParty"
 
         # 如果是公司具有法定代表人属性
         if self.GetLitigantType() == 2 or self.GetLitigantType() == 3:
