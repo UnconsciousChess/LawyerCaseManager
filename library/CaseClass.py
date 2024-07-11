@@ -281,7 +281,7 @@ class Case():
                     print("SetJurisdictionDict报错：输入的【%s】键名不符合规范" % stage)
 
     # 诉讼请求设定方法
-    def SetClaimText(self,ClaimText,debugmode=False):
+    def SetClaimText(self,ClaimText,debugmode=False) -> None:
         if isinstance(ClaimText,str):
             self._ClaimText = ClaimText
         else:
