@@ -1129,8 +1129,6 @@ class Case():
         # 被告名字字符串
         OutputDict["defendantNames"] = self.GetAllDefendantNames()
 
-        # 测试
-        print(OutputDict)
         # 返回字典
         return OutputDict
     
