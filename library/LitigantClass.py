@@ -173,16 +173,28 @@ class Litigant():
 
     # 定义外部设置法定代表人身份证号码的方法
     def SetLegalRepresentativeIdCode(self,LegalRepresentativeIdCode):
+
         if isinstance(LegalRepresentativeIdCode,str):
+            
             if LegalRepresentativeIdCode == "":
                 print("SetLegalRepresentativeIdCode方法报错：法定代表人身份证号码不能为空")
                 return
+            
+            # 如果是读入的是字符串“None”，则将值设置为None
+            if LegalRepresentativeIdCode == "None":
+                self._LegalRepresentativeIdCode = None
+                return
+            
             # 调用id_validator库的验证方法，判断身份证号码是否合法
             if not validator.is_valid(LegalRepresentativeIdCode):
                 print("SetLegalRepresentativeIdCode方法报错：法定代表人身份证号码有误")
                 return
             else:
                 self._LegalRepresentativeIdCode = LegalRepresentativeIdCode
+                return
+        else:
+            print("SetLegalRepresentativeIdCode方法报错：传入的参数不是字符串")
+            return
 
     # 定义内部根据规则设置诉讼参与人性别的方法
     def SetSexByRule(self,debug=False):
@@ -201,9 +213,11 @@ class Litigant():
                 else:
                     if debug:
                         print("SetSexByRule报错：身份证长度有误，因此无法自动设置性别")
+                        return
             else:
                 if debug:
                     print("SetSexByRule报错：该诉讼参与人对象还没有身份证号码，因此无法自动设置性别")
+                    return
 
     def SetLitigantTypeByRule(self,debug=False):
         # 如果名称大于6个字，就视为公司或非法人组织
@@ -544,7 +558,7 @@ class Lawyer():
 
     # ========== 下面是Output方法 ==========
     # 输出律师信息到屏幕
-    def OutputLawyerInfoToScreen(self):
+    def OutputLawyerInfoToScreen(self)  -> None:
         print(self._Name+"律师的执业证号="+self._LawyerLicense)
         print(self._Name+"律师的身份证号="+self._IdCode)
         print(self._Name+"律师的联系方式="+self._ContactNumber)
@@ -555,5 +569,16 @@ class Lawyer():
         else:
             print(self._Name+"律师不是实习律师")
         return 
+
+    # 输出律师信息成字典格式
+    def OutputLawyerInfoToDict(self) -> dict:
+        LawyerInfoDict = {}
+        LawyerInfoDict["lawyerName"] = self.GetName()
+        LawyerInfoDict["lawyerIdNumber"] = self.GetIdCode()
+        LawyerInfoDict["lawyerAddress"] = self.GetLocation()
+        LawyerInfoDict["lawyerPhoneNumber"] = self.GetContactNumber()
+        LawyerInfoDict["lawyerLicense"] = self.GetLawyerLicense()
+        LawyerInfoDict["isInternLawyer"] = self.IsInternLawyer()
+        return LawyerInfoDict
 
 
