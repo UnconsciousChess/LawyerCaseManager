@@ -106,8 +106,6 @@
 
 <script setup>
 
-import { ref, onMounted } from "vue";
-
 // 定义案件信息展示的数据
 const propData = defineProps({
 	propShowTextList: Array,

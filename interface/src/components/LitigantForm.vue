@@ -112,8 +112,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted, inject } from "vue";
-
 import { checkIdNumberValid, checkEnterpriseIdNumberValid } from "../js/check.js";
 
 

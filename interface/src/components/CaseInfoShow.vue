@@ -70,7 +70,6 @@
 </template>
 
 <script setup>
-import { ref, onMounted} from "vue";
 
 // 导入案件信息展示组件
 import CaseInfoShowDescription from "./CaseInfoShowDescription.vue";

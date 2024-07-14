@@ -1,8 +1,5 @@
 <!-- 组合式Vue -->
 <script setup>
-import { ref, computed } from "vue";
-// 导入router部分
-// import {useRoute,useRouter} from "vue-router";
 
 const activeIndex = ref("1");
 // 默认不显示About的dialog

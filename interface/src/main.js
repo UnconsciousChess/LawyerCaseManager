@@ -1,13 +1,7 @@
-// 导入Vue
-import { createApp } from 'vue'
 // 导入App.vue
 import App from './App.vue'
 // 导入router
 import {createMemoryHistory, createRouter} from 'vue-router'
-// 导入Element
-import ElementPlus from 'element-plus'
-// 导入Element样式
-import 'element-plus/dist/index.css'
 
 
 // 导入组件
@@ -37,11 +31,8 @@ const router = createRouter({
 // 创建Vue实例app
 const app = createApp(App)
 
-// app使用Element
-app.use(ElementPlus)
 // app使用router
 app.use(router)
-
 
 // 将app挂载到id为vueapp的dom上
 app.mount('#vueapp')
