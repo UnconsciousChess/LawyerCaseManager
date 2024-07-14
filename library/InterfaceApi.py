@@ -204,7 +204,7 @@ class Api:
         return Result
     
     # 该方法用于对接前端的文书生成按钮，用于生成案件文件夹及对应的文件模板
-    def documentsGenerate(self,caseId):
+    def documentsGenerate(self,caseId,templateFilesIdList) -> int:
         # 先将对应caseId的案件对象找到，赋值给TargetCase
         for case in self._cases:
             if case.GetCaseId() == caseId:
@@ -219,10 +219,22 @@ class Api:
             print("Error: The templateFiles is empty!")
             return -1
         
+        # 根据templateFilesIdList找到对应的模板文件对象，赋值给TargetTemplateFiles
+        TargetTemplateFiles = []
+        for templateFileId in templateFilesIdList:
+            for templateFile in self._templateFiles:
+                if templateFile.GetTemplateFileId() == templateFileId:
+                    TargetTemplateFiles.append(templateFile)
+                    break
+        
+        # 测试是否找到了对应的案件和模板文件
+        for file in TargetTemplateFiles:
+            print(file.GetTemplateFileName())
+
         # 检验无误后，执行案件文件夹生成的操作
         Result = FolderCreator(case=TargetCase,              
                       OutputDir=TargetCase.GetCaseFolderPath(),   
-                      TemplateListOrTemplateListDir=self._templateFiles)
+                      TemplateListOrTemplateListDir=TargetTemplateFiles)
         
         # 检查FolderCreator是否执行成功
         if Result != "Success":

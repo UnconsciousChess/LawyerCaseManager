@@ -38,6 +38,11 @@
 
     <!-- 下面是按下按钮以后弹出的对话框 -->
 
+    <!-- 选择生成文书对话框 -->
+    <el-dialog title="选择生成文书" width="600" v-model="dialogChooseTemplateVisible">
+        <TemplateFileCheckBoxList @generate="documentsGenerate"/>
+    </el-dialog>
+
     <!-- 编辑对话框 -->
     <el-dialog title="编辑案件信息" width="700" align-center v-model="dialogEditDataVisible">
         <CaseInfoForm ref="caseInfoFormRef" :propCaseData="currentEditRow" :propMode="caseInfoFormMode" @updateCaseData="updateCaseDataFromCaseInfoForm" />
@@ -71,9 +76,12 @@ import { ref, onMounted} from "vue";
 import CaseInfoShowDescription from "./CaseInfoShowDescription.vue";
 // 导入案件信息编辑表单组件
 import CaseInfoForm from "./CaseInfoForm.vue";
+// 导入
+import TemplateFileCheckBoxList from "./TemplateFileCheckBoxList.vue";
 
 // 导入测试数据
 import { testCase1, testCase2, testCase3 } from "./test/data.js";
+
 
 
 // 初始化tableData，为空数组，是案件表格的数据
@@ -88,15 +96,17 @@ const currentExpandedRow = ref(0);
 // 这个列表是存放展开的行的caseId（即rowkey）
 const expandRowKeys = ref([]);
 
-// 以下变量是用于控制输出对话框的显示的布尔值
+// 以下变量是用于控制各个对话框的显示的布尔值
 const dialogOutputDataVisible = ref(false);
 const dialogDeleteDataVisible = ref(false);
 const dialogEditDataVisible = ref(false);
+const dialogChooseTemplateVisible = ref(false)
 
-// 当前编辑、删除、输出的行的数据
+// 当前编辑、删除、输出、生成的行的数据
 const currentEditRow = ref(null);
 const currentDeleteRow = ref(null);
 const currentOutputRow = ref(null);
+const currentGenerateRow = ref(null);
 
 // 这个变量是用于控制编辑表单的模式，有edit和create两种模式
 const caseInfoFormMode = ref(null);
@@ -235,7 +245,6 @@ async function handleBulkOutputData() {
     }
 }
 
-
 // 编辑数据的前置函数
 function handleEditData(val) {
     console.log("当前要编辑的案件id为" + val.caseId);
@@ -253,8 +262,7 @@ async function updateCaseDataFromCaseInfoForm(data) {
     console.log(data);
     // 将对话框隐藏
     dialogEditDataVisible.value = false;
-    // 前端的父组件更新数据
-    // 获取要更新的数据的index
+    // 前端的父组件更新数据。获取要更新的数据的index
     var updateItemIndex = tableData.value.findIndex(
         (item) => item.caseId === data.caseId
     );
@@ -279,17 +287,6 @@ async function updateCaseDataFromCaseInfoForm(data) {
     tableData.value[updateItemIndex].thirdParties = data.thirdParties;
     tableData.value[updateItemIndex].litigantsName = data.litigantsName;
     tableData.value[updateItemIndex].title = data.causeOfAction + "一案，编号：" + data.caseId;
-
-    // 下面是将信息传递给后端的部分
-    // // 如果未连接后端，则只测试前端
-    // if (typeof pywebview === 'undefined') {
-    //     console.log("updateCaseDataFromCaseInfoForm()：未连接后端，目前只测试前端");
-    // }
-    // // 将对应的id及其他数据，传递给后端(实际运行环境)
-    // else {
-    //     let result = await pywebview.api.backEndUpdateCaseData(data.caseId, data);
-    //     console.log(result);
-    // }
 }
 
 
@@ -351,7 +348,7 @@ function outputToExcel(val) {
     // 将对话框隐藏
     dialogOutputDataVisible.value = false;
     console.log("输出案件信息到excel");
-    console.log(val.caseId)
+    // console.log(val.caseId)
     // 如果未连接后端，则只测试前端
     if (typeof pywebview === 'undefined') {
         console.log("outputToExcel()：未连接后端，目前只测试前端");
@@ -378,18 +375,39 @@ function outputToTxt(val) {
     }
 }
 
+// 唤起文书生成对话框
+function handleDocumentsGenerate(val){
+    // 显示文书生成对话框
+    dialogChooseTemplateVisible.value = true;
+    currentGenerateRow.value = val;
+}
 
-// 生成文书
-async function handleDocumentsGenerate(val) {
+// 收到从子组件传来的，文书生成的模板data以后，调用下面的DocumentsGenerate函数生成文书
+async function documentsGenerate(data) {
     console.log("文书生成");
-    console.log("当前要生成文书的案件id为" + val.caseId)
+    console.log("documentsGenerate当前要生成文书的案件id为" + currentGenerateRow.value.caseId);
+
+    // 将对话框隐藏
+    dialogChooseTemplateVisible.value = false;
+    
+    console.log(data);
+    // 将data里面的模板文件id传递给后端
+    let templateFileIdList = [];
+    for (let i = 0; i < data.length; i++) {
+        templateFileIdList.push(data[i].templateFileId);
+    }
+
+    console.log(templateFileIdList);
+
+    // 前后端通信部分
+
     // 如果未连接后端，则只测试前端
     if (typeof pywebview === 'undefined') {
         console.log("handleDocumentGenerate()：未连接后端，目前只测试前端");
     }
-    // 如果连接了后端，则调用后端的函数,将当前案件id传到后端(实际运行环境)
+    // 如果连接了后端，则调用后端的函数,将当前案件id,以及模板id列表传到后端(实际运行环境)
     else {
-         let result = await pywebview.api.documentsGenerate(val.caseId);
+         let result = await pywebview.api.documentsGenerate(currentGenerateRow.value.caseId, templateFileIdList);
          if (result == 0) {
              console.log("文书生成成功");
          }
