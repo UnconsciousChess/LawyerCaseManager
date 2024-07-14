@@ -152,39 +152,39 @@ class Api:
     # ==输出类==
 
     # 该方法用于输出指定案件的信息到Excel，并保存到案件文件夹中
-    def outputCaseInfoToExcel(self,caseId):
+    def outputCaseInfoToExcel(self,caseId) -> str:
         # 判断案件列表是否为空
         if len(self._cases) == 0:
-            return 1
+            return "CaseListIsEmpty"
         # 如果案件列表不为空，则根据caseId找到对应案件
         for case in self._cases:
             if case.GetCaseId() == caseId:
                 case.OutputCaseInfoToExcel()
-                return 0
+                return "Success"
 
     # 该方法用于输出指定案件的信息到txt，并保存到案件文件夹中        
-    def outputCaseInfoToTxt(self,caseId):
+    def outputCaseInfoToTxt(self,caseId) -> str:
         # 判断案件列表是否为空
         if len(self._cases) == 0:
-            return 1
+            return "CaseListIsEmpty"
         # 如果案件列表不为空，则根据caseId找到对应案件
         for case in self._cases:
             if case.GetCaseId() == caseId:
                 case.OutputCaseInfoToTxt()
-                return 0
+                return "Success"
 
     # 该方法用于输出所有案件的信息到一个txt
-    def outputAllCasesInfoToTxt(self):
+    def outputAllCasesInfoToTxt(self) -> str:
         OutputFolderPath = self.GetFolderpath(title="请选择案件信息保存的文件夹")
         print(OutputFolderPath)
         # 判断OutputPath是否存在
         if not os.path.exists(OutputFolderPath):
             print("Error: The path is not exist!")
-            return 1
+            return "PathNotExist"
         # 判断OutputPath是否是文件夹
         if not os.path.isdir(OutputFolderPath):
             print("Error: The path is not a directory!")
-            return 2
+            return "NotDirectory"
         OutputFolderPath = OutputFolderPath + "\\"
         OutputName = "所有案件信息输出.txt"
         with open(OutputFolderPath+OutputName,"w",encoding='utf-8') as f:
@@ -193,7 +193,7 @@ class Api:
                 f.write(case.OutputCaseInfoToStr())
                 f.write("$CaseEnd$\n\n")
             print("全部案件信息输出成功！")
-            return 0
+            return "Success"
 
     # 该方法用于输出当前所有案件信息成一个列表并推送到前端
     def outputAllCaseInfoToFrontEnd(self) -> list:
@@ -204,7 +204,7 @@ class Api:
         return Result
     
     # 该方法用于对接前端的文书生成按钮，用于生成案件文件夹及对应的文件模板
-    def documentsGenerate(self,caseId,templateFilesIdList) -> int:
+    def documentsGenerate(self,caseId,templateFilesIdList) -> str:
         # 先将对应caseId的案件对象找到，赋值给TargetCase
         for case in self._cases:
             if case.GetCaseId() == caseId:
@@ -217,7 +217,7 @@ class Api:
         # 检查templateFiles是否为空
         if len(self._templateFiles) == 0:
             print("Error: The templateFiles is empty!")
-            return -1
+            return "TemplateFilesIsEmpty"
         
         # 根据templateFilesIdList找到对应的模板文件对象，赋值给TargetTemplateFiles
         TargetTemplateFiles = []
@@ -227,10 +227,6 @@ class Api:
                     TargetTemplateFiles.append(templateFile)
                     break
         
-        # 测试是否找到了对应的案件和模板文件
-        for file in TargetTemplateFiles:
-            print(file.GetTemplateFileName())
-
         # 检验无误后，执行案件文件夹生成的操作
         Result = FolderCreator(case=TargetCase,              
                       OutputDir=TargetCase.GetCaseFolderPath(),   
@@ -239,11 +235,11 @@ class Api:
         # 检查FolderCreator是否执行成功
         if Result != "Success":
             print("Generator报错")
-            return -1
+            return "GeneratorError"
         else:
             print("案件文件夹及对应的文件模板生成成功！")
             # 返回值为0代表生成成功
-            return 0
+            return "Success"
     
     # ==删除类==
     # 该方法用于后端的数据中删除指定案件
@@ -265,15 +261,15 @@ class Api:
 
     # ==输入类==
     # 该方法用于从一个txt中读取当事人信息，然后生成对应的新的当事人
-    def inputLitigantFromTxt(self,TxtPath,LitigantType):
+    def inputLitigantFromTxt(self,TxtPath,LitigantType) -> str|dict:
         # 判断输入的路径是否存在
         if not os.path.exists(TxtPath):
             print("Error: The path is not exist!")
-            return 1
+            return "PathNotExist"
         # 判断输入的文件是否是txt文件
         if not TxtPath.endswith(".txt"):
             print("Error: The file is not a txt file!")
-            return 2
+            return "NotTxtFile"
         
         # 导入案件类litigant
         from library.LitigantClass import Litigant
@@ -320,7 +316,7 @@ class Api:
         return "Success"
 
     def backEndPushTemplateFileDataToFrontEnd(self) -> list:
-        # 如果self._templateFiles为空，则返回空
+        # 如果self._templateFiles为空，则返回空列表给前端
         if len(self._templateFiles) == 0:
             return []
 
