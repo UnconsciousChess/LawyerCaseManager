@@ -10,7 +10,7 @@ sys.dont_write_bytecode = True
 from nanoid import generate
 
 # 导入诉讼参与人类
-from .LitigantClass import *
+from LitigantClass import *
 
 class Case():
 
