@@ -147,7 +147,7 @@ from library.LitigantClass import Lawyer
 
 | 方法名                 | 返回值数据类型 | 作用                                  |
 | ---------------------- | -------------- | ------------------------------------- |
-| InputLawyerInfoFromTxt | None           | 从一个txt文件中读入一个律师的所有信息 |
+| InputLawyerInfoFromTxt | str            | 从一个txt文件中读入一个律师的所有信息 |
 
 参数
 
@@ -156,6 +156,15 @@ from library.LitigantClass import Lawyer
 * 类型：str
 * 含义：传入的txt文件的路径
 * 默认值：n/a
+
+返回值
+
+| 取值            | 含义                            |
+| --------------- | ------------------------------- |
+| "Success"       | 函数执行完毕，成功读入信息      |
+| "PathNotExists" | 读入的路径不存在                |
+| "NotFile"       | 读入的路径并非一个文件          |
+| "NotTxtFile"    | 读入的文件后缀名并非一个txt文件 |
 
 ---
 
