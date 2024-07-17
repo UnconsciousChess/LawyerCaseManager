@@ -219,6 +219,19 @@ class Case():
                 CourtNameStr += stage + "：" + court + "、"
         CourtNameStr = CourtNameStr[:-1]
         return CourtNameStr
+    
+    # 递归获取当前案件文件夹中的所有文件，返回一个文件列表FilesList
+    def GetCaseFolderFiles(self) -> list:
+        FilesList = []
+
+        for item in os.scandir(self._CaseFolderPath):
+            if item.is_file():
+                FilesList.append(item.path)
+            elif item.is_dir():
+                FilesList.extend(self.GetCaseFolderFiles(item.path))
+
+        return FilesList
+
 
     # ============Set和Append方法：下面定义设定各属性的方法（含输入值校验）=============
 
