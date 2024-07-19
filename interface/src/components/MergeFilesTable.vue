@@ -18,7 +18,7 @@
 	<el-table
 		:data="filesData"
 		style="width: 100%"
-		empty-text="文件夹中无文件名"
+		empty-text="文件夹中无文件"
 		@selection-change="handleSelectionChange"
 	>
 		<el-table-column type="selection" width="55" />
@@ -130,4 +130,10 @@ async function handleMerge() {
 onMounted(() => {
 	getFilesData();
 });
+
+watchEffect(() => {
+	console.log("MergeFilesTable已经更新");
+	getFilesData();
+});
+
 </script>
