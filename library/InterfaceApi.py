@@ -5,7 +5,6 @@ sys.dont_write_bytecode = True
 
 # api类中暴露给前端的函数名称，命名保持与前端一致（小驼峰），方便前后端对接
 
-# 定义一个Api类，用于与前端交互 
 class Api:
     def __init__(self):
 
@@ -388,6 +387,42 @@ class Api:
             # 全部正常运行，返回Success
             result["res"] = "Success"
             return result
+
+
+    # ===== 下面是和 MergeFilesTable组件 交互的方法 =====
+    def backEndGetCaseFolderFiles(self,CaseId) -> list|str:
+        # 遍历案件列表
+        for case in self._cases:
+            # 如果案件ID相同，则返回案件文件夹中的文件列表
+            if case.GetCaseId() == CaseId:
+                FolderFileDirs = case.GetCaseFolderFiles(CurrentPath=case.GetCaseFolderPath())
+                
+                ResultArray = []
+                # 对文件列表进行处理，并放入ResultArray中
+                for FileDir in FolderFileDirs:
+                    ResultArray.append({"name":FileDir.split("\\")[-1],"path":FileDir})
+                # 对文件列表进行处理
+                return ResultArray
+        # 如果遍历完，都没有找到对应的案件，则返回CaseIdNotExist
+        return "CaseIdNotExist"
+    
+    def backEndMergeFiles(self,CaseId,SelectedFiles) -> str:
+        from source.MergeFiles import MergeFiles
+        # 遍历案件列表
+        for case in self._cases:
+            # 如果案件ID相同，则调用Mergefiles执行合并文件操作
+            if case.GetCaseId() == CaseId:
+                print(SelectedFiles)
+                MergeFiles(MergeList=SelectedFiles,
+                           MergeOutputName=case.GetCaseId() + "合并文件",
+                           FolderPath=case.GetCaseFolderPath())
+                print("合并文件成功！")
+                return "Success"
+        # 如果遍历完，没有找到对应的案件，则返回CaseIdNotExist
+        print("CaseIdNotExist")
+        return "CaseIdNotExist"
+
+
 
 
     # =====  下面是和其他未开发完成的组件交互的方法  =====

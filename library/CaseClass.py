@@ -10,7 +10,7 @@ sys.dont_write_bytecode = True
 from nanoid import generate
 
 # 导入诉讼参与人类
-from LitigantClass import *
+from .LitigantClass import *
 
 class Case():
 
@@ -221,10 +221,10 @@ class Case():
         return CourtNameStr
     
     # 递归获取当前案件文件夹中的所有文件，返回一个文件列表FilesList
-    def GetCaseFolderFiles(self) -> list:
-        FilesList = []
+    def GetCaseFolderFiles(self, CurrentPath) -> list:
 
-        for item in os.scandir(self._CaseFolderPath):
+        FilesList = []
+        for item in os.scandir(CurrentPath):
             if item.is_file():
                 FilesList.append(item.path)
             elif item.is_dir():

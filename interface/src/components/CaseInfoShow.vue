@@ -10,13 +10,14 @@
         <el-table-column prop="causeOfAction" label="案由" width="180" />
         <!-- <el-table-column prop="caseCourtCode" label="案号" width="200" /> -->
         <el-table-column prop="litigantsName" label="当事人" width="350" />
-        <el-table-column fixed="right" label="操作" width="400">
+        <el-table-column fixed="right" label="操作" width="450">
             <template #default="{ row }">
                 <el-button type="primary" size="small" @click="handleEditData(row)">编辑</el-button>
                 <el-button type="danger" size="small" @click="handleDeleteData(row)">删除</el-button>
                 <el-button type="success" size="small" @click="handleOutputData(row)">导出</el-button>
                 <el-button color="#626aef" size="small" disabled>上传</el-button>
                 <el-button type="warning" size="small" plain @click="handleDocumentsGenerate(row)">文书生成</el-button>
+                <el-button type="info" size="small" plain @click="handleDocumentsMerge(row)">文书合并</el-button>
             </template>
         </el-table-column>
     </el-table>
@@ -67,6 +68,13 @@
 
     <!-- 上传功能对话框（待开发）-->
 
+    <!-- 合并文书对话框 -->
+    <el-dialog title="合并文书" width="800" v-model="dialogMergeFilesVisible">
+        <el-scrollbar height="500px">
+            <MergeFilesTable :caseId="currentMergeFilesRow.caseId"/>
+        </el-scrollbar>
+    </el-dialog>
+
 </template>
 
 <script setup>
@@ -75,8 +83,11 @@
 import CaseInfoShowDescription from "./CaseInfoShowDescription.vue";
 // 导入案件信息编辑表单组件
 import CaseInfoForm from "./CaseInfoForm.vue";
-// 导入
+// 导入选择模板文件列表组件
 import TemplateFileCheckBoxList from "./TemplateFileCheckBoxList.vue";
+// 导入合并文件列表组件
+import MergeFilesTable from "./MergeFilesTable.vue";
+
 
 // 导入测试数据
 import { testCase1, testCase2, testCase3 } from "./test/data.js";
@@ -100,12 +111,14 @@ const dialogOutputDataVisible = ref(false);
 const dialogDeleteDataVisible = ref(false);
 const dialogEditDataVisible = ref(false);
 const dialogChooseTemplateVisible = ref(false)
+const dialogMergeFilesVisible = ref(false);
 
 // 当前编辑、删除、输出、生成的行的数据
 const currentEditRow = ref(null);
 const currentDeleteRow = ref(null);
 const currentOutputRow = ref(null);
 const currentGenerateRow = ref(null);
+const currentMergeFilesRow = ref(null);
 
 // 这个变量是用于控制编辑表单的模式，有edit和create两种模式
 const caseInfoFormMode = ref(null);
@@ -412,6 +425,16 @@ async function documentsGenerate(data) {
          }
     }
 }
+
+
+// 唤起文书合并对话框
+function handleDocumentsMerge(val){
+    // 显示文书合并对话框
+    dialogMergeFilesVisible.value = true;
+    currentMergeFilesRow.value = val;
+}
+
+
 
 
 // 测试后端输出的代码
