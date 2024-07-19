@@ -8,6 +8,12 @@
 
     TemplateFile.py
 
+#### 导入代码
+
+```python
+from library.TemplateFile import TemplateFile
+```
+
 #### 属性
 
 | 属性名             | 含义                   | 数据类型 |
