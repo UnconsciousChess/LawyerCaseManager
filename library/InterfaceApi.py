@@ -14,15 +14,26 @@ class Api:
         self._templateFiles = []
 
     # ===== 下面是获取文件或文件夹路径的方法，方便后面的方法复用（该组方法不对接前端） =====
-    def GetFilepath(self,title) -> str:
+    def GetFilepath(self,title,filetype="All") -> str:
         # 下面是用tkinter的方法获取文件的绝对路径
         from tkinter import filedialog
+        # 根据读入的filetype参数，选择不同的文件类型
+        filetypes = []
+
+        # filetype用逗号进行分割，然后根据不同的文件类型添加到filetypes中,默认值为All
+        filetypeList = filetype.split(",")
+        for type in filetypeList:
+            if type == "All":
+                filetypes.append(("All files", "*.*"))
+            elif type == "Text":
+                filetypes.append(("Text files", "*.txt"))
+            elif type == "Excel":
+                filetypes.append(("Excel files", "*.xlsx"))
+            elif type == "Word":
+                filetypes.append(("Word files", "*.docx"))
+
         # #  获取文件路径
-        SelectedFilePath = filedialog.askopenfilename(title=title,filetypes=[
-            ("Text files", "*.txt"),
-            ("Excel files", "*.xlsx"),
-            ("Word files", "*.docx"),
-            ("All files", "*.*")])
+        SelectedFilePath = filedialog.askopenfilename(title=title,filetypes=filetypes)
         return SelectedFilePath
 
         # 下面用webview的方法获取文件的绝对路径
@@ -88,7 +99,7 @@ class Api:
     
     # 该方法用于读入一个包含多个案件信息的txt文件，批量生成新的案件信息
     def inputAllCasesFromTxt(self) -> str:
-        InputPath = self.GetFilepath(title="请选择案件信息输入文件")
+        InputPath = self.GetFilepath(title="请选择案件信息输入文件",filetype="Text")
         # 判断输入的路径是否存在
         if not os.path.exists(InputPath):
             print("Error: The path is not exist!")
@@ -288,8 +299,8 @@ class Api:
     
     def backEndAddTemplateFileData(self) -> str:
 
-        # 调用GetFilepath方法获取文件路径
-        TemplateFilePath = self.GetFilepath(title="请选择模板列表文件")
+        # 调用GetFilepath方法获取txt文件路径
+        TemplateFilePath = self.GetFilepath(title="请选择模板列表文件",filetype="Text")
         # 导入模板文件类TemplateFile
         from source.Generator import ReadTemplateList
 
@@ -373,7 +384,7 @@ class Api:
         }
 
         # 调用GetFilepath方法获取文件路径
-        NewTemplateFileDir = self.GetFilepath(title="请选择新的模板文件")
+        NewTemplateFileDir = self.GetFilepath(title="请选择新的模板文件",filetype="Word")
         # 如果NewTemplateFile为空，则返回Cancel
         if NewTemplateFileDir == "":
             result["res"] = "Cancel"
@@ -421,8 +432,6 @@ class Api:
         # 如果遍历完，没有找到对应的案件，则返回CaseIdNotExist
         print("CaseIdNotExist")
         return "CaseIdNotExist"
-
-
 
 
     # =====  下面是和其他未开发完成的组件交互的方法  =====
