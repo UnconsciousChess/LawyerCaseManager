@@ -36,25 +36,12 @@ class Api:
         SelectedFilePath = filedialog.askopenfilename(title=title,filetypes=filetypes)
         return SelectedFilePath
 
-        # 下面用webview的方法获取文件的绝对路径
-        # import webview
-        # FileTypes = [("Text files", "*.txt"),("Excel files", "*.xlsx")]
-        # result = window.create_file_dialog(webview.OPEN_DIALOG, allow_multiple=False, file_types=FileTypes)
-        # print(result)
-        # return result
-
     def GetFolderpath(self,title) -> str:
         # 下面是用tkinter的方法获取文件夹的绝对路径
         from tkinter import filedialog
         # 获取文件夹路径
         SelectedFolderPath = filedialog.askdirectory(title=title)
         return SelectedFolderPath
-
-        # 下面用webview的方法获取文件夹的绝对路径
-        # import webview
-        # result = window.create_file_dialog(webview.FOLDER_DIALOG)
-        # print(result)
-        # return result
 
 
     # ===== 下面是和 CaseInfoForm 组件交互的方法 =====
