@@ -43,33 +43,51 @@ def ReadTemplateList(TemplateListDir) -> list[TemplateFile]:
 # 生成文件夹，同时调用source.RenderFile中的方法生成对应的文书   
 def FolderCreator(case,OutputDir,TemplateListOrTemplateListDir) -> str: 
 
-    # 传入参数判断
+    # 检查传入的参数OutputDir
+    if isinstance(OutputDir,str):
+        # 如果OutputDir不存在，则报错
+        if not os.path.exists(OutputDir):
+            print("输出文件夹不存在！")
+            return "OutputDirNotExists"
+        # 如果OutputDir不是文件夹，则报错
+        if not os.path.isdir(OutputDir):
+            print("输出文件夹应该是一个文件夹！")
+            return "OutputDirNotADir"
+
+    # 检查传入的参数TemplateListOrTemplateListDir
     # 如果TemplateListOrTemplateListDir是一个字符串，则认为是模板列表文件的路径,则进行读取模板列表的操作
     if isinstance(TemplateListOrTemplateListDir,str):
         # 如果TemplateListDir存在，则读取模板列表
         if not os.path.exists(TemplateListOrTemplateListDir):
             print("模板列表文件不存在！")
+            return "TemplateListDirNotExists"
         if not os.path.isfile(TemplateListOrTemplateListDir):
             print("模板列表文件应该是一个文件！")
+            return "TemplateListDirNotAFile"
 
-        # 确定路径无误以后，调用ReadTemplateList函数读取模板列表
+        # 确定路径无误且为文件以后，调用ReadTemplateList函数读取模板列表
         TemplateFilesList = ReadTemplateList(TemplateListOrTemplateListDir)
+
     # 如果TemplateListOrTemplateListDir是一个列表，则认为是模板列表，直接赋值给TemplateFilesList
     elif isinstance(TemplateListOrTemplateListDir,list):
         TemplateFilesList = TemplateListOrTemplateListDir
+    # 如果TemplateListOrTemplateListDir不是字符串也不是列表，则报类型错误
     else:
         print("模板列表参数类型错误！")
-
+        return "TemplateListTypeError"
 
     # 创建案件项目文件夹到指定目录Outputdir下面，其中项目文件夹名称由案件的原告、被告和案由组成
     os.chdir(OutputDir)
     FolderName = case.GetAllPlaintiffNames() + "诉" + case.GetAllDefendantNames() + "-" + case.GetCauseOfAction() + "一案"
+
     # 如果文件夹已经存在，则不创建；如果不存在，则创建
     if os.path.exists(FolderName):
         print("名称为【%s】的文件夹已经存在,不再创建。" % FolderName)
     else:
         os.makedirs(FolderName)
 
+    # 将该名字作为该案件的文件夹
+    case.SetCaseFolderPath(OutputDir + "//" + FolderName)
     # 进入该案件文件夹路径
     os.chdir(FolderName)
 

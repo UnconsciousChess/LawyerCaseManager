@@ -158,9 +158,20 @@ class TemplateFile():
                 return "Error"
         
         # 将字符串按照|分割
-        FileStage,FiledirAndFileType = InputString.split("|")
+        try:
+            FileStage,FiledirAndFileType = InputString.split("|")
+        except:
+            if Debug:
+                print("SetTemplateFromString函数报错:读入的字符串%s无法按照【|】分割" % InputString)
+            return "Error"
         # 将剩下的字符串按照@分割
-        Filedir,FileType = FiledirAndFileType.split("@")
+        try:
+            Filedir,FileType = FiledirAndFileType.split("@")
+        except:
+            if Debug:
+                print("SetTemplateFromString函数报错:读入的字符串%s无法按照【@】分割" % InputString)
+            return "Error"
+        
         # 调用Set方法分别赋值
         if self.SetTemplateFileStage(FileStage) == -1:
             return "Error"

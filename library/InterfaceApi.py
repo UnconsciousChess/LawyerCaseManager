@@ -223,12 +223,22 @@ class Api:
                 if templateFile.GetTemplateFileId() == templateFileId:
                     TargetTemplateFiles.append(templateFile)
                     break
-        
-        # 检验无误后，执行案件文件夹生成的操作
-        Result = FolderCreator(case=TargetCase,              
-                      OutputDir=TargetCase.GetCaseFolderPath(),   
-                      TemplateListOrTemplateListDir=TargetTemplateFiles)
-        
+                    
+        if TargetCase.GetCaseFolderPath() == "":
+            # 如果当前案件文件夹路径为空，则调用GetFolderpath方法获取文件夹路径
+            Result = FolderCreator(
+                        case=TargetCase,              
+                        OutputDir=self.GetFolderpath(title="请选择案件文件夹保存的文件夹"),   
+                        TemplateListOrTemplateListDir=TargetTemplateFiles,
+                        )
+        else:
+            # 如果当前案件文件夹路径不为空，则直接使用当前案件文件夹路径
+            Result = FolderCreator(
+                        case=TargetCase,              
+                        OutputDir=TargetCase.GetCaseFolderPath(),   
+                        TemplateListOrTemplateListDir=TargetTemplateFiles,
+                        )
+    
         # 检查FolderCreator是否执行成功
         if Result != "Success":
             print("Generator报错")
@@ -393,26 +403,31 @@ class Api:
         for case in self._cases:
             # 如果案件ID相同，则返回案件文件夹中的文件列表
             if case.GetCaseId() == CaseId:
-                FolderFileDirs = case.GetCaseFolderFiles(CurrentPath=case.GetCaseFolderPath())
-                
-                ResultArray = []
-                # 对文件列表进行处理，并放入ResultArray中
-                for FileDir in FolderFileDirs:
-                    ResultArray.append({"name":FileDir.split("\\")[-1],"path":FileDir})
-                # 对文件列表进行处理
-                return ResultArray
+               
+                if os.path.exists(case.GetCaseFolderPath()):
+                    print(case.GetCaseFolderPath())
+                    FolderFileDirs = case.GetCaseFolderFiles(CurrentPath=case.GetCaseFolderPath())
+                    ResultArray = []
+                    # 对文件列表进行处理，并放入ResultArray中
+                    for FileDir in FolderFileDirs:
+                        ResultArray.append({"name":FileDir.split("\\")[-1],"path":FileDir})
+                    # 对文件列表进行处理
+                    return ResultArray
+                else:
+                    return "CaseFolderNotExist"
         # 如果遍历完，都没有找到对应的案件，则返回CaseIdNotExist
         return "CaseIdNotExist"
-    
+
+
     def backEndMergeFiles(self,CaseId,SelectedFiles) -> str:
         from source.MergeFiles import MergeFiles
         # 遍历案件列表
         for case in self._cases:
             # 如果案件ID相同，则调用Mergefiles执行合并文件操作
             if case.GetCaseId() == CaseId:
-                print(SelectedFiles)
-                MergeFiles(MergeList=SelectedFiles,
-                           MergeOutputName=case.GetCaseId() + "合并文件",
+                # print(SelectedFiles)
+                MergeFiles(MergeList=SelectedFiles, 
+                           MergeOutputName=case.GetCaseId() + "合并文件" ,
                            FolderPath=case.GetCaseFolderPath())
                 print("合并文件成功！")
                 return "Success"
