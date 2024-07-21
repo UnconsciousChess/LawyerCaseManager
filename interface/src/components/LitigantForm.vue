@@ -211,7 +211,8 @@
 	>
 		<el-card :style="{'margin-top': '10px', 'margin-bottom': '10px'}">
 			<el-descriptions
-				title="原告"
+				title="原告信息"
+				:column="1"
 				border
 				:style="{
 					'margin-top': '20px',
@@ -256,6 +257,7 @@
 		>
 			<el-descriptions
 				title="被告信息"
+				:column="1"
 				border
 				:style="{
 					'margin-top': '20px',
@@ -296,9 +298,8 @@ const getCurrentplaintiffData = inject("getCurrentplaintiffData");
 const getCurrentDefendantData = inject("getCurrentDefendantData");
 
 const props = defineProps({
-	// litigantPosition: String,
-	// id: Number,
 	litigant: Object,
+	showDescriptionList: Boolean,
 });
 
 const litigantForm = ref({
@@ -313,7 +314,7 @@ const litigantForm = ref({
 
 const getInfoByPath = ref(false);
 
-const showDescriptionListAndHideForm = ref(false);
+const showDescriptionListAndHideForm = ref(null);
 
 // 检查身份证号码是否合法
 function checkIdNumber() {
@@ -424,6 +425,8 @@ onMounted(() => {
 	litigantForm.value.litigantAddress = props.litigant.litigantAddress;
 	litigantForm.value.litigantPosition = props.litigant.litigantPosition;
 	litigantForm.value.id = props.litigant.id;
+
+	showDescriptionListAndHideForm.value = props.showDescriptionList;
 });
 
 // 将litigantForm暴露给父组件
