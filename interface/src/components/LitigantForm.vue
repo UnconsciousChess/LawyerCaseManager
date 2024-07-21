@@ -1,181 +1,204 @@
 <template>
 	<!-- 原告表单 -->
-	<el-form
-		:model="litigantForm"
-		label-width="180px"
-		:style="{
-			'max-width': '700px',
-			// 'background-color': '#FFEEBB',
-		}"
+	<div
 		v-if="
 			litigantForm.litigantPosition === 'plaintiff' &&
 			showDescriptionListAndHideForm == false
 		"
 	>
-		<el-form-item label="是否采取文件导入信息">
-			<el-switch
-				v-model="getInfoByPath"
-				style="--el-switch-on-color: #ffc105; --el-switch-off-color: #c4c4c4"
-				active-text="是"
-				inactive-text="否"
-			/>
-		</el-form-item>
+		<el-card
+			shadow="never"
+			:style="{'margin-top': '10px', 'margin-bottom': '10px'}"
+		>
+			<el-form
+				:model="litigantForm"
+				label-width="180px"
+				:style="{
+					'max-width': '700px',
+					// 'background-color': '#FFEEBB',
+				}"
+			>
+				<el-form-item label="是否采取文件导入信息">
+					<el-switch
+						v-model="getInfoByPath"
+						style="
+							--el-switch-on-color: #ffc105;
+							--el-switch-off-color: #c4c4c4;
+						"
+						active-text="是"
+						inactive-text="否"
+					/>
+				</el-form-item>
 
-		<el-form-item v-if="getInfoByPath == true" label="原告信息文件路径">
-			<el-input
-				v-model="litigantForm.litigantInfoPath"
-				style="max-width: 500px"
-			/>
-		</el-form-item>
-
-		<el-form-item v-if="getInfoByPath == false" label="原告名字">
-			<el-input
-				v-model="litigantForm.litigantName"
-				prop="litigantName"
-				style="max-width: 300px"
-			/>
-		</el-form-item>
-
-		<el-form-item v-if="getInfoByPath == false" label="原告身份证号码">
-			<el-row width="70" :gutter="50">
-				<el-col :span="20">
+				<el-form-item v-if="getInfoByPath == true" label="原告信息文件路径">
 					<el-input
-						v-model="litigantForm.litigantIdNumber"
+						v-model="litigantForm.litigantInfoPath"
+						style="max-width: 500px"
+					/>
+				</el-form-item>
+
+				<el-form-item v-if="getInfoByPath == false" label="原告名字">
+					<el-input
+						v-model="litigantForm.litigantName"
+						prop="litigantName"
+						style="max-width: 300px"
+					/>
+				</el-form-item>
+
+				<el-form-item v-if="getInfoByPath == false" label="原告身份证号码">
+					<el-row width="70" :gutter="50">
+						<el-col :span="20">
+							<el-input
+								v-model="litigantForm.litigantIdNumber"
+								style="max-width: 400px"
+							/>
+						</el-col>
+						<el-col :span="4">
+							<el-button color="#EFBA1B" @click="checkIdNumber"
+								>校验证件号码</el-button
+							>
+						</el-col>
+					</el-row>
+				</el-form-item>
+
+				<el-form-item v-if="getInfoByPath == false" label="原告电话号码">
+					<el-input
+						v-model="litigantForm.litigantPhoneNumber"
 						style="max-width: 400px"
 					/>
-				</el-col>
-				<el-col :span="4">
-					<el-button color="#EFBA1B" @click="checkIdNumber"
-						>校验证件号码</el-button
-					>
-				</el-col>
-			</el-row>
-		</el-form-item>
+				</el-form-item>
 
-		<el-form-item v-if="getInfoByPath == false" label="原告电话号码">
-			<el-input
-				v-model="litigantForm.litigantPhoneNumber"
-				style="max-width: 400px"
-			/>
-		</el-form-item>
+				<el-form-item v-if="getInfoByPath == false" label="原告地址">
+					<el-input
+						v-model="litigantForm.litigantAddress"
+						style="max-width: 400px"
+					/>
+				</el-form-item>
 
-		<el-form-item v-if="getInfoByPath == false" label="原告地址">
-			<el-input
-				v-model="litigantForm.litigantAddress"
-				style="max-width: 400px"
-			/>
-		</el-form-item>
+				<el-form-item>
+					<el-row :gutter="60">
+						<el-col :span="6">
+							<el-button type="success" plain @click="sumbitCurrentlitigantInfo"
+								>提交该原告</el-button
+							>
+						</el-col>
+						<el-col :span="6">
+							<el-button type="danger" plain @click="deleteCurrentlitigantInfo"
+								>删除该原告</el-button
+							>
+						</el-col>
+						<el-col :span="6">
+							<el-button type="info" plain @click="checkInfo"
+								>该功能未完善</el-button
+							>
+						</el-col>
+					</el-row>
+				</el-form-item>
 
-		<el-form-item>
-			<el-row :gutter="60">
-				<el-col :span="6">
-					<el-button type="success" plain @click="sumbitCurrentlitigantInfo"
-						>提交该原告</el-button
-					>
-				</el-col>
-				<el-col :span="6">
-					<el-button type="danger" plain @click="deleteCurrentlitigantInfo"
-						>删除该原告</el-button
-					>
-				</el-col>
-				<el-col :span="6">
-					<el-button type="info" plain @click="checkInfo"
-						>该功能未完善</el-button
-					>
-				</el-col>
-			</el-row>
-		</el-form-item>
-
-		<!-- 下面是调试显示部分 -->
-		<!-- <el-form-item>
+				<!-- 下面是调试显示部分 -->
+				<!-- <el-form-item>
 			<ul>
 				<li v-for="(value, key) in litigantForm">{{ key }} : {{ value }}</li>
 			</ul>
 		</el-form-item> -->
-	</el-form>
+			</el-form>
+		</el-card>
+	</div>
 
 	<!-- 被告表单 -->
-	<el-form
-		:model="litigantForm"
-		label-width="180px"
-		:style="{
-			'max-width': '700px',
-			// 'background-color': '#E6F4FF',
-		}"
+	<div
 		v-if="
 			litigantForm.litigantPosition === 'defendant' &&
 			showDescriptionListAndHideForm == false
 		"
 	>
-		<el-form-item label="是否采取文件导入信息">
-			<el-switch v-model="getInfoByPath" active-text="是" inactive-text="否" />
-		</el-form-item>
+		<el-card
+			shadow="hover"
+			:style="{'margin-top': '10px', 'margin-bottom': '10px'}"
+		>
+			<el-form
+				:model="litigantForm"
+				label-width="180px"
+				:style="{
+					'max-width': '700px',
+					// 'background-color': '#E6F4FF',
+				}"
+			>
+				<el-form-item label="是否采取文件导入信息">
+					<el-switch
+						v-model="getInfoByPath"
+						active-text="是"
+						inactive-text="否"
+					/>
+				</el-form-item>
 
-		<el-form-item v-if="getInfoByPath == true" label="被告信息文件路径">
-			<el-input
-				v-model="litigantForm.litigantInfoPath"
-				style="max-width: 500px"
-			/>
-		</el-form-item>
-
-		<el-form-item v-if="getInfoByPath == false" label="被告名字">
-			<el-input
-				v-model="litigantForm.litigantName"
-				prop="litigantName"
-				style="max-width: 300px"
-			/>
-		</el-form-item>
-
-		<el-form-item v-if="getInfoByPath == false" label="被告身份证号码">
-			<el-row width="50" :gutter="50">
-				<el-col :span="20">
+				<el-form-item v-if="getInfoByPath == true" label="被告信息文件路径">
 					<el-input
-						v-model="litigantForm.litigantIdNumber"
+						v-model="litigantForm.litigantInfoPath"
+						style="max-width: 500px"
+					/>
+				</el-form-item>
+
+				<el-form-item v-if="getInfoByPath == false" label="被告名字">
+					<el-input
+						v-model="litigantForm.litigantName"
+						prop="litigantName"
 						style="max-width: 300px"
 					/>
-				</el-col>
-				<el-col :span="4">
-					<el-button color="#216CF3" @click="checkIdNumber"
-						>校验证件号码</el-button
-					>
-				</el-col>
-			</el-row>
-		</el-form-item>
+				</el-form-item>
 
-		<el-form-item v-if="getInfoByPath == false" label="被告电话号码">
-			<el-input
-				v-model="litigantForm.litigantPhoneNumber"
-				style="max-width: 400px"
-			/>
-		</el-form-item>
+				<el-form-item v-if="getInfoByPath == false" label="被告身份证号码">
+					<el-row width="50" :gutter="50">
+						<el-col :span="20">
+							<el-input
+								v-model="litigantForm.litigantIdNumber"
+								style="max-width: 300px"
+							/>
+						</el-col>
+						<el-col :span="4">
+							<el-button color="#216CF3" @click="checkIdNumber"
+								>校验证件号码</el-button
+							>
+						</el-col>
+					</el-row>
+				</el-form-item>
 
-		<el-form-item v-if="getInfoByPath == false" label="被告地址">
-			<el-input
-				v-model="litigantForm.litigantAddress"
-				style="max-width: 400px"
-			/>
-		</el-form-item>
+				<el-form-item v-if="getInfoByPath == false" label="被告电话号码">
+					<el-input
+						v-model="litigantForm.litigantPhoneNumber"
+						style="max-width: 400px"
+					/>
+				</el-form-item>
 
-		<el-form-item>
-			<el-row :gutter="60">
-				<el-col :span="6">
-					<el-button type="success" plain @click="sumbitCurrentlitigantInfo"
-						>提交该被告</el-button
-					>
-				</el-col>
-				<el-col :span="6">
-					<el-button type="danger" plain @click="deleteCurrentlitigantInfo"
-						>删除该被告</el-button
-					>
-				</el-col>
-				<el-col :span="6">
-					<el-button type="info" plain @click="checkInfo"
-						>该功能未完善</el-button
-					>
-				</el-col>
-			</el-row>
-		</el-form-item>
-	</el-form>
+				<el-form-item v-if="getInfoByPath == false" label="被告地址">
+					<el-input
+						v-model="litigantForm.litigantAddress"
+						style="max-width: 400px"
+					/>
+				</el-form-item>
+
+				<el-form-item>
+					<el-row :gutter="60">
+						<el-col :span="6">
+							<el-button type="success" plain @click="sumbitCurrentlitigantInfo"
+								>提交该被告</el-button
+							>
+						</el-col>
+						<el-col :span="6">
+							<el-button type="danger" plain @click="deleteCurrentlitigantInfo"
+								>删除该被告</el-button
+							>
+						</el-col>
+						<el-col :span="6">
+							<el-button type="info" plain @click="checkInfo"
+								>该功能未完善</el-button
+							>
+						</el-col>
+					</el-row>
+				</el-form-item>
+			</el-form>
+		</el-card>
+	</div>
 
 	<!-- 下面是提交完成以后显示原被告信息部分 -->
 
@@ -186,34 +209,36 @@
 			showDescriptionListAndHideForm == true
 		"
 	>
-		<el-descriptions
-			title="原告"
-			border
-			:style="{
-				'margin-top': '20px',
-				'margin-bottom': '20px',
-			}"
-		>
-			<el-descriptions-item label="原告名称">{{
-				litigantForm.litigantName
-			}}</el-descriptions-item>
-			<el-descriptions-item label="原告证件号码">{{
-				litigantForm.litigantIdNumber
-			}}</el-descriptions-item>
-			<el-descriptions-item label="原告电话号码">{{
-				litigantForm.litigantPhoneNumber
-			}}</el-descriptions-item>
-			<el-descriptions-item label="原告地址">{{
-				litigantForm.litigantAddress
-			}}</el-descriptions-item>
-		</el-descriptions>
+		<el-card :style="{'margin-top': '10px', 'margin-bottom': '10px'}">
+			<el-descriptions
+				title="原告"
+				border
+				:style="{
+					'margin-top': '20px',
+					'margin-bottom': '20px',
+				}"
+			>
+				<el-descriptions-item label="原告名称">{{
+					litigantForm.litigantName
+				}}</el-descriptions-item>
+				<el-descriptions-item label="原告证件号码">{{
+					litigantForm.litigantIdNumber
+				}}</el-descriptions-item>
+				<el-descriptions-item label="原告电话号码">{{
+					litigantForm.litigantPhoneNumber
+				}}</el-descriptions-item>
+				<el-descriptions-item label="原告地址">{{
+					litigantForm.litigantAddress
+				}}</el-descriptions-item>
+			</el-descriptions>
 
-		<el-button
-			type="danger"
-			plain
-			@click="showDescriptionListAndHideForm = false"
-			>返回修改</el-button
-		>
+			<el-button
+				type="danger"
+				plain
+				@click="showDescriptionListAndHideForm = false"
+				>编辑与删除</el-button
+			>
+		</el-card>
 	</div>
 
 	<!-- 被告部分 -->
@@ -223,34 +248,41 @@
 			showDescriptionListAndHideForm == true
 		"
 	>
-		<el-descriptions
-			title="被告信息"
-			border
+		<el-card
 			:style="{
-				'margin-top': '20px',
-				'margin-bottom': '20px',
+				'margin-top': '10px',
+				'margin-bottom': '10px',
 			}"
 		>
-			<el-descriptions-item label="被告名称">{{
-				litigantForm.litigantName
-			}}</el-descriptions-item>
-			<el-descriptions-item label="被告证件号码">{{
-				litigantForm.litigantIdNumber
-			}}</el-descriptions-item>
-			<el-descriptions-item label="被告电话号码">{{
-				litigantForm.litigantPhoneNumber
-			}}</el-descriptions-item>
-			<el-descriptions-item label="被告地址">{{
-				litigantForm.litigantAddress
-			}}</el-descriptions-item>
-		</el-descriptions>
+			<el-descriptions
+				title="被告信息"
+				border
+				:style="{
+					'margin-top': '20px',
+					'margin-bottom': '20px',
+				}"
+			>
+				<el-descriptions-item label="被告名称">{{
+					litigantForm.litigantName
+				}}</el-descriptions-item>
+				<el-descriptions-item label="被告证件号码">{{
+					litigantForm.litigantIdNumber
+				}}</el-descriptions-item>
+				<el-descriptions-item label="被告电话号码">{{
+					litigantForm.litigantPhoneNumber
+				}}</el-descriptions-item>
+				<el-descriptions-item label="被告地址">{{
+					litigantForm.litigantAddress
+				}}</el-descriptions-item>
+			</el-descriptions>
 
-		<el-button
-			type="danger"
-			plain
-			@click="showDescriptionListAndHideForm = false"
-			>返回修改</el-button
-		>
+			<el-button
+				type="danger"
+				plain
+				@click="showDescriptionListAndHideForm = false"
+				>编辑与删除</el-button
+			>
+		</el-card>
 	</div>
 </template>
 
