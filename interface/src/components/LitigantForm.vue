@@ -5,9 +5,12 @@
 		label-width="180px"
 		:style="{
 			'max-width': '700px',
-			'background-color': '#FFEEBB',
+			// 'background-color': '#FFEEBB',
 		}"
-		v-if="litigantForm.litigantPosition === 'plaintiff'"
+		v-if="
+			litigantForm.litigantPosition === 'plaintiff' &&
+			showDescriptionListAndHideForm == false
+		"
 	>
 		<el-form-item label="是否采取文件导入信息">
 			<el-switch
@@ -97,9 +100,12 @@
 		label-width="180px"
 		:style="{
 			'max-width': '700px',
-			'background-color': '#E6F4FF',
+			// 'background-color': '#E6F4FF',
 		}"
-		v-if="litigantForm.litigantPosition === 'defendant'"
+		v-if="
+			litigantForm.litigantPosition === 'defendant' &&
+			showDescriptionListAndHideForm == false
+		"
 	>
 		<el-form-item label="是否采取文件导入信息">
 			<el-switch v-model="getInfoByPath" active-text="是" inactive-text="否" />
@@ -170,6 +176,82 @@
 			</el-row>
 		</el-form-item>
 	</el-form>
+
+	<!-- 下面是提交完成以后显示原被告信息部分 -->
+
+	<!-- 原告部分 -->
+	<div
+		v-if="
+			litigantForm.litigantPosition === 'plaintiff' &&
+			showDescriptionListAndHideForm == true
+		"
+	>
+		<el-descriptions
+			title="原告"
+			border
+			:style="{
+				'margin-top': '20px',
+				'margin-bottom': '20px',
+			}"
+		>
+			<el-descriptions-item label="原告名称">{{
+				litigantForm.litigantName
+			}}</el-descriptions-item>
+			<el-descriptions-item label="原告证件号码">{{
+				litigantForm.litigantIdNumber
+			}}</el-descriptions-item>
+			<el-descriptions-item label="原告电话号码">{{
+				litigantForm.litigantPhoneNumber
+			}}</el-descriptions-item>
+			<el-descriptions-item label="原告地址">{{
+				litigantForm.litigantAddress
+			}}</el-descriptions-item>
+		</el-descriptions>
+
+		<el-button
+			type="danger"
+			plain
+			@click="showDescriptionListAndHideForm = false"
+			>返回修改</el-button
+		>
+	</div>
+
+	<!-- 被告部分 -->
+	<div
+		v-if="
+			litigantForm.litigantPosition === 'defendant' &&
+			showDescriptionListAndHideForm == true
+		"
+	>
+		<el-descriptions
+			title="被告信息"
+			border
+			:style="{
+				'margin-top': '20px',
+				'margin-bottom': '20px',
+			}"
+		>
+			<el-descriptions-item label="被告名称">{{
+				litigantForm.litigantName
+			}}</el-descriptions-item>
+			<el-descriptions-item label="被告证件号码">{{
+				litigantForm.litigantIdNumber
+			}}</el-descriptions-item>
+			<el-descriptions-item label="被告电话号码">{{
+				litigantForm.litigantPhoneNumber
+			}}</el-descriptions-item>
+			<el-descriptions-item label="被告地址">{{
+				litigantForm.litigantAddress
+			}}</el-descriptions-item>
+		</el-descriptions>
+
+		<el-button
+			type="danger"
+			plain
+			@click="showDescriptionListAndHideForm = false"
+			>返回修改</el-button
+		>
+	</div>
 </template>
 
 <script setup>
@@ -198,6 +280,8 @@ const litigantForm = ref({
 });
 
 const getInfoByPath = ref(false);
+
+const showDescriptionListAndHideForm = ref(false);
 
 // 检查身份证号码是否合法
 function checkIdNumber() {
@@ -231,6 +315,10 @@ async function sumbitCurrentlitigantInfo() {
 			console.log("文件信息读取完毕，提交了一个原告");
 			// 调用父组件的方法将通过文件导入的数据传递给父组件
 			getCurrentplaintiffData(litigantForm.value, litigantForm.value.id);
+
+			// 隐藏表单，显示描述列表
+			showDescriptionListAndHideForm.value = true;
+
 			return;
 
 			// 通过表单直接输入
@@ -238,6 +326,9 @@ async function sumbitCurrentlitigantInfo() {
 			// 这里要写检验函数
 			console.log("表单信息检验无误，提交了一个原告");
 			getCurrentplaintiffData(litigantForm.value, litigantForm.value.id);
+
+			// 隐藏表单，显示描述列表
+			showDescriptionListAndHideForm.value = true;
 			return;
 		}
 
@@ -260,6 +351,9 @@ async function sumbitCurrentlitigantInfo() {
 			console.log("文件信息读取完毕，提交了一个被告");
 			// 调用父组件的方法将通过文件导入的数据传递给父组件
 			getCurrentDefendantData(litigantForm.value, litigantForm.value.id);
+
+			// 隐藏表单，显示描述列表
+			showDescriptionListAndHideForm.value = true;
 			return;
 
 			// 通过表单直接输入
@@ -267,6 +361,9 @@ async function sumbitCurrentlitigantInfo() {
 			// 这里要写检验函数
 			console.log("提交了一个被告");
 			getCurrentDefendantData(litigantForm.value, litigantForm.value.id);
+
+			// 隐藏表单，显示描述列表
+			showDescriptionListAndHideForm.value = true;
 			return;
 		}
 	}
