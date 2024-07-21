@@ -495,12 +495,12 @@ watchEffect(() => {
 	</div>
 
 	<!-- 下面的是用于测试，直接展示从表格中输入的数据 -->
-	<div>
+	<!-- <div>
 		<ul>
 			<p>案件信息</p>
 			<li v-for="(item, key) in caseForm">{{ key }} - {{ item }}</li>
 		</ul>
-	</div>
+	</div> -->
 </template>
 
 
