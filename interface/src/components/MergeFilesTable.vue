@@ -19,6 +19,9 @@
 		:data="filesData"
 		style="width: 100%"
 		empty-text="文件夹中无文件"
+		v-loading="loading"
+		element-loading-text="合并中..."
+		element-loading-background="#f4fff4"
 		@selection-change="handleSelectionChange"
 	>
 		<el-table-column type="selection" width="55" />
@@ -53,6 +56,9 @@ const props = defineProps({
 const filesData = ref([]);
 
 const value = ref("");
+
+// 加载状态
+const loading = ref(false);
 
 const options = [
 	{value: "1", label: "委托材料"},
@@ -111,6 +117,9 @@ async function handleMerge() {
 		selectedFilesDir.push(multipleSelection.value[i].fileDir);
 	}
 
+	// 开始loading
+	loading.value = true;
+
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
 		console.log("handleMerge()：未连接后端，目前只测试前端");
@@ -130,6 +139,10 @@ async function handleMerge() {
 		} else {
 			console.log("合并失败");
 		}
+
+		// 结束loading
+		loading.value = false;
+		return;
 	}
 }
 
