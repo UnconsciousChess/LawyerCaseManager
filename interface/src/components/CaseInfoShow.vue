@@ -71,15 +71,6 @@
 
 	<!-- 下面是按下按钮以后弹出的对话框 -->
 
-	<!-- 选择生成文书对话框 -->
-	<el-dialog
-		title="选择生成文书"
-		width="600"
-		v-model="dialogChooseTemplateVisible"
-	>
-		<TemplateFileCheckBoxList @generate="documentsGenerate" />
-	</el-dialog>
-
 	<!-- 编辑对话框 -->
 	<el-dialog
 		title="编辑案件信息"
@@ -131,6 +122,15 @@
 	</el-dialog>
 
 	<!-- 上传功能对话框（待开发）-->
+
+	<!-- 选择生成文书对话框 -->
+	<el-dialog
+		title="选择生成文书"
+		width="600"
+		v-model="dialogChooseTemplateVisible"
+	>
+		<TemplateFileCheckBoxList @generate="documentsGenerate" />
+	</el-dialog>
 
 	<!-- 合并文书对话框 -->
 	<el-dialog title="合并文书" width="800" v-model="dialogMergeFilesVisible">
@@ -237,41 +237,80 @@ function getTableData() {
 		pywebview.api.outputAllCaseInfoToFrontEnd().then((cases) => {
 			// 遍历cases，将数据根据一定的规则添加到tableData中
 			for (let i = 0; i < cases.length; i++) {
-				// 对比案件的id，如果相同则不添加
+				// 对比案件的id，如果相同则不添加，改为更新
 				if (
 					tableData.value.findIndex(
 						(item) => item.caseId === cases[i].caseId
 					) !== -1
 				) {
-					continue;
+					// 获取要更新的数据的index
+					var updateItemIndex = tableData.value.findIndex(
+						(item) => item.caseId === cases[i].caseId
+					);
+					// 对应的tableData更新数据
+					tableData.value[updateItemIndex].causeOfAction =
+						cases[i].causeOfAction;
+					tableData.value[updateItemIndex].courtName = cases[i].courtName;
+					tableData.value[updateItemIndex].litigationAmount =
+						cases[i].litigationAmount;
+					tableData.value[updateItemIndex].caseCourtCode =
+						cases[i].caseCourtCode;
+					tableData.value[updateItemIndex].mediationIntention =
+						cases[i].mediationIntention;
+					tableData.value[updateItemIndex].caseType = cases[i].caseType;
+					tableData.value[updateItemIndex].riskAgentStatus =
+						cases[i].riskAgentStatus;
+					tableData.value[updateItemIndex].riskAgentUpfrontFee =
+						cases[i].riskAgentUpfrontFee;
+					tableData.value[updateItemIndex].riskAgentPostFeeRate =
+						cases[i].riskAgentPostFeeRate;
+					tableData.value[updateItemIndex].caseAgentStage =
+						cases[i].caseAgentStage;
+					tableData.value[updateItemIndex].claimText = cases[i].claimText;
+					tableData.value[updateItemIndex].caseFolderGeneratedPath =
+						cases[i].caseFolderGeneratedPath;
+					tableData.value[updateItemIndex].factAndReason =
+						cases[i].factAndReason;
+					tableData.value[updateItemIndex].rejectMediationReasonText =
+						cases[i].rejectMediationReasonText;
+					tableData.value[updateItemIndex].agentFixedFee =
+						cases[i].agentFixedFee;
+					tableData.value[updateItemIndex].plaintiffs = cases[i].plaintiffs;
+					tableData.value[updateItemIndex].defendants = cases[i].defendants;
+					tableData.value[updateItemIndex].thirdParties = cases[i].thirdParties;
+					tableData.value[updateItemIndex].litigantsName =
+						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames;
+					tableData.value[updateItemIndex].title =
+						cases[i].causeOfAction + "一案，编号：" + cases[i].caseId;
+				} else {
+					// 如果没有相同的，则将数据添加到tableData中
+					tableData.value.push({
+						causeOfAction: cases[i].causeOfAction,
+						courtName: cases[i].courtName,
+						litigationAmount: cases[i].litigationAmount,
+						caseCourtCode: cases[i].caseCourtCode,
+						mediationIntention: cases[i].mediationIntention,
+						caseType: cases[i].caseType,
+						riskAgentStatus: cases[i].riskAgentStatus,
+						riskAgentUpfrontFee: cases[i].riskAgentUpfrontFee,
+						riskAgentPostFeeRate: cases[i].riskAgentPostFeeRate,
+						caseAgentStage: cases[i].caseAgentStage,
+						claimText: cases[i].claimText,
+						factAndReason: cases[i].factAndReason,
+						rejectMediationReasonText: cases[i].rejectMediationReasonText,
+						caseFolderGeneratedPath: cases[i].caseFolderGeneratedPath,
+						agentFixedFee: cases[i].agentFixedFee,
+						caseId: cases[i].caseId,
+						plaintiffs: cases[i].plaintiffs,
+						defendants: cases[i].defendants,
+						thirdParties: cases[i].thirdParties,
+						litigantsName:
+							cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames,
+						// 测试title的数据
+						title: cases[i].causeOfAction + "一案，编号：" + cases[i].caseId,
+					});
+					// console.log(tableData.value);
 				}
-				// 如果没有相同的，则将数据添加到tableData中
-				tableData.value.push({
-					causeOfAction: cases[i].causeOfAction,
-					courtName: cases[i].courtName,
-					litigationAmount: cases[i].litigationAmount,
-					caseCourtCode: cases[i].caseCourtCode,
-					mediationIntention: cases[i].mediationIntention,
-					caseType: cases[i].caseType,
-					riskAgentStatus: cases[i].riskAgentStatus,
-					riskAgentUpfrontFee: cases[i].riskAgentUpfrontFee,
-					riskAgentPostFeeRate: cases[i].riskAgentPostFeeRate,
-					caseAgentStage: cases[i].caseAgentStage,
-					claimText: cases[i].claimText,
-					factAndReason: cases[i].factAndReason,
-					rejectMediationReasonText: cases[i].rejectMediationReasonText,
-					caseFolderGeneratedPath: cases[i].caseFolderGeneratedPath,
-					agentFixedFee: cases[i].agentFixedFee,
-					caseId: cases[i].caseId,
-					plaintiffs: cases[i].plaintiffs,
-					defendants: cases[i].defendants,
-					thirdParties: cases[i].thirdParties,
-					litigantsName:
-						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames,
-					// 测试title的数据
-					title: cases[i].causeOfAction + "一案，编号：" + cases[i].caseId,
-				});
-				console.log(tableData.value);
 			}
 
 			// 对tableData的index进行重新排序
@@ -475,8 +514,6 @@ async function documentsGenerate(data) {
 		templateFileIdList.push(data[i].templateFileId);
 	}
 
-	console.log(templateFileIdList);
-
 	// 前后端通信部分
 
 	// 如果未连接后端，则只测试前端
@@ -489,9 +526,18 @@ async function documentsGenerate(data) {
 			currentGenerateRow.value.caseId,
 			templateFileIdList
 		);
-		if (result == 0) {
+
+		// 如果后端返回成功
+		if (result == "Success") {
 			console.log("文书生成成功");
+			// 生成成功以后，刷新数据
+			getTableData();
 		}
+		// 如果后端未返回成功则直接输出后端返回的错误信息
+		else {
+			console.log(result);
+		}
+		
 	}
 }
 

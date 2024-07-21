@@ -245,7 +245,6 @@ class Api:
             return "GeneratorError"
         else:
             print("案件文件夹及对应的文件模板生成成功！")
-            # 返回值为0代表生成成功
             return "Success"
     
     # ==删除类==
