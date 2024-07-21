@@ -8,16 +8,15 @@ import {createMemoryHistory, createRouter} from 'vue-router'
 import CaseInfoForm from './components/CaseInfoForm.vue'
 import Caculator from './components/Caculator.vue'
 import Blank from './components/Blank.vue'
-import CaseInfoShow from './components/CaseInfoShow.vue'
+import CaseInfoShow from './components/CaseInfoShowTable.vue'
 import TemplateFileTable from './components/TemplateFileTable.vue'
 import TemplateFileEditForm from './components/TemplateFileEditForm.vue'
 
 // 设置路由
 const routes = [
   {path: '/', component: Blank },
-  {path: '/case-info-form', component: CaseInfoForm},
   {path: '/caculator', component:Caculator},
-  {path: '/case-info-list', component: CaseInfoShow},
+  {path: '/case-info-table', component: CaseInfoShow},
   {path: '/template-file', component: TemplateFileTable},
   {path: '/test',component: TemplateFileEditForm},
 ]

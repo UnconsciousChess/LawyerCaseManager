@@ -13,7 +13,7 @@ const aboutDialog = ref({
 		<el-menu-item index="/">律师小只工具箱</el-menu-item>
 		<el-sub-menu index="2">
 			<template #title>文书生成器</template>
-			<el-menu-item index="/case-info-list">案件列表</el-menu-item>
+			<el-menu-item index="/case-info-table">案件列表</el-menu-item>
 			<!-- <el-menu-item index="/case-info-form">案件信息录入</el-menu-item> -->
 			<el-menu-item index="/template-file">模板文件选择</el-menu-item>
 			<el-menu-item disabled>归档材料生成</el-menu-item>
