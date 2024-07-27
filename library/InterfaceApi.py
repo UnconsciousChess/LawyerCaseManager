@@ -14,7 +14,7 @@ class Api:
         self._templateFiles = []
 
     # ===== 下面是获取文件或文件夹路径的方法，方便后面的方法复用（该组方法不对接前端） =====
-    def GetFilepath(self,title,filetype="All") -> str:
+    def GetOpenFilepath(self,title,filetype="All") -> str:
         # 下面是用tkinter的方法获取文件的绝对路径
         from tkinter import filedialog
         # 根据读入的filetype参数，选择不同的文件类型
@@ -42,6 +42,32 @@ class Api:
         # 获取文件夹路径
         SelectedFolderPath = filedialog.askdirectory(title=title)
         return SelectedFolderPath
+    
+    def GetSaveFilepath(self,title,filetype="All") -> str:
+        # 下面是用tkinter的方法获取文件的绝对路径
+        from tkinter import filedialog
+        # 根据读入的filetype参数，选择不同的文件类型
+        filetypes = []
+
+        # filetype用逗号进行分割，然后根据不同的文件类型添加到filetypes中,默认值为All
+        filetypeList = filetype.split(",")
+        for type in filetypeList:
+            if type == "All":
+                filetypes.append(("All files", "*.*"))
+            elif type == "Text":
+                filetypes.append(("Text files", "*.txt"))
+                defaultextension = ".txt"
+            elif type == "Excel":
+                filetypes.append(("Excel files", "*.xlsx"))
+                defaultextension = ".xlsx"
+
+        #  获取文件路径
+        SelectedFilePath = filedialog.asksaveasfilename(title=title,
+                                                        filetypes=filetypes,
+                                                        confirmoverwrite=True,
+                                                        defaultextension=defaultextension)
+        return SelectedFilePath
+
 
 
     # ===== 下面是和 CaseInfoForm 组件交互的方法 =====
@@ -86,7 +112,7 @@ class Api:
     
     # 该方法用于读入一个包含多个案件信息的txt文件，批量生成新的案件信息
     def inputAllCasesFromTxt(self) -> str:
-        InputPath = self.GetFilepath(title="请选择案件信息输入文件",filetype="Text")
+        InputPath = self.GetOpenFilepath(title="请选择案件信息输入文件",filetype="Text")
         # 判断输入的路径是否存在
         if not os.path.exists(InputPath):
             print("Error: The path is not exist!")
@@ -172,24 +198,19 @@ class Api:
 
     # 该方法用于输出所有案件的信息到一个txt
     def outputAllCasesInfoToTxt(self) -> str:
-        OutputFolderPath = self.GetFolderpath(title="请选择案件信息保存的文件夹")
-        print(OutputFolderPath)
-        # 判断OutputPath是否存在
-        if not os.path.exists(OutputFolderPath):
-            print("Error: The path is not exist!")
-            return "PathNotExist"
-        # 判断OutputPath是否是文件夹
-        if not os.path.isdir(OutputFolderPath):
-            print("Error: The path is not a directory!")
-            return "NotDirectory"
-        OutputFolderPath = OutputFolderPath + "\\"
-        OutputName = "所有案件信息输出.txt"
-        with open(OutputFolderPath+OutputName,"w",encoding='utf-8') as f:
-            for case in self._cases:
-                f.write("$CaseStart$\n")
-                f.write(case.OutputCaseInfoToStr())
-                f.write("$CaseEnd$\n\n")
-            print("全部案件信息输出成功！")
+        OutputFileName = self.GetSaveFilepath(title="导出案件信息",filetype="Text")
+        print(OutputFileName)
+        with open(OutputFileName,"w",encoding='utf-8') as f:
+            if len(self._cases) == 0:
+                f.write("[空空如也]案件列表为空")
+                print("案件列表为空！") 
+                return "Success"
+            else:
+                for case in self._cases:
+                    f.write("$CaseStart$\n")
+                    f.write(case.OutputCaseInfoToStr())
+                    f.write("$CaseEnd$\n\n")
+                print("全部案件信息输出成功！")
             return "Success"
 
     # 该方法用于输出当前所有案件信息成一个列表并推送到前端
@@ -225,7 +246,7 @@ class Api:
                     break
                     
         if TargetCase.GetCaseFolderPath() == "":
-            # 如果当前案件文件夹路径为空，则调用GetFolderpath方法获取文件夹路径
+            # 如果当前案件文件夹路径为空，则获取文件夹路径
             Result = FolderCreator(
                         case=TargetCase,              
                         OutputDir=self.GetFolderpath(title="请选择案件文件夹保存的文件夹"),   
@@ -295,8 +316,8 @@ class Api:
     
     def backEndAddTemplateFileData(self) -> str:
 
-        # 调用GetFilepath方法获取txt文件路径
-        TemplateFilePath = self.GetFilepath(title="请选择模板列表文件",filetype="Text")
+        # 调用GetOpenFilepath方法获取txt文件路径
+        TemplateFilePath = self.GetOpenFilepath(title="请选择模板列表文件",filetype="Text")
         # 导入模板文件类TemplateFile
         from source.Generator import ReadTemplateList
 
@@ -358,8 +379,8 @@ class Api:
 
     def backEndOutputTemplateFileData(self) -> str:
         import time
-        # 调用GetFolderpath方法获取文件夹路径
-        OutputFolderPath = self.GetFolderpath(title="请选择模板文件保存的文件夹")
+        # 调用GetSaveFilepath方法获取文件夹路径
+        OutputFolderPath = self.GetSaveFilepath(title="请选择模板文件保存的文件夹")
         # 判断OutputPath是否存在,如果不存在则返回错误
         if OutputFolderPath == "":
             return "Cancel"
@@ -379,8 +400,8 @@ class Api:
             "templateFileName" : "",
         }
 
-        # 调用GetFilepath方法获取文件路径
-        NewTemplateFileDir = self.GetFilepath(title="请选择新的模板文件",filetype="Word")
+        # 调用GetOpenFilepath方法获取文件路径
+        NewTemplateFileDir = self.GetOpenFilepath(title="请选择新的模板文件",filetype="Word")
         # 如果NewTemplateFile为空，则返回Cancel
         if NewTemplateFileDir == "":
             result["res"] = "Cancel"
