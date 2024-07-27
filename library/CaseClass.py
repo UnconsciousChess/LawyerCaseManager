@@ -11,6 +11,7 @@ from nanoid import generate
 
 # 导入诉讼参与人类
 from .LitigantClass import *
+from .Stage import *
 
 class Case():
 
@@ -21,15 +22,9 @@ class Case():
         # 诉讼标的额
         self._LitigationAmount = 0
         # 案由
-        self._CaseOfAction = ""
-        # 管辖法院
-        self._JurisdictionDict = {
-            "一审": "",
-            "二审": "",
-            "再审": "",
-            "执行": "",
-            "仲裁": "",
-        }        
+        self._CaseOfAction = ""      
+        # 案件阶段(列表，每个元素为一个阶段对象)
+        self._Stages = []
         # 上传文件列表
         self._UploadFilesList = {}
         # 诉讼请求（上诉请求）
@@ -58,19 +53,17 @@ class Case():
         self._RiskAgentPostFeeRate = 0
         # 非风险代理的固定费用(是一个列表，第一个元素对应第一个阶段的费用，第二个元素对应第二个阶段的费用...)
         self._AgentFixedFeeList = []
-        # 案号
-        self._CaseCourtCode = ""
-        # 案件id（实例化案件时自动生成，用于前后端交互时识别）,该属性没有对应的Set方法，也无法input
+        # 案件id（实例化案件时自动生成，用于前后端交互时识别）
         self._CaseId = "Case-" + generate(alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', size=16)
 
 
         # 下面通过读取文件得到一些通用列表,并作为类的属性
 
         # 准备所有合法法院名称的列表，方便进行对比，以防止输入的法院名称有误
-        with open(r"Data\PublicInfomationList\CourtNameList.txt","r",encoding="utf-8") as f:
-            StandardJurisdictionList = f.readlines()
-            # 去除每个法院名称的换行符
-            self._StandardJurisdictionList = [i.strip() for i in StandardJurisdictionList]
+        # with open(r"Data\PublicInfomationList\CourtNameList.txt","r",encoding="utf-8") as f:
+        #     StandardJurisdictionList = f.readlines()
+        #     # 去除每个法院名称的换行符
+        #     self._StandardJurisdictionList = [i.strip() for i in StandardJurisdictionList]
         # 准备所有合法民事案由的列表，方便进行对比，以防止输入的案由有误
         with open(r"Data\PublicInfomationList\CauseOfActionList.txt","r",encoding="utf-8") as f:
             CaseOfActionList = f.readlines()
@@ -95,9 +88,9 @@ class Case():
     # 案由
     def GetCauseOfAction(self):
         return self._CaseOfAction
-    # 管辖法院
-    def GetJurisdictionDict(self):
-        return self._JurisdictionDict
+    # 案件阶段
+    def GetStages(self):
+        return self._Stages
     # 上传文件列表
     def GetUploadFilesList(self):
         return self._UploadFilesList
@@ -140,9 +133,6 @@ class Case():
     # 非风险代理的固定费用数组
     def GetAgentFixedFee(self):
         return self._AgentFixedFeeList
-    # 法院案号
-    def GetCaseCourtCode(self):
-        return self._CaseCourtCode
     # 案件id
     def GetCaseId(self):
         return self._CaseId
@@ -213,11 +203,11 @@ class Case():
     
     def GetCourtNameStr(self) -> str:
         CourtNameStr = ""
-        for stage,court in self._JurisdictionDict.items():
-            # 如果法院不为空，则添加到字符串中
-            if court != "":
-                CourtNameStr += stage + "：" + court + "、"
+        for stage in self._Stages:
+            if stage.GetCourtName() != "":
+                CourtNameStr += stage.GetStageName() + ":" + stage.GetCourtName() + "、"  
         CourtNameStr = CourtNameStr[:-1]
+
         return CourtNameStr
     
     # 递归获取当前案件文件夹中的所有文件，返回一个文件列表FilesList
@@ -275,29 +265,53 @@ class Case():
             if debugmode:
                 print(" SetCauseOfActionb报错：输入的【%s】名称不符合现有民事、行政、执行案由规定,请重新输入" % CaseOfAction)
     
-    # 管辖法院设定方法
-    def SetJurisdictionDict(self,InputJurisdictionDict,debugmode=False):
-        if not isinstance(InputJurisdictionDict,dict):
-            if debugmode:
-                print("SetJurisdictionDict报错：该输入对象的类型与属性不匹配,管辖法院输入值为字典")
-            return
-        for stage,jurisdictionname in InputJurisdictionDict.items():
-             #如果输入的键名（阶段）在现有的字典的键名（阶段）中,则进一步判断输入的键值是否合法  
-            if stage in self._JurisdictionDict.keys():      
-                    # 判断输入的键名（法院名称）是否在Standard法院列表中，即是否合法  
-                    if (jurisdictionname in self._StandardJurisdictionList):
-                        self._JurisdictionDict[stage] = jurisdictionname
-                        if debugmode:
-                            print("添加【%s】管辖法院【%s】成功" % (stage,jurisdictionname))
-                            return
-                    else:
-                        if debugmode:
-                            print("SetJurisdictionDict报错：输入的案由【%s】不符合现有法院名称。" % jurisdictionname)
-                            return
+
+
+
+
+    def SetStage(self,StageInfo):
+        # 如果输入的是一个Stage对象，就直接赋值
+        if isinstance(StageInfo,Stage):
+            self._Stages.append(StageInfo)
+        # 如果输入的是一个字符串，就先用分号分隔字符串，再逐个调用InputStageByString方法
+        elif isinstance(StageInfo,str):
+            # 以分号分隔字符串,形成一个阶段信息字符串列表
+            StageInfoList = [i.strip() for i in StageInfo.split(";")]
+            for StageString in StageInfoList:
+                if StageString == "":
+                    continue
+                # 实例化一个阶段对象
+                stage = Stage()
+                # 调用阶段对象的读取方法
+                if stage.InputStageByString(StageString) == "Success":
+                    # 调用添加阶段的方法，将该阶段添加到案件中
+                    self._Stages.append(stage)
+                else:
+                    print("输入的阶段信息【%s】不符合规范" % StageString)
+        # 如果输入的是一个字典，就调用InputStageByDict方法
+        elif isinstance(StageInfo,dict):
+            # 实例化一个阶段对象
+            stage = Stage()
+            # 调用阶段对象的读取方法
+            if stage.InputStageByDict(StageInfo) == "Success":
+                # 调用添加阶段的方法，将该阶段添加到案件中
+                self._Stages.append(stage)
             else:
-                if debugmode:
-                    print("SetJurisdictionDict报错：输入的【%s】键名不符合规范" % stage)
-                    return
+                print("输入的阶段信息【%s】不符合规范" % StageInfo)  
+        # 如果输入的是一个列表，就逐个调用InputStageByDict方法
+        elif isinstance(StageInfo,list):
+            for stageinfo in StageInfo:
+                # 实例化一个阶段对象
+                stage = Stage()
+                # 调用阶段对象的读取方法
+                if stage.InputStageByDict(stageinfo) == "Success":
+                    # 调用添加阶段的方法，将该阶段添加到案件中
+                    self._Stages.append(stage)
+                else:
+                    print("输入的阶段信息【%s】不符合规范" % stageinfo)  
+        else:
+            print("输入的阶段信息类型错误，请输入字符串、字典或列表")
+
 
     # 诉讼请求设定方法
     def SetClaimText(self,ClaimText,debugmode=False) -> None:
@@ -407,7 +421,7 @@ class Case():
             if DebugMode:
                 print("风险代理前期费用不能小于零")
             return
-    
+        
     # 风险代理后期比例设定方法
     def SetRiskAgentPostFeeRate(self,RiskAgentPostFeeRate,DebugMode=False):
         # 尝试将输入值转换为浮点数
@@ -457,13 +471,6 @@ class Case():
             if DebugMode:
                 print("SetAgentFixedFee报错：输入对象的类型与属性不匹配,非风险代理的固定费用输入值为列表或整数")
         
-    # 法院案号设定方法
-    def SetCaseCourtCode(self,CaseCourtCode):
-        if isinstance(CaseCourtCode,str):
-            self._CaseCourtCode = CaseCourtCode
-        else:
-            print("SetCaseCourtCode方法报错：该输入对象的类型与属性不匹配,法院案号输入值为字符串")
-
 
 
     # 添加诉讼参与人的方法
@@ -582,24 +589,9 @@ class Case():
 
         elif Key == '案由':
             self.SetCauseOfAction(str(Value))
-
-        elif Key == '管辖法院':
-            # 将Value转换为字典，以便SetJurisdictionDict方法处理
-
-            # 以逗号分割字符串,分割出Stage:Court的字符串列表
-            StageAndCourtList = Value.split(",")
-            for stageandcourt in StageAndCourtList: 
-                # 去掉阶段和法院名称的空格
-                stageandcourt = stageandcourt.strip()
-                # 去掉“阶段”两个字
-                stageandcourt = stageandcourt.replace("阶段","")
-                # 以冒号分割字符串,中文冒号或英文冒号
-                if "：" in stageandcourt:
-                    Stage,Court = stageandcourt.split("：")
-                elif ":" in stageandcourt:
-                    Stage,Court = stageandcourt.split(":")
-                # 调用设定管辖法院的方法
-                self.SetJurisdictionDict({Stage:Court})
+        
+        elif Key == '各阶段信息':
+            self.SetStage(Value)
 
         elif Key == '诉讼请求':
             self.SetClaimText(str(Value))
@@ -651,8 +643,7 @@ class Case():
             FixedFeeList = [float(i) for i in FixedFeeList]
             self.SetAgentFixedFeeByList(FixedFeeList)
             
-        elif Key == '法院案号':
-            self.SetCaseCourtCode(Value)
+
 
         elif ('案件当事人' in Key) or ("原告" in Key) or ("被告" in Key) or ("第三人" in Key):
             self.SetLitigant(Value)
@@ -672,9 +663,9 @@ class Case():
         elif Key == 'caurseOfAction':
             self.SetCauseOfAction(Value)
 
-        # 管辖法院
-        elif Key == 'courtName':
-            self.SetJurisdictionDict(Value)
+        # 各阶段信息
+        elif Key == 'stages':
+            self.SetStage(Value)
 
         # 诉讼请求
         elif Key == 'claimText':
@@ -744,11 +735,7 @@ class Case():
             pass
             # self.SetAgentFixedFeeByList(FixedFeeList)
 
-        # 法院案号
-        elif Key == 'caseCourtCode':
-            self.SetCaseCourtCode(Value)       
-
-
+ 
 
 
     # 设定一个方法从字符串的列表中读取案件信息（主要便于前端的批量读入）
@@ -852,9 +839,9 @@ class Case():
                 f.write("案件类型=执行案件\n")
             f.write("诉讼标的=%s元\n" % self.GetLitigationAmount())
             f.write("案由=%s\n" % self.GetCauseOfAction())
-            f.write("管辖法院=")
-            for stage,court in self.GetJurisdictionDict().items():
-                f.write("%s:%s," % (stage,court))
+            f.write("各阶段信息=")
+            for stage in self.GetStages():
+                f.write("%s" % stage.OutputToString())
             f.write("\n")
             f.write("诉讼请求=%s\n" % self.GetClaimText())
             f.write("事实与理由=%s\n" % self.GetFactAndReasonText())
@@ -919,7 +906,7 @@ class Case():
                 else:
                     for fee in self.GetAgentFixedFee():
                         f.write("%s," % fee)
-            f.write("法院案号：%s\n" % self.GetCaseCourtCode())
+
     
     # 输出案件信息到excel文件
     def OutputCaseInfoToExcel(self) -> None:
@@ -957,11 +944,12 @@ class Case():
 
         ws.append(["诉讼标的",self.GetLitigationAmount()])
         ws.append(["案由",self.GetCauseOfAction()])
-        # 管辖法院变成字符串
-        JurisdictionStr = ""
-        for stage,court in self.GetJurisdictionDict().items():
-            JurisdictionStr += stage + ":" + court + ","
-        ws.append(["管辖法院",JurisdictionStr])
+
+        StageStr = ""
+        for stage in self.GetStages():
+            StageStr += stage.OutputToString()
+        ws.append(["各阶段情况",StageStr])
+
         ws.append(["诉讼请求",self.GetClaimText()])
         ws.append(["事实与理由",self.GetFactAndReasonText()])
         ws.append(["案件文件所在文件夹路径",self.GetCaseFolderPath()])
@@ -992,9 +980,9 @@ class Case():
         if self.GetRiskAgentStatus() == True:
             ws.append(["风险代理前期费用",self.GetRiskAgentUpfrontFee()])
             ws.append(["风险代理后期比例",self.GetRiskAgentPostFeeRate()])
-        else:
-            ws.append(["非风险代理的固定费用",self.GetAgentFixedFee()])
-        ws.append(["法院案号",self.GetCaseCourtCode()])
+        # else:
+        #     ws.append(["非风险代理的固定费用",self.GetAgentFixedFee()])
+
 
         # 设定文件名
         # OutputName = self.GetAllPlaintiffNames() + "诉" + self.GetAllDefendantNames() + "案件信息.xlsx"
@@ -1014,15 +1002,13 @@ class Case():
         OutputStr += "案件类型=%s\n" % self.GetCaseType()
         OutputStr += "诉讼标的=%s\n" % self.GetLitigationAmount()
         OutputStr += "案由=%s\n" % self.GetCauseOfAction()
-        OutputStr += "管辖法院="
-        for stage,court in self.GetJurisdictionDict().items():
-            OutputStr += "%s:%s," % (stage,court)
+        OutputStr += "各阶段信息="
+        for stage in self.GetStages():
+            OutputStr += "%s" % stage.OutputToString()
         OutputStr += "\n"
         OutputStr += "诉讼请求=%s\n" % self.GetClaimText()
         OutputStr += "事实与理由=%s\n" % self.GetFactAndReasonText()
         OutputStr += "案件文件所在文件夹路径=%s\n" % self.GetCaseFolderPath()
-        OutputStr += "法院案号=%s\n" % self.GetCaseCourtCode()
-
         # 写原告主体列表
         index = 0
         for plaintiff in self.GetPlaintiffList():
@@ -1094,10 +1080,10 @@ class Case():
         OutputDict = {}
 
         # 逐个输出案件信息
-        OutputDict["caseCourtCode"] = self.GetCaseType()
+        OutputDict["caseType"] = self.GetCaseType()
         OutputDict["litigationAmount"] = self.GetLitigationAmount()
         OutputDict["causeOfAction"] = self.GetCauseOfAction()
-        OutputDict["courtName"] = self.GetCourtNameStr()    #法院名称直接输出字符串
+
         OutputDict["claimText"] = self.GetClaimText()
         OutputDict["factAndReason"] = self.GetFactAndReasonText()
         OutputDict["caseFolderGeneratedPath"] = self.GetCaseFolderPath()
@@ -1105,8 +1091,13 @@ class Case():
         OutputDict["rejectMediationReasonText"] = self.GetRejectMediationReasonText()
         OutputDict["caseAgentStage"] = self.GetCaseAgentStage()
         OutputDict["caseType"] = self.GetCaseType()
-        OutputDict["caseCourtCode"] = self.GetCaseCourtCode()
         OutputDict["caseId"] = self.GetCaseId()
+
+        # 输出各个阶段的信息
+        StageList = []
+        for stage in self.GetStages():
+            StageList.append(stage.OutputToDict())
+        OutputDict["stages"] = StageList
 
         # 根据是否为风险收费代理，输出不同的费用信息
         if self.GetRiskAgentStatus() == True:     #风险收费
@@ -1147,7 +1138,7 @@ class Case():
         return OutputDict
     
 
-    # 输出当前案件的当事人信息到前端（直接输出字典）
+    # 输出当前案件的当事人信息到前端（直接输出字典，这个方法暂时不知道有什么用）
     def OutputLitigantInfoToFrontEnd(self,DebugMode=False) -> dict:
         # 需要返回的字典初始化
         OutputDict = {}
