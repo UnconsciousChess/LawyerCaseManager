@@ -277,7 +277,10 @@ class Case():
     
     # 管辖法院设定方法
     def SetJurisdictionDict(self,InputJurisdictionDict,debugmode=False):
-
+        if not isinstance(InputJurisdictionDict,dict):
+            if debugmode:
+                print("SetJurisdictionDict报错：该输入对象的类型与属性不匹配,管辖法院输入值为字典")
+            return
         for stage,jurisdictionname in InputJurisdictionDict.items():
              #如果输入的键名（阶段）在现有的字典的键名（阶段）中,则进一步判断输入的键值是否合法  
             if stage in self._JurisdictionDict.keys():      
@@ -286,12 +289,15 @@ class Case():
                         self._JurisdictionDict[stage] = jurisdictionname
                         if debugmode:
                             print("添加【%s】管辖法院【%s】成功" % (stage,jurisdictionname))
+                            return
                     else:
                         if debugmode:
                             print("SetJurisdictionDict报错：输入的案由【%s】不符合现有法院名称。" % jurisdictionname)
+                            return
             else:
                 if debugmode:
                     print("SetJurisdictionDict报错：输入的【%s】键名不符合规范" % stage)
+                    return
 
     # 诉讼请求设定方法
     def SetClaimText(self,ClaimText,debugmode=False) -> None:
@@ -557,7 +563,17 @@ class Case():
     def SetCaseInfoWithKeyAndValue(self,Key,Value):
         # 根据Key的不同，调用不同的设定方法
         if Key == '案件Id' :
-            self._CaseId = Value
+            # 如果案件Id为空，则自动生成一个
+            if Value == "":
+                self._CaseId = "Case-" + generate(alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', size=16)
+            # 如果案件Id不为空，则检验是否符合规范
+            else:
+                if Value[:5] == "Case-":
+                    self._CaseId = Value
+                else:
+                    print("案件Id不符合规范，自动生成一个")
+                    self._CaseId = "Case-" + generate(alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', size=16)
+
         elif Key == '案件类型':
             self.SetCaseType(int(Value))
 
@@ -658,22 +674,7 @@ class Case():
 
         # 管辖法院
         elif Key == 'courtName':
-            # 以逗号分割字符串,分割出Stage:Court的字符串列表（这是暂时的，假设输入的是一个字符串）
-            # 后期要在前端做好多选框，这里的Value应该是一个字典或者字典
-            StageAndCourtList = Value.split(",")
-            for stageandcourt in StageAndCourtList: 
-                # 去掉阶段和法院名称的空格
-                stageandcourt = stageandcourt.strip()
-                # 去掉“阶段”两个字
-                stageandcourt = stageandcourt.replace("阶段","")
-                # 以冒号分割字符串,中文冒号或英文冒号
-                if "：" in stageandcourt:
-                    Stage,Court = stageandcourt.split("：")
-                elif ":" in stageandcourt:
-                    Stage,Court = stageandcourt.split(":")
-                # 调用设定管辖法院的方法
-                self.SetJurisdictionDict({Stage:Court})
-
+            self.SetJurisdictionDict(Value)
 
         # 诉讼请求
         elif Key == 'claimText':
