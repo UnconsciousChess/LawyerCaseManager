@@ -200,6 +200,11 @@ class Api:
     def outputAllCasesInfoToTxt(self) -> str:
         OutputFileName = self.GetSaveFilepath(title="导出案件信息",filetype="Text")
         print(OutputFileName)
+
+        # 判断OutputFileName是否为空，如果空就视为取消
+        if OutputFileName == "":
+            return "Cancel"
+        
         with open(OutputFileName,"w",encoding='utf-8') as f:
             if len(self._cases) == 0:
                 f.write("[空空如也]案件列表为空")
@@ -379,14 +384,12 @@ class Api:
 
     def backEndOutputTemplateFileData(self) -> str:
         import time
-        # 调用GetSaveFilepath方法获取文件夹路径
-        OutputFolderPath = self.GetSaveFilepath(title="请选择模板文件保存的文件夹")
+        # 调出文本框来输入文件名
+        OutputPath = self.GetSaveFilepath(title="选择模板列表保存路径",filetype="Text")
         # 判断OutputPath是否存在,如果不存在则返回错误
-        if OutputFolderPath == "":
-            return "Cancel"
-        # 写入模板列表文件，名字为“模板列表+当前时间.txt”
-        FileName = "模板列表"+time.strftime("%Y-%m-%d-%H-%M-%S", time.localtime())+".txt"  
-        with open(OutputFolderPath + "\\" + FileName, "w" , encoding='utf-8') as f:
+        if OutputPath == "":
+            return "Cancel" 
+        with open(OutputPath, "w" , encoding='utf-8') as f:
             for templateFile in self._templateFiles:
                 f.write(templateFile.OutputTemplateFileToString())
                 f.write("\n")
@@ -401,7 +404,7 @@ class Api:
         }
 
         # 调用GetOpenFilepath方法获取文件路径
-        NewTemplateFileDir = self.GetOpenFilepath(title="请选择新的模板文件",filetype="Word")
+        NewTemplateFileDir = self.GetOpenFilepath(title="请选择模板文件",filetype="Word")
         # 如果NewTemplateFile为空，则返回Cancel
         if NewTemplateFileDir == "":
             result["res"] = "Cancel"
