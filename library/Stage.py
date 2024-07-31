@@ -18,7 +18,7 @@ class Stage:
     def GetStageName(self):
         return self._StageName
     def GetCourtName(self):
-        return self._Name
+        return self._CourtName
     def GetCaseNumber(self):
         return self._CaseNumber
     
@@ -74,7 +74,7 @@ class Stage:
         # 例：{"stage":"一审","courtName":"北京市第一中级人民法院","caseNumber":"（2019）京01民初100号"}
 
         # 赋值
-        if self.SetStageName(InfoDict["stage"]) == "Error":
+        if self.SetStageName(InfoDict["stageName"]) == "Error":
             return "Error"
         if self.SetCourtName(InfoDict["courtName"]) == "Error":
             return "Error"
@@ -93,7 +93,7 @@ class Stage:
     
     def OutputToDict(self) -> dict:
         # 通过字典输出阶段信息
-        return {"stage":self._StageName,
+        return {"stageName":self._StageName,
                 "courtName":self._CourtName,
                 "caseNumber":self._CaseNumber}
 
