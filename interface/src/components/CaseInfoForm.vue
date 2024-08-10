@@ -408,11 +408,14 @@ watchEffect(() => {
 
 		<el-form-item
 			v-if="componentsConfig.inputInfoByFileSwitchStatus"
-			label="文件导入模式"
+
 		>
 			<el-switch
 				@change="ChangeInputStatus"
 				v-model="componentsConfig.inputInfoByFile"
+				style="--el-switch-on-color: #13ce76; --el-switch-off-color: #ff4949"
+				active-text="文件导入模式"
+				inactive-text="前端输入模式"
 			/>
 		</el-form-item>
 
