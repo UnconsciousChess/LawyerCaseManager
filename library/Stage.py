@@ -1,3 +1,8 @@
+import os,sys
+
+# 不要生成字节码
+sys.dont_write_bytecode = True
+
 class Stage:
     
     def __init__(self) -> None:
