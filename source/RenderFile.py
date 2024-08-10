@@ -59,7 +59,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
 
     # 案件共同信息（非当事人信息）
     context["案由"] = Case.GetCauseOfAction()
-    # context["管辖法院"] = Case.GetJurisdiction()
+
     context["委托阶段"] = Case.GetCaseAgentStageStr()
 
     # 获取全部原告信息
@@ -72,11 +72,56 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
     # 获取诉讼请求
     context["诉讼请求"] = Case.GetClaimText()
 
-    # 获取案号
-    if Case.GetCaseCourtCode() == "":
-        context["案号"] = "本案尚未立案，最终以实际案号为准"
+    # 获取案件阶段的实例列表
+    CaseStages = Case.GetStages()
+    
+    # 默认案号为空
+    CaseCodeIsEmpty = True
+
+    # 遍历各个阶段，获取各个阶段的法院名称和案号
+    for stage in CaseStages:
+        if stage.GetStageName() == "一审":
+            context["一审法院"] = stage.GetCourtName()
+            context["一审案号"] = stage.GetCaseNumber()
+            CaseCodeIsEmpty = False
+        if stage.GetStageName() == "二审":
+            context["二审法院"] = stage.GetCourtName()
+            context["二审案号"] = stage.GetCaseNumber()
+            CaseCodeIsEmpty = False
+        if stage.GetStageName() == "再审":
+            context["再审法院"] = stage.GetCourtName()
+            context["再审案号"] = stage.GetCaseNumber()
+            CaseCodeIsEmpty = False
+        if stage.GetStageName() == "执行":
+            context["执行法院"] = stage.GetCourtName()
+            context["执行案号"] = stage.GetCaseNumber()
+            CaseCodeIsEmpty = False
+        if stage.GetStageName() == "仲裁":
+            context["仲裁机构"] = stage.GetCourtName()
+            context["仲裁案号"] = stage.GetCaseNumber()
+            CaseCodeIsEmpty = False
+
+    if CaseCodeIsEmpty:
+        context["委托合同案号"] = "本案尚未立案，最终以实际案号为准"
     else:
-        context["案号"] = Case.GetCaseCourtCode()
+        if Case.GetCaseAgentStage() != None:
+            for AgentStage in Case.GetCaseAgentStage():
+                if AgentStage == 1:
+                    context["委托合同案号"] = context["一审案号"]
+                    break
+                if AgentStage == 2:
+                    context["委托合同案号"] = context["二审案号"]
+                    break
+                if AgentStage == 3:
+                    context["委托合同案号"] = context["再审案号"]
+                    break
+                if AgentStage == 4:
+                    context["委托合同案号"] = context["执行案号"]
+                    break
+                if AgentStage == 5:
+                    context["委托合同案号"] = context["仲裁案号"]
+                    break
+                
 
     # 获取每一原告身份信息的字典，并将其装到一个字典里面
     PlaintiffIdentityDict = {}
@@ -258,16 +303,16 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
 
     # 如果当前文书是法院需要分开的文书，则遍历法院字典并分别生成
     if CurrentTemplateFileIsInCourtMultipleFileList:
-        for stage , jurisdictionname in Case.GetJurisdictionDict().items():
+        for stage in Case.GetStages():
             #  根据情况填入
-            if stage !="" and jurisdictionname !="":
-                context['管辖法院'] = jurisdictionname
-                context['委托阶段'] = stage
+            if stage.GetStageName() !="" and stage.GetCourtName() !="":
+                context['管辖法院'] = stage.GetCourtName()
+                context['委托阶段'] = stage.GetStageName()  
                 # 渲染模板
                 doc.render(context)
                 
                 DocSaveName = TemplaterFileName.replace(".docx", "")
-                DocSaveName += "({}-{}).docx".format(stage,jurisdictionname) 
+                DocSaveName += "({}-{}).docx".format(context['委托阶段'],context['管辖法院']) 
                 # 判断是否存在同名文件，如果存在就删除原文件
                 DeleteFileIfExist(OutputDir,DocSaveName)
                 # 保存文件
@@ -277,7 +322,7 @@ def RenderFileInDocxtpl(TemplateFileDir,Case,OutputDir) -> None:
     if (not CurrentTemplateFileIsInOurClientMultipleFileList and 
         not CurrentTemplateFileIsInOppositeMultipleFileList  and 
         not CurrentTemplateFileIsInCourtMultipleFileList):
-        context['管辖法院'] = Case.GetJurisdictionDict()["一审"]
+        # context['管辖法院'] = Case.GetJurisdictionDict()["一审"]
         # 直接渲染模板
         doc.render(context)
         # 判断是否存在同名文件，如果存在就删除原文件
