@@ -41,7 +41,7 @@ def ReadTemplateList(TemplateListDir) -> list[TemplateFile]:
 
 
 # 生成文件夹，同时调用source.RenderFile中的方法生成对应的文书   
-def FolderCreator(case,OutputDir,TemplateListOrTemplateListDir) -> str: 
+def FolderCreator(case,OutputDir,TemplateListOrTemplateListDir,Initial) -> str: 
 
     # 检查传入的参数OutputDir
     if isinstance(OutputDir,str):
@@ -76,20 +76,28 @@ def FolderCreator(case,OutputDir,TemplateListOrTemplateListDir) -> str:
         print("模板列表参数类型错误！")
         return "TemplateListTypeError"
 
-    # 创建案件项目文件夹到指定目录Outputdir下面，其中项目文件夹名称由案件的原告、被告和案由组成
-    os.chdir(OutputDir)
-    FolderName = case.GetAllPlaintiffNames() + "诉" + case.GetAllDefendantNames() + "-" + case.GetCauseOfAction() + "一案"
+    # 创建顶层的案件文件夹
+    # 如果是第一次生成文件夹，则创建案件项目文件夹到指定目录Outputdir下面
+    if Initial:
+        os.chdir(OutputDir)
+        # 其中项目文件夹名称由案件的原告、被告和案由组成
+        FolderName = case.GetAllPlaintiffNames() + "诉" + case.GetAllDefendantNames() + "-" + case.GetCauseOfAction() + "一案"
+        # 如果文件夹已经存在，则不创建；如果不存在，则创建
+        if os.path.exists(FolderName):
+            print("名称为【%s】的文件夹已经存在,不再创建。" % FolderName)
+        else:
+            os.makedirs(FolderName)
+        
+        # 将该名字作为该案件的文件夹地址
+        case.SetCaseFolderPath(OutputDir + "//" + FolderName)
+        # 最后进入该案件文件夹路径
+        os.chdir(FolderName)
 
-    # 如果文件夹已经存在，则不创建；如果不存在，则创建
-    if os.path.exists(FolderName):
-        print("名称为【%s】的文件夹已经存在,不再创建。" % FolderName)
-    else:
-        os.makedirs(FolderName)
+    # 如果不是第一次生成文件夹，则直接进入该文件夹的地址
+    if not Initial:
+        os.chdir(OutputDir)
 
-    # 将该名字作为该案件的文件夹
-    case.SetCaseFolderPath(OutputDir + "//" + FolderName)
-    # 进入该案件文件夹路径
-    os.chdir(FolderName)
+
 
     # 文件夹序号初始化
     FolderNum = 0

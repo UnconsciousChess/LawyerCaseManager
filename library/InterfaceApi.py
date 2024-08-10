@@ -256,6 +256,7 @@ class Api:
                         case=TargetCase,              
                         OutputDir=self.GetFolderpath(title="请选择案件文件夹保存的文件夹"),   
                         TemplateListOrTemplateListDir=TargetTemplateFiles,
+                        Initial=True,
                         )
         else:
             # 如果当前案件文件夹路径不为空，则直接使用当前案件文件夹路径
@@ -263,6 +264,7 @@ class Api:
                         case=TargetCase,              
                         OutputDir=TargetCase.GetCaseFolderPath(),   
                         TemplateListOrTemplateListDir=TargetTemplateFiles,
+                        Initial=False,
                         )
     
         # 检查FolderCreator是否执行成功
