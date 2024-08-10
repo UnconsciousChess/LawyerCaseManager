@@ -9,6 +9,7 @@ const litigantFormDefendant = ref(null);
 
 // 定义表单数据
 const caseForm = ref({
+
 	caseId: "", //案件ID
 	causeOfAction: "", //案由
 	litigationAmount: "", //标的额
@@ -290,15 +291,14 @@ function caseFormInfoInitiation(propData) {
 		// 如果有传递过来的案件信息，则将其赋值给表单
 		let caseData = propData.propCaseData;
 
-		console.log(caseData);
 		caseForm.value.caseId = caseData.caseId;
-		caseForm.value.caseCourtCode = caseData.caseCourtCode;
+
 		caseForm.value.causeOfAction = caseData.causeOfAction;
 		caseForm.value.stages = caseData.stages;
 		caseForm.value.litigationAmount = caseData.litigationAmount;
 		caseForm.value.caseAgentStage = caseData.caseAgentStage;
 		caseForm.value.caseType = caseData.caseType.toString();
-		caseForm.value.courtName = caseData.courtName;
+
 		caseForm.value.mediationIntention = caseData.mediationIntention;
 		caseForm.value.caseFolderGeneratedPath = caseData.caseFolderGeneratedPath;
 		caseForm.value.riskAgentStatus = caseData.riskAgentStatus;
@@ -523,12 +523,12 @@ watchEffect(() => {
 
 		<el-form-item v-if="inputInfoByFrontEndStatus">
 			委托阶段：
-			<el-checkbox-group v-model="caseForm.caseAgentStage" >
-				<el-checkbox value=1 > 一审立案阶段 </el-checkbox>
-				<el-checkbox value=2 > 一审开庭阶段 </el-checkbox>
-				<el-checkbox value=3 > 二审阶段 </el-checkbox>
-				<el-checkbox value=4 > 执行阶段 </el-checkbox>
-				<el-checkbox value=5 > 再审阶段 </el-checkbox>
+			<el-checkbox-group v-model="caseForm.caseAgentStage">
+				<el-checkbox value="1"> 一审立案阶段 </el-checkbox>
+				<el-checkbox value="2"> 一审开庭阶段 </el-checkbox>
+				<el-checkbox value="3"> 二审阶段 </el-checkbox>
+				<el-checkbox value="4"> 执行阶段 </el-checkbox>
+				<el-checkbox value="5"> 再审阶段 </el-checkbox>
 			</el-checkbox-group>
 		</el-form-item>
 
