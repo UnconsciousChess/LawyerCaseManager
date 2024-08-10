@@ -428,14 +428,6 @@ watchEffect(() => {
 			</el-button>
 		</el-form-item>
 
-		<!-- <el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="法院案号"
-			prop="caseCourtCode"
-		>
-			<el-input v-model.trim="caseForm.caseCourtCode" style="width: 240px" />
-		</el-form-item> -->
-
 		<el-form-item
 			v-if="inputInfoByFrontEndStatus"
 			label="案由"
@@ -541,13 +533,6 @@ watchEffect(() => {
 			</el-radio-group>
 		</el-form-item>
 
-		<!-- <el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="管辖法院"
-			prop="courtName"
-		>
-			<el-input v-model="caseForm.courtName" />
-		</el-form-item> -->
 
 		<el-form-item
 			v-if="inputInfoByFrontEndStatus"
