@@ -246,25 +246,63 @@ function getTableData() {
 					var updateItemIndex = tableData.value.findIndex(
 						(item) => item.caseId === cases[i].caseId
 					);
+
 					// 对应的tableData更新数据
+
+					// 代理固定费用
+					tableData.value[updateItemIndex].agentFixedFee =
+						cases[i].agentFixedFee;
+
+					// 代理阶段
+					tableData.value[updateItemIndex].caseAgentStage =
+						cases[i].caseAgentStage;
+
+					// 案件文件夹路径
+					tableData.value[updateItemIndex].caseFolderGeneratedPath =
+						cases[i].caseFolderGeneratedPath;
+
+					// 案件id
+					// 案件id无须更新
+
+					// 案件类型
+					tableData.value[updateItemIndex].caseType = cases[i].caseType;
 
 					// 案由
 					tableData.value[updateItemIndex].causeOfAction =
 						cases[i].causeOfAction;
 
+					// 诉讼请求
+					tableData.value[updateItemIndex].claimText = cases[i].claimText;
+
+					// 当事人-被告
+					tableData.value[updateItemIndex].defendants = cases[i].defendants;
+
+					// 事实与理由
+					tableData.value[updateItemIndex].factAndReason =
+						cases[i].factAndReason;
+
+					// 当事人-原告与被告
+					tableData.value[updateItemIndex].litigantsName =
+						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames;
+
 					// 诉讼标的额
 					tableData.value[updateItemIndex].litigationAmount =
 						cases[i].litigationAmount;
-
-					// 案件各阶段(这是一个列表)
-					tableData.value[updateItemIndex].stages = cases[i].stages;
 
 					// 调解意向
 					tableData.value[updateItemIndex].mediationIntention =
 						cases[i].mediationIntention;
 
-					// 案件类型
-					tableData.value[updateItemIndex].caseType = cases[i].caseType;
+					// 当事人-原告
+					tableData.value[updateItemIndex].plaintiffs = cases[i].plaintiffs;
+
+					// 拒绝调解理由
+					tableData.value[updateItemIndex].rejectMediationReasonText =
+						cases[i].rejectMediationReasonText;
+
+					// 风险代理后付费率
+					tableData.value[updateItemIndex].riskAgentPostFeeRate =
+						cases[i].riskAgentPostFeeRate;
 
 					// 风险代理状态
 					tableData.value[updateItemIndex].riskAgentStatus =
@@ -274,45 +312,11 @@ function getTableData() {
 					tableData.value[updateItemIndex].riskAgentUpfrontFee =
 						cases[i].riskAgentUpfrontFee;
 
-					// 风险代理后付费率
-					tableData.value[updateItemIndex].riskAgentPostFeeRate =
-						cases[i].riskAgentPostFeeRate;
-
-					// 代理阶段
-					tableData.value[updateItemIndex].caseAgentStage =
-						cases[i].caseAgentStage;
-
-					// 诉讼请求
-					tableData.value[updateItemIndex].claimText = cases[i].claimText;
-
-					// 案件文件夹路径
-					tableData.value[updateItemIndex].caseFolderGeneratedPath =
-						cases[i].caseFolderGeneratedPath;
-
-					// 事实与理由
-					tableData.value[updateItemIndex].factAndReason =
-						cases[i].factAndReason;
-
-					// 拒绝调解理由
-					tableData.value[updateItemIndex].rejectMediationReasonText =
-						cases[i].rejectMediationReasonText;
-
-					// 代理固定费用
-					tableData.value[updateItemIndex].agentFixedFee =
-						cases[i].agentFixedFee;
-
-					// 当事人-原告
-					tableData.value[updateItemIndex].plaintiffs = cases[i].plaintiffs;
-
-					// 当事人-被告
-					tableData.value[updateItemIndex].defendants = cases[i].defendants;
+					// 案件各阶段
+					tableData.value[updateItemIndex].stages = cases[i].stages;
 
 					// 当事人-第三人
 					tableData.value[updateItemIndex].thirdParties = cases[i].thirdParties;
-
-					// 当事人-原告与被告
-					tableData.value[updateItemIndex].litigantsName =
-						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames;
 
 					// 表格title的数据
 					tableData.value[updateItemIndex].title =
@@ -320,27 +324,45 @@ function getTableData() {
 				} else {
 					// 如果没有相同的，则将数据添加到tableData中
 					tableData.value.push({
-						causeOfAction: cases[i].causeOfAction,
-						litigationAmount: cases[i].litigationAmount,
-						stages: cases[i].stages,
-						mediationIntention: cases[i].mediationIntention,
-						caseType: cases[i].caseType,
-						riskAgentStatus: cases[i].riskAgentStatus,
-						riskAgentUpfrontFee: cases[i].riskAgentUpfrontFee,
-						riskAgentPostFeeRate: cases[i].riskAgentPostFeeRate,
-						caseAgentStage: cases[i].caseAgentStage,
-						claimText: cases[i].claimText,
-						factAndReason: cases[i].factAndReason,
-						rejectMediationReasonText: cases[i].rejectMediationReasonText,
-						caseFolderGeneratedPath: cases[i].caseFolderGeneratedPath,
 						agentFixedFee: cases[i].agentFixedFee,
+
+						caseAgentStage: cases[i].caseAgentStage,
+
+						caseFolderGeneratedPath: cases[i].caseFolderGeneratedPath,
+
 						caseId: cases[i].caseId,
-						plaintiffs: cases[i].plaintiffs,
+
+						caseType: cases[i].caseType,
+
+						causeOfAction: cases[i].causeOfAction,
+
+						claimText: cases[i].claimText,
+
 						defendants: cases[i].defendants,
-						thirdParties: cases[i].thirdParties,
+
+						factAndReason: cases[i].factAndReason,
+
 						litigantsName:
 							cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames,
-						// 测试title的数据
+
+						litigationAmount: cases[i].litigationAmount,
+
+						mediationIntention: cases[i].mediationIntention,
+
+						plaintiffs: cases[i].plaintiffs,
+
+						rejectMediationReasonText: cases[i].rejectMediationReasonText,
+
+						riskAgentPostFeeRate: cases[i].riskAgentPostFeeRate,
+
+						riskAgentStatus: cases[i].riskAgentStatus,
+
+						riskAgentUpfrontFee: cases[i].riskAgentUpfrontFee,
+
+						stages: cases[i].stages,
+
+						thirdParties: cases[i].thirdParties,
+
 						title: cases[i].causeOfAction + "一案，编号：" + cases[i].caseId,
 					});
 					// console.log(tableData.value);
@@ -410,28 +432,48 @@ async function updateCaseDataFromCaseInfoForm(data) {
 		(item) => item.caseId === data.caseId
 	);
 	// 对应的tableData更新数据
-	tableData.value[updateItemIndex].causeOfAction = data.causeOfAction;
-	tableData.value[updateItemIndex].litigationAmount = data.litigationAmount;
-	tableData.value[updateItemIndex].stages = data.stages;
-	tableData.value[updateItemIndex].mediationIntention = data.mediationIntention;
-	tableData.value[updateItemIndex].caseType = data.caseType;
-	tableData.value[updateItemIndex].riskAgentStatus = data.riskAgentStatus;
-	tableData.value[updateItemIndex].riskAgentUpfrontFee =
-		data.riskAgentUpfrontFee;
-	tableData.value[updateItemIndex].riskAgentPostFeeRate =
-		data.riskAgentPostFeeRate;
+	tableData.value[updateItemIndex].agentFixedFee = data.agentFixedFee;
+
 	tableData.value[updateItemIndex].caseAgentStage = data.caseAgentStage;
-	tableData.value[updateItemIndex].claimText = data.claimText;
+
 	tableData.value[updateItemIndex].caseFolderGeneratedPath =
 		data.caseFolderGeneratedPath;
+
+	// caseId无须更新,留空
+
+	tableData.value[updateItemIndex].caseType = data.caseType;
+
+	tableData.value[updateItemIndex].causeOfAction = data.causeOfAction;
+
+	tableData.value[updateItemIndex].claimText = data.claimText;
+
+	tableData.value[updateItemIndex].defendants = data.defendants;
+
 	tableData.value[updateItemIndex].factAndReason = data.factAndReason;
+
+	tableData.value[updateItemIndex].litigantsName = data.litigantsName;
+
+	tableData.value[updateItemIndex].litigationAmount = data.litigationAmount;
+
+	tableData.value[updateItemIndex].mediationIntention = data.mediationIntention;
+
+	tableData.value[updateItemIndex].plaintiffs = data.plaintiffs;
+
 	tableData.value[updateItemIndex].rejectMediationReasonText =
 		data.rejectMediationReasonText;
-	tableData.value[updateItemIndex].agentFixedFee = data.agentFixedFee;
-	tableData.value[updateItemIndex].plaintiffs = data.plaintiffs;
-	tableData.value[updateItemIndex].defendants = data.defendants;
+
+	tableData.value[updateItemIndex].riskAgentPostFeeRate =
+		data.riskAgentPostFeeRate;
+
+	tableData.value[updateItemIndex].riskAgentStatus = data.riskAgentStatus;
+	
+	tableData.value[updateItemIndex].riskAgentUpfrontFee =
+		data.riskAgentUpfrontFee;
+
+	tableData.value[updateItemIndex].stages = data.stages;
+
 	tableData.value[updateItemIndex].thirdParties = data.thirdParties;
-	tableData.value[updateItemIndex].litigantsName = data.litigantsName;
+
 	tableData.value[updateItemIndex].title =
 		data.causeOfAction + "一案，编号：" + data.caseId;
 }
