@@ -15,7 +15,7 @@
 			{{ showText.litigationAmount }} 元
 		</el-descriptions-item>
 
-		<el-descriptions-item>
+		<!-- <el-descriptions-item>
 			<template #label>
 				<div class="cell-item">管辖法院</div>
 			</template>
@@ -27,7 +27,7 @@
 				<div class="cell-item">法院案号</div>
 			</template>
 			{{ showText.caseCourtCode }}
-		</el-descriptions-item>
+		</el-descriptions-item> -->
 
 		<el-descriptions-item>
 			<template #label>
@@ -122,8 +122,8 @@ function showTextInitialize(prop) {
 	showText.value.title = prop.propShowTextList[Index].title;
 	showText.value.causeOfAction = prop.propShowTextList[Index].causeOfAction;
 	showText.value.litigationAmount = prop.propShowTextList[Index].litigationAmount;
-	showText.value.courtName = prop.propShowTextList[Index].courtName;
-	showText.value.caseCourtCode = prop.propShowTextList[Index].caseCourtCode;
+	showText.value.caseType = prop.propShowTextList[Index].caseType;
+	showText.value.stages = prop.propShowTextList[Index].stages;
 	showText.value.caseAgentStage = prop.propShowTextList[Index].caseAgentStage;
 	showText.value.riskAgentUpfrontFee = prop.propShowTextList[Index].riskAgentUpfrontFee;
 	showText.value.riskAgentPostFeeRate = prop.propShowTextList[Index].riskAgentPostFeeRate;

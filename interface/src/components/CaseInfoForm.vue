@@ -10,16 +10,13 @@ const litigantFormDefendant = ref(null);
 // 定义表单数据
 const caseForm = ref({
 	caseId: "", //案件ID
-
-	caseCourtCode: "", //法院案号
 	causeOfAction: "", //案由
 	litigationAmount: "", //标的额
 	caseAgentStage: [], //委托阶段
 	caseType: 0, //案件类型
-	courtName: "", //管辖法院
 	mediationIntention: false, //调解意愿
 	caseFolderGeneratedPath: "", //案件文件夹生成路径
-
+	stages: [], //案件各阶段信息
 	riskAgentStatus: true, //风险收费
 	riskAgentUpfrontFee: "", //前期风险收费金额
 	riskAgentPostFeeRate: "", //后期风险收费比例
@@ -47,6 +44,15 @@ const inputInfoByFrontEndStatus = ref(false);
 
 // 决根据编辑模式，去决定是否显示描述列表，传递给子组件
 const showDescriptionList = ref(false);
+
+// 设定阶段的选择
+const stageOptions = ref([
+	{value: "一审", label: "一审阶段"},
+	{value: "二审", label: "二审阶段"},
+	{value: "再审", label: "再审阶段"},
+	{value: "执行", label: "执行阶段"},
+	{value: "仲裁", label: "仲裁阶段"},
+]);
 
 // 设定表单的校验规则
 const caseFormRules = ref({
@@ -288,6 +294,7 @@ function caseFormInfoInitiation(propData) {
 		caseForm.value.caseId = caseData.caseId;
 		caseForm.value.caseCourtCode = caseData.caseCourtCode;
 		caseForm.value.causeOfAction = caseData.causeOfAction;
+		caseForm.value.stages = caseData.stages;
 		caseForm.value.litigationAmount = caseData.litigationAmount;
 		caseForm.value.caseAgentStage = caseData.caseAgentStage;
 		caseForm.value.caseType = caseData.caseType.toString();
@@ -326,9 +333,6 @@ function caseFormInfoInitiation(propData) {
 		// 因为是编辑模式，所以默认不需要文件导入
 		componentsConfig.value.inputInfoByFile = false;
 
-		// console.log("案件信息已经传递过来了");
-		// console.log(caseForm.value);
-
 		// 因为是编辑模式，所以默认显示描述列表
 		showDescriptionList.value = true;
 	}
@@ -346,12 +350,13 @@ function caseFormInfoInitiation(propData) {
 
 		// 所有信息回归初始值（似乎引起了bug）
 		caseForm.value.caseId = "";
-		caseForm.value.caseCourtCode = "";
+		// caseForm.value.caseCourtCode = "";
 		caseForm.value.causeOfAction = "";
 		caseForm.value.litigationAmount = "";
+		caseForm.value.stages = [];
 		caseForm.value.caseAgentStage = [];
 		caseForm.value.caseType = "";
-		caseForm.value.courtName = "";
+		// caseForm.value.courtName = "";
 		caseForm.value.mediationIntention = true;
 		caseForm.value.caseFolderGeneratedPath = "";
 		caseForm.value.riskAgentStatus = false;
@@ -423,13 +428,13 @@ watchEffect(() => {
 			</el-button>
 		</el-form-item>
 
-		<el-form-item
+		<!-- <el-form-item
 			v-if="inputInfoByFrontEndStatus"
 			label="法院案号"
 			prop="caseCourtCode"
 		>
 			<el-input v-model.trim="caseForm.caseCourtCode" style="width: 240px" />
-		</el-form-item>
+		</el-form-item> -->
 
 		<el-form-item
 			v-if="inputInfoByFrontEndStatus"
@@ -450,6 +455,37 @@ watchEffect(() => {
 				style="width: 240px"
 			/>
 		</el-form-item>
+
+		<template v-for="stage in caseForm.stages">
+			<el-form-item v-if="inputInfoByFrontEndStatus" label="案件阶段">
+				<el-row>
+					<el-select
+						v-model="stage.stageName"
+						placeholder="请选择案件各阶段信息"
+						style="width: 100px; margin-right: 15px"
+					>
+						<el-option
+							v-for="item in stageOptions"
+							:key="item.value"
+							:label="item.label"
+							:value="item.value"
+						></el-option>
+					</el-select>
+
+					<el-input
+						v-model="stage.courtName"
+						placeholder="请输入管辖法院"
+						style="width: 200px; margin-right: 10px"
+					/>
+
+					<el-input
+						v-model="stage.caseNumber"
+						placeholder="请输入案号"
+						style="width: 160px"
+					/>
+				</el-row>
+			</el-form-item>
+		</template>
 
 		<el-row>
 			<el-col :span="12">
@@ -487,12 +523,12 @@ watchEffect(() => {
 
 		<el-form-item v-if="inputInfoByFrontEndStatus">
 			委托阶段：
-			<el-checkbox-group v-model="caseForm.caseAgentStage" id="caseAgentStage">
-				<el-checkbox value="1" name="type"> 一审立案阶段 </el-checkbox>
-				<el-checkbox value="2" name="type"> 一审开庭阶段 </el-checkbox>
-				<el-checkbox value="3" name="type"> 二审阶段 </el-checkbox>
-				<el-checkbox value="4" name="type"> 执行阶段 </el-checkbox>
-				<el-checkbox value="5" name="type"> 再审阶段 </el-checkbox>
+			<el-checkbox-group v-model="caseForm.caseAgentStage" >
+				<el-checkbox value=1 > 一审立案阶段 </el-checkbox>
+				<el-checkbox value=2 > 一审开庭阶段 </el-checkbox>
+				<el-checkbox value=3 > 二审阶段 </el-checkbox>
+				<el-checkbox value=4 > 执行阶段 </el-checkbox>
+				<el-checkbox value=5 > 再审阶段 </el-checkbox>
 			</el-checkbox-group>
 		</el-form-item>
 
@@ -505,13 +541,13 @@ watchEffect(() => {
 			</el-radio-group>
 		</el-form-item>
 
-		<el-form-item
+		<!-- <el-form-item
 			v-if="inputInfoByFrontEndStatus"
 			label="管辖法院"
 			prop="courtName"
 		>
 			<el-input v-model="caseForm.courtName" />
-		</el-form-item>
+		</el-form-item> -->
 
 		<el-form-item
 			v-if="inputInfoByFrontEndStatus"

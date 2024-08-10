@@ -49,9 +49,8 @@
 		</el-table-column>
 	</el-table>
 
-	<el-divider></el-divider>
 	<!-- 刷新按钮 -->
-	<div>
+	<div style="margin-top: 20px">
 		<el-button color="#9EC1DD" @click="createNewCase">新建案件</el-button>
 		<el-button color="#B5BEF2" @click="getTableData">刷新数据</el-button>
 		<el-button color="#CEECAB" @click="handleBulkLoadingData"
@@ -61,9 +60,9 @@
 			>批量导出案件</el-button
 		>
 	</div>
-	<el-divider></el-divider>
+
 	<!-- 测试按钮 -->
-	<div>
+	<div style="margin-top: 20px">
 		<el-button type="primary" @click="testOutputCase"
 			>后端输出案件信息</el-button
 		>
@@ -248,47 +247,82 @@ function getTableData() {
 						(item) => item.caseId === cases[i].caseId
 					);
 					// 对应的tableData更新数据
+
+					// 案由
 					tableData.value[updateItemIndex].causeOfAction =
 						cases[i].causeOfAction;
-					tableData.value[updateItemIndex].courtName = cases[i].courtName;
+
+					// 诉讼标的额
 					tableData.value[updateItemIndex].litigationAmount =
 						cases[i].litigationAmount;
-					tableData.value[updateItemIndex].caseCourtCode =
-						cases[i].caseCourtCode;
+
+					// 案件各阶段(这是一个列表)
+					tableData.value[updateItemIndex].stages = cases[i].stages;
+
+					// 调解意向
 					tableData.value[updateItemIndex].mediationIntention =
 						cases[i].mediationIntention;
+
+					// 案件类型
 					tableData.value[updateItemIndex].caseType = cases[i].caseType;
+
+					// 风险代理状态
 					tableData.value[updateItemIndex].riskAgentStatus =
 						cases[i].riskAgentStatus;
+
+					// 风险代理预付费
 					tableData.value[updateItemIndex].riskAgentUpfrontFee =
 						cases[i].riskAgentUpfrontFee;
+
+					// 风险代理后付费率
 					tableData.value[updateItemIndex].riskAgentPostFeeRate =
 						cases[i].riskAgentPostFeeRate;
+
+					// 代理阶段
 					tableData.value[updateItemIndex].caseAgentStage =
 						cases[i].caseAgentStage;
+
+					// 诉讼请求
 					tableData.value[updateItemIndex].claimText = cases[i].claimText;
+
+					// 案件文件夹路径
 					tableData.value[updateItemIndex].caseFolderGeneratedPath =
 						cases[i].caseFolderGeneratedPath;
+
+					// 事实与理由
 					tableData.value[updateItemIndex].factAndReason =
 						cases[i].factAndReason;
+
+					// 拒绝调解理由
 					tableData.value[updateItemIndex].rejectMediationReasonText =
 						cases[i].rejectMediationReasonText;
+
+					// 代理固定费用
 					tableData.value[updateItemIndex].agentFixedFee =
 						cases[i].agentFixedFee;
+
+					// 当事人-原告
 					tableData.value[updateItemIndex].plaintiffs = cases[i].plaintiffs;
+
+					// 当事人-被告
 					tableData.value[updateItemIndex].defendants = cases[i].defendants;
+
+					// 当事人-第三人
 					tableData.value[updateItemIndex].thirdParties = cases[i].thirdParties;
+
+					// 当事人-原告与被告
 					tableData.value[updateItemIndex].litigantsName =
 						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames;
+
+					// 表格title的数据
 					tableData.value[updateItemIndex].title =
 						cases[i].causeOfAction + "一案，编号：" + cases[i].caseId;
 				} else {
 					// 如果没有相同的，则将数据添加到tableData中
 					tableData.value.push({
 						causeOfAction: cases[i].causeOfAction,
-						courtName: cases[i].courtName,
 						litigationAmount: cases[i].litigationAmount,
-						caseCourtCode: cases[i].caseCourtCode,
+						stages: cases[i].stages,
 						mediationIntention: cases[i].mediationIntention,
 						caseType: cases[i].caseType,
 						riskAgentStatus: cases[i].riskAgentStatus,
@@ -377,9 +411,8 @@ async function updateCaseDataFromCaseInfoForm(data) {
 	);
 	// 对应的tableData更新数据
 	tableData.value[updateItemIndex].causeOfAction = data.causeOfAction;
-	tableData.value[updateItemIndex].courtName = data.courtName;
 	tableData.value[updateItemIndex].litigationAmount = data.litigationAmount;
-	tableData.value[updateItemIndex].caseCourtCode = data.caseCourtCode;
+	tableData.value[updateItemIndex].stages = data.stages;
 	tableData.value[updateItemIndex].mediationIntention = data.mediationIntention;
 	tableData.value[updateItemIndex].caseType = data.caseType;
 	tableData.value[updateItemIndex].riskAgentStatus = data.riskAgentStatus;
@@ -537,7 +570,6 @@ async function documentsGenerate(data) {
 		else {
 			console.log(result);
 		}
-		
 	}
 }
 
