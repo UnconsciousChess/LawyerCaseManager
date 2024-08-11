@@ -5,7 +5,6 @@ import {createMemoryHistory, createRouter} from 'vue-router'
 
 
 // 导入组件
-import CaseInfoForm from './components/CaseInfoForm.vue'
 import Caculator from './components/Caculator.vue'
 import Blank from './components/Blank.vue'
 import CaseInfoShow from './components/CaseInfoShowTable.vue'
