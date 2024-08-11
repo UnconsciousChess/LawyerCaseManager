@@ -1,4 +1,3 @@
-<!-- 组合式Vue -->
 <script setup>
 
 const activeIndex = ref("1");
@@ -6,10 +5,34 @@ const activeIndex = ref("1");
 const aboutDialog = ref({
 	visible: false,
 });
+
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+async function init() {
+	// 等待1000ms，等待后端的服务启动，避免前端调用后端的函数失败
+	await sleep(1000);
+
+	// 调用后端的函数appStartInit，初始化后端的数据（如果后端已经初始化，后端会识别）
+	let result = await pywebview.api.appStartInit();
+	// console.log(result);
+
+}
+
+onMounted(() => {
+	init();
+});
+
 </script>
 
 <template>
-	<el-menu :default-active="activeIndex" :router="true" class="el-menu-demo" mode="horizontal">
+	<el-menu
+		:default-active="activeIndex"
+		:router="true"
+		class="el-menu-demo"
+		mode="horizontal"
+	>
 		<el-menu-item index="/">律师小只工具箱</el-menu-item>
 		<el-sub-menu index="2">
 			<template #title>文书生成器</template>
@@ -32,7 +55,12 @@ const aboutDialog = ref({
 		<el-menu-item @click="aboutDialog.visible = true">关于</el-menu-item>
 	</el-menu>
 
-	<el-dialog v-model="aboutDialog.visible" title="关于本程序" width="300" draggable>
+	<el-dialog
+		v-model="aboutDialog.visible"
+		title="关于本程序"
+		width="300"
+		draggable
+	>
 		<p>Version:0.2</p>
 		<p>一只肥猫开发ing.....ZZzzzz</p>
 	</el-dialog>

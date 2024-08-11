@@ -164,6 +164,7 @@ const currentExpandedRow = ref(0);
 // 这个列表是存放展开的行的caseId（即rowkey）
 const expandRowKeys = ref([]);
 
+
 // 以下变量是用于控制各个对话框的显示的布尔值
 const dialogOutputDataVisible = ref(false);
 const dialogDeleteDataVisible = ref(false);
@@ -220,8 +221,9 @@ function createNewCase() {
 }
 
 // 从后端获取数据
-function getTableData() {
-	// 如果未连接后端，则只测试前端
+async function getTableData() {
+
+	// 如果未连接后端，则只测试前端,并只导入默认数据
 	if (typeof pywebview === "undefined") {
 		console.log("getTableData()：未连接后端，目前只测试前端");
 		// 当tableData为空时，添加测试数据
@@ -233,6 +235,11 @@ function getTableData() {
 	}
 	// 如果连接了后端，则从后端获取数据(实际工作流程)
 	else {
+
+		let result = await pywebview.api.appStartInit();
+		console.log(result);
+
+		// 开始获取数据的过程
 		pywebview.api.outputAllCaseInfoToFrontEnd().then((cases) => {
 			// 遍历cases，将数据根据一定的规则添加到tableData中
 			for (let i = 0; i < cases.length; i++) {

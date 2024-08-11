@@ -3,8 +3,10 @@ import os,sys
 # 不要生成字节码
 sys.dont_write_bytecode = True
 
-# api类中暴露给前端的函数名称，命名保持与前端一致（小驼峰），方便前后端对接
+# 将当前工作目录添加到系统路径中
+sys.path.append(os.getcwd())
 
+# api类中暴露给前端的函数名称，命名保持与前端一致（小驼峰），方便前后端对接
 class Api:
     def __init__(self):
 
@@ -12,6 +14,121 @@ class Api:
         self._cases = []
         # templateFiles属性是一个列表，用于存放模板文件对象
         self._templateFiles = []
+        # 
+        self._isInitial = False
+
+    # ===== 下面是初始化函数 =====
+
+    def appStartInit(self) -> dict|str:
+        # 判断是否已经初始化
+        if self._isInitial:
+            return "AlreadyInitial"
+        
+        # 如果没有初始化才进行下面的步骤
+
+        # 导入json模块
+        import json
+        # 读取配置文件
+        with open(r"test\TestData\config.json","r",encoding="utf-8") as f:
+            Config = json.load(f)
+        # 读取案件信息路径
+        CasesInputPath = Config["path"]["casesPath"]
+        TemplateFilesPath = Config["path"]["templateFilesPath"]
+
+        # 初始化本函数的变量
+
+        Result = {
+            "caseResult" : "",
+            "templateFileResult" : "",
+        }
+        StartCaseInput = True
+        StartTemplateFileInput = True
+
+        # 判断输入的案件信息路径是否存在
+        if not os.path.exists(CasesInputPath):
+            print("Error: The path is not exist!")
+            Result["caseResult"] = "PathNotExist"
+            StartCaseInput = False
+        # 判断输入的文件是否是txt文件
+        if not CasesInputPath.endswith(".txt"):
+            print("Error: The file is not a txt file!")
+            Result["caseResult"] = "NotTxtFile"
+            StartCaseInput = False
+        
+        # 开始预读取案件信息
+        if StartCaseInput:
+            # 导入案件类Case
+            from library.CaseClass import Case
+
+            # 打开文件
+            with open(CasesInputPath,"r",encoding='utf-8') as f:
+                CaseContentList = []
+                CurrentCaseContent = []
+                # 读取文件内容
+                Content = f.readlines()
+                # 将文件内容分成不同的CaseContent，并放入CaseContentList中
+                for line in Content:
+                    # 如果读取到案件开始符，则跳过
+                    if "$CaseStart$" in line:
+                        continue
+                    # 如果当前行以#开头，则跳过
+                    elif line.startswith("#"):
+                        continue
+                    # 如果当前行为空行，则跳过
+                    elif line == "\n":
+                        continue
+                    # 如果读取到案件结束符，则将当前案件内容添加到CaseContentList中，同时清空当前案件内容
+                    elif "$CaseEnd$" in line:
+                        CaseContentList.append(CurrentCaseContent)
+                        CurrentCaseContent = []
+                        continue
+                    # 如果当前行不为空，则将当前行添加到当前案件内容中
+                    else:
+                        # 去掉当前行的换行符
+                        line = line.strip("\n")
+                        CurrentCaseContent.append(line)
+
+                # 循环读取每个案件的CaseContent，注意CaseContent也是一个列表
+                for CaseContent in CaseContentList:
+                    # 如果案件内容为空，则跳过
+                    if CaseContent == "": 
+                        continue
+                    # 实例化一个Case对象
+                    case = Case()
+                    # 将案件内容调用case对象的InputCaseInfoFromStringList方法，将信息导入到当前case对象中
+                    case.InputCaseInfoFromStringList(CaseContent)
+                    self._cases.append(case)
+                
+                Result["caseResult"] = "Success"
+
+        # 判断输入的路径是否存在
+        if not os.path.exists(TemplateFilesPath):
+            print("Error: The path is not exist!")
+            Result["templateFileResult"] = "PathNotExist"
+            StartTemplateFileInput = False
+        # 判断输入的文件是否是txt文件
+        if not TemplateFilesPath.endswith(".txt"):
+            print("Error: The file is not a txt file!")
+            Result["templateFileResult"] = "NotTxtFile"
+            StartTemplateFileInput = False
+
+        # 开始预读取模板文件信息
+        if StartTemplateFileInput:
+            from source.Generator import ReadTemplateList
+
+            TemplateFileList = ReadTemplateList(TemplateFilesPath)
+            
+            for TemplateFile in TemplateFileList:
+                self._templateFiles.append(TemplateFile)
+
+            Result["templateFileResult"] = "Success"
+
+        # 如果案件信息和模板文件信息都导入成功，则视为初始化成功
+        if Result["caseResult"] == "Success" and Result["templateFileResult"] == "Success":
+            self._isInitial = True
+        # 返回结果
+        return Result
+        
 
     # ===== 下面是获取文件或文件夹路径的方法，方便后面的方法复用（该组方法不对接前端） =====
     def GetOpenFilepath(self,title,filetype="All") -> str:
@@ -344,7 +461,7 @@ class Api:
             if templateFile.GetTemplateFileName() in [File.GetTemplateFileName() for File in self._templateFiles]:
                 continue
 
-            # 如果文件ID相同，则将TemplateFile对象添加到self._templateFiles中
+            # 将TemplateFile对象添加到self._templateFiles中
             self._templateFiles.append(templateFile)
 
         return "Success"
