@@ -6,6 +6,7 @@ const aboutDialog = ref({
 	visible: false,
 });
 
+
 function sleep(ms) {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
@@ -16,7 +17,21 @@ async function init() {
 
 	// 调用后端的函数appStartInit，初始化后端的数据（如果后端已经初始化，后端会识别）
 	let result = await pywebview.api.appStartInit();
-	// console.log(result);
+	if (result.caseResult == "Success" && result.templateFileResult == "Success"){
+		// 初始化成功
+		ElNotification({
+			title: '初始化成功',
+			message: '已成功加载后台数据！',
+			duration: 3500,
+		});
+
+	} else {
+		// 初始化失败
+		ElNotification({
+			title: '初始化失败',
+			message: '后台数据加载失败！',
+		});
+	}
 
 }
 
