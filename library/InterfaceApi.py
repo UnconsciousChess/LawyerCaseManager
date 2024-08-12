@@ -321,8 +321,8 @@ class Api:
                 case.OutputCaseInfoToTxt()
                 return "Success"
 
-    # 该方法用于输出所有案件的信息到一个txt
-    def outputAllCasesInfoToTxt(self) -> str:
+    # 该方法用于输出所有案件的信息到一个txt(可能要废弃)
+    def outputAllCasesToTxt(self) -> str:
         OutputFileName = self.GetSaveFilepath(title="导出案件信息",filetype="Text")
         print(OutputFileName)
 
@@ -343,13 +343,37 @@ class Api:
                 print("全部案件信息输出成功！")
             return "Success"
 
+    def outputAllCasesToJson(self) -> str:
+        OutputFileName = self.GetSaveFilepath(title="导出案件信息",filetype="Json")
+        print(OutputFileName)
+
+        # 判断OutputFileName是否为空，如果空就视为取消
+        if OutputFileName == "":
+            return "Cancel"
+        
+        import json
+
+        with open(OutputFileName,"w",encoding='utf-8') as f:
+            if len(self._cases) == 0:
+                return "Fail"
+            else:
+                CaseList = []
+                for case in self._cases:
+                    CaseList.append(case.OutputCaseInfoToDict())
+                json.dump(CaseList,
+                          f, 
+                          ensure_ascii=False,
+                          indent=4)
+                print("全部案件信息输出成功！")
+            return "Success"
+
     # 该方法用于输出当前所有案件信息成一个列表并推送到前端
     def outputAllCaseInfoToFrontEnd(self) -> list:
-        Result = []
+        CaseList = []
         for case in self._cases:
-            Result.append(case.OutputCaseInfoToFrontEnd())
+            CaseList.append(case.OutputCaseInfoToDict())
         # 返回案件列表
-        return Result
+        return CaseList
     
     # 该方法用于对接前端的文书生成按钮，用于生成案件文件夹及对应的文件模板
     def documentsGenerate(self,caseId,templateFilesIdList) -> str:

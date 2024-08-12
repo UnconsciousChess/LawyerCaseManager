@@ -423,8 +423,8 @@ class Litigant():
             print(str(self._Name)+"的id为"+str(self._LitigantId)+"\n")
             return 
 
-    # 定义将当前诉讼参与人各项信息输出到前端的方法
-    def OutputLitigantInfoToFrontEnd(self) -> dict:
+    # 定义将当前诉讼参与人各项信息输出为字典的方法
+    def OutputLitigantInfoToDict(self) -> dict:
         LitigantInfoDict = {}
 
         # 返回的字典中的键值对应的是前端需要的字段
@@ -448,6 +448,9 @@ class Litigant():
             LitigantInfoDict["legalRepresentative"] = self.GetLegalRepresentative()
             LitigantInfoDict["legalRepresentativeIdNumber"] = self.GetLegalRepresentativeIdCode()
 
+        # 对字典进行排序
+        LitigantInfoDict = dict(sorted(LitigantInfoDict.items(),key=lambda x:x[0]))
+        
         return LitigantInfoDict
 
         
@@ -613,6 +616,9 @@ class Lawyer():
         LawyerInfoDict["lawyerPhoneNumber"] = self.GetContactNumber()
         LawyerInfoDict["lawyerLicense"] = self.GetLawyerLicense()
         LawyerInfoDict["isInternLawyer"] = self.IsInternLawyer()
+
+        # 排序
+        LawyerInfoDict = dict(sorted(LawyerInfoDict.items(),key=lambda x:x[0]))
         
         return LawyerInfoDict
 

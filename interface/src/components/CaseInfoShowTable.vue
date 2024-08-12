@@ -413,7 +413,7 @@ async function handleBulkOutputData() {
 	}
 	// 如果连接了后端，则调用后端的函数outputAllCasesInfoToTxt
 	else {
-		pywebview.api.outputAllCasesInfoToTxt();
+		pywebview.api.outputAllCasesToJson();
 	}
 }
 

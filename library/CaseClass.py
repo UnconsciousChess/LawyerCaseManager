@@ -1075,23 +1075,20 @@ class Case():
         return OutputStr
 
     # 输出案件信息到前端（直接输出字典）
-    def OutputCaseInfoToFrontEnd(self,DebugMode=False) -> dict:
+    def OutputCaseInfoToDict(self,DebugMode=False) -> dict:
         # 需要返回的字典初始化
         OutputDict = {}
 
-        # 逐个输出案件信息
+        OutputDict["caseAgentStage"] = self.GetCaseAgentStage()
+        OutputDict["caseId"] = self.GetCaseId()
         OutputDict["caseType"] = self.GetCaseType()
-        OutputDict["litigationAmount"] = self.GetLitigationAmount()
-        OutputDict["causeOfAction"] = self.GetCauseOfAction()
-
         OutputDict["claimText"] = self.GetClaimText()
-        OutputDict["factAndReason"] = self.GetFactAndReasonText()
+        OutputDict["causeOfAction"] = self.GetCauseOfAction()
         OutputDict["caseFolderGeneratedPath"] = self.GetCaseFolderPath()
+        OutputDict["factAndReason"] = self.GetFactAndReasonText()
+        OutputDict["litigationAmount"] = self.GetLitigationAmount()
         OutputDict["mediationIntention"] = self.GetMediationIntention()
         OutputDict["rejectMediationReasonText"] = self.GetRejectMediationReasonText()
-        OutputDict["caseAgentStage"] = self.GetCaseAgentStage()
-        OutputDict["caseType"] = self.GetCaseType()
-        OutputDict["caseId"] = self.GetCaseId()
 
         # 输出各个阶段的信息
         StageList = []
@@ -1114,19 +1111,19 @@ class Case():
         # 原告主体列表（列表归零）
         LitigantList = []
         for plaintiff in self.GetPlaintiffList():
-            LitigantList.append(plaintiff.OutputLitigantInfoToFrontEnd())
+            LitigantList.append(plaintiff.OutputLitigantInfoToDict())
         OutputDict["plaintiffs"] = LitigantList
 
         # 被告主体列表（列表重新归零）
         LitigantList = []
         for defendant in self.GetDefendantList():
-            LitigantList.append(defendant.OutputLitigantInfoToFrontEnd())
+            LitigantList.append(defendant.OutputLitigantInfoToDict())
         OutputDict["defendants"] = LitigantList
 
         # 第三人主体列表（列表重新归零）
         LitigantList = []
         for thirdparty in self.GetLegalThirdPartyList():
-            LitigantList.append(thirdparty.OutputLitigantInfoToFrontEnd())
+            LitigantList.append(thirdparty.OutputLitigantInfoToDict())
         OutputDict["thirdParties"] = LitigantList
 
         # 原告名字字符串
@@ -1134,6 +1131,10 @@ class Case():
         # 被告名字字符串
         OutputDict["defendantNames"] = self.GetAllDefendantNames()
 
+        # 字典排序
+        OutputDict = dict(sorted(OutputDict.items(),key=lambda x:x[0]))
+        
+        # print(OutputDict)
         # 返回字典
         return OutputDict
     

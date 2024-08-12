@@ -98,9 +98,13 @@ class Stage:
     
     def OutputToDict(self) -> dict:
         # 通过字典输出阶段信息
-        return {"stageName":self._StageName,
+        OutputDict =  {"stageName":self._StageName,
                 "courtName":self._CourtName,
                 "caseNumber":self._CaseNumber}
+        # 排序
+        OutputDict = dict(sorted(OutputDict.items(), key=lambda item: item[0]))
+
+        return OutputDict
 
     
 
