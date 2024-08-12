@@ -53,27 +53,7 @@ class Stage:
     
 
     # === input方法 ===
-    def InputStageByString(self, InfoString) -> str:
-        # 通过字符串输入阶段信息
-        # 例：阶段,法院名称,案号
-
-        # 通过逗号分隔字符串
-        try:
-            StageName,CourtName,CaseNumber = InfoString.split(",")
-        except:
-            return "Error"
-        
-        # 赋值
-        if self.SetStageName(StageName) == "Error":
-            return "Error"
-        if self.SetCourtName(CourtName) == "Error":
-            return "Error"
-        if self.SetCaseNumber(CaseNumber) == "Error":
-            return "Error"
-        
-        # 返回成功
-        return "Success"
-    
+  
     def InputStageByDict(self, InfoDict) -> str:
         # 通过字典输入阶段信息
         # 例：{"stage":"一审","courtName":"北京市第一中级人民法院","caseNumber":"（2019）京01民初100号"}

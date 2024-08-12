@@ -336,10 +336,44 @@ class Litigant():
             elif LitigantPosition == "defendant":
                 self.SetLitigantPosition(2)
         
-        # 先根据规则设置诉讼参与人的类型属性
+        # 根据规则设置诉讼参与人的类型属性
         self.SetLitigantTypeByRule()
-        # 再根据规则设置诉讼参与人的性别属性
+        # 根据规则设置诉讼参与人的性别属性
         self.SetSexByRule()
+
+    def InputLitigantInfoFromDict(self,InfoDict):
+        for key,value in InfoDict.items():
+            if key == "litigantName":
+                self.SetName(value)
+            if key == "litigantIdNumber":
+                self.SetIdCode(value)
+            if key == "litigantAddress":
+                self.SetLocation(value)
+            if key == "litigantPhoneNumber":
+                self.SetContactNumber(value)
+            if key == "litigantPosition":
+                if value == "plaintiff":
+                    self.SetLitigantPosition(1)
+                elif value == "defendant":
+                    self.SetLitigantPosition(2)
+                elif value == "thirdParty":
+                    self.SetLitigantPosition(3)
+            if key == "litigantIsOurClient":
+                self.SetOurClient(value)
+            if key == "legalRepresentative":
+                self.SetLegalRepresentative(value)
+            if key == "legalRepresentativeIdNumber":
+                self.SetLegalRepresentativeIdCode(value)
+            if key == "id":
+                self._LitigantId = value
+            if key == "litigantType":
+                self.SetLitigantType(value)
+            
+        # 根据规则设置诉讼参与人的类型属性
+        self.SetLitigantTypeByRule()
+        # 根据规则设置诉讼参与人的性别属性
+        self.SetSexByRule()
+
 
     # 定义通过前端输入的方法用于输入诉讼参与人信息
     def InputLitigantInfoFromFrontEnd(self,LitigantInfoDict):
@@ -434,6 +468,7 @@ class Litigant():
         LitigantInfoDict["litigantPhoneNumber"] = self.GetContactNumber()
         LitigantInfoDict["litigantIsOurClient"] = self.IsOurClient()
         LitigantInfoDict["id"] = self.GetLitigantId()
+        LitigantInfoDict["litigantType"] = self.GetLitigantType()  
 
         # 根据诉讼地位设置诉讼地位属性的字符串，分别为plaintiff、defendant、thirdParty
         if self.GetLitigantPosition() == 1:

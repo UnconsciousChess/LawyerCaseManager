@@ -49,55 +49,23 @@ class Api:
             print("Error: The path is not exist!")
             Result["caseResult"] = "PathNotExist"
             StartCaseInput = False
-        # 判断输入的文件是否是txt文件
-        if not CasesInputPath.endswith(".txt"):
-            print("Error: The file is not a txt file!")
-            Result["caseResult"] = "NotTxtFile"
-            StartCaseInput = False
+
         
         # 开始预读取案件信息
         if StartCaseInput:
             # 导入案件类Case
             from library.CaseClass import Case
-
+            
             # 打开文件
             with open(CasesInputPath,"r",encoding='utf-8') as f:
-                CaseContentList = []
-                CurrentCaseContent = []
-                # 读取文件内容
-                Content = f.readlines()
-                # 将文件内容分成不同的CaseContent，并放入CaseContentList中
-                for line in Content:
-                    # 如果读取到案件开始符，则跳过
-                    if "$CaseStart$" in line:
-                        continue
-                    # 如果当前行以#开头，则跳过
-                    elif line.startswith("#"):
-                        continue
-                    # 如果当前行为空行，则跳过
-                    elif line == "\n":
-                        continue
-                    # 如果读取到案件结束符，则将当前案件内容添加到CaseContentList中，同时清空当前案件内容
-                    elif "$CaseEnd$" in line:
-                        CaseContentList.append(CurrentCaseContent)
-                        CurrentCaseContent = []
-                        continue
-                    # 如果当前行不为空，则将当前行添加到当前案件内容中
-                    else:
-                        # 去掉当前行的换行符
-                        line = line.strip("\n")
-                        CurrentCaseContent.append(line)
-
-                # 循环读取每个案件的CaseContent，注意CaseContent也是一个列表
-                for CaseContent in CaseContentList:
-                    # 如果案件内容为空，则跳过
-                    if CaseContent == "": 
-                        continue
+                cases = json.load(f)
+                for case in cases:
                     # 实例化一个Case对象
-                    case = Case()
-                    # 将案件内容调用case对象的InputCaseInfoFromStringList方法，将信息导入到当前case对象中
-                    case.InputCaseInfoFromStringList(CaseContent)
-                    self._cases.append(case)
+                    caseObj = Case()
+                    # 将案件信息调用case对象的InputCaseInfoFromDict方法，将信息导入到当前case对象中
+                    caseObj.InputCaseInfoFromDict(case)
+                    
+                    self._cases.append(caseObj)
                 
                 Result["caseResult"] = "Success"
 
