@@ -139,39 +139,36 @@ class TemplateFile():
     # ======= 更抽象一些的Set方法 ======= #
 
     # 下面是对于读入文件中的每一行进行处理
-    def SetTemplateFileFromString(self,InputString,Debug=False) -> str:
+    def SetTemplateFileFromJsonDict(self,InputDict,Debug=False) -> str:
         
-        # 每一个合法的字符串格式应当为：TemplateFileStage|TemplateFileDir@TemplateFileType
-
-
-        # 去除首尾空格
-        InputString = InputString.strip()
-
-        # 检查字符串是否符合规则
-        if "|" not in InputString:
+        # 检查是否为字典
+        if not isinstance(InputDict,dict):
             if Debug:
-                print("SetTemplateFromString函数报错:读入的字符串%s缺少字符【|】，不符合规则" % InputString)
-                return "Error"
-        if "@" not in InputString:
-            if Debug:
-                print("SetTemplateFromString函数报错:读入的字符串%s缺少字符【@】，不符合规则" % InputString)
-                return "Error"
-        
-        # 将字符串按照|分割
-        try:
-            FileStage,FiledirAndFileType = InputString.split("|")
-        except:
-            if Debug:
-                print("SetTemplateFromString函数报错:读入的字符串%s无法按照【|】分割" % InputString)
-            return "Error"
-        # 将剩下的字符串按照@分割
-        try:
-            Filedir,FileType = FiledirAndFileType.split("@")
-        except:
-            if Debug:
-                print("SetTemplateFromString函数报错:读入的字符串%s无法按照【@】分割" % InputString)
+                print("SetTemplateFileFromDict函数报错:输入不是字典")
             return "Error"
         
+        # 检查是否有stage键
+        if "stage" not in InputDict:
+            if Debug:
+                print("SetTemplateFileFromDict函数报错:输入字典缺少键【stage】")
+            return "Error"
+        # 检查是否有path键
+        if "dir" not in InputDict:
+            if Debug:
+                print("SetTemplateFileFromDict函数报错:输入字典缺少键【path】")
+            return "Error"
+        # 检查是否有type键
+        if "type" not in InputDict:
+            if Debug:
+                print("SetTemplateFileFromDict函数报错:输入字典缺少键【type】")
+            return "Error"
+        
+
+        # 从字典中提取出stage、path、type
+        FileStage = InputDict["stage"]
+        Filedir = InputDict["dir"]
+        FileType = InputDict["type"]
+
         # 调用Set方法分别赋值
         if self.SetTemplateFileStage(FileStage) == -1:
             return "Error"
@@ -243,15 +240,19 @@ class TemplateFile():
 
     # ======= Output方法 ======= #
 
-    # 输出为该模板文件的字符串，方便写入txt文件(只输出3个属性)
-    def OutputTemplateFileToString(self) -> str:
-        return self.GetTemplateFileStage() + "|" + self.GetTemplateFileDir() + "@" + self.GetTemplateFileType()
-
-    # 输出为字典，方便写入json文件或输出到前端
+    # 输出为字典，输出到前端
     def OutputTemplateFileToDict(self) -> dict:
         return {"templateFileName":self.GetTemplateFileName(),
                 "templateFileDir":self.GetTemplateFileDir(),
                 "templateFileType":self.GetTemplateFileType(),
                 "templateFileStage":self.GetTemplateFileStage(),
                 "templateFileId":self.GetTemplateFileId()
+                }
+
+    # 输出为字典，输出到json文件
+    def OutputTemplateFileToJsonDict(self) -> dict:
+        return { 
+                "stage":self.GetTemplateFileStage(),
+                "dir":self.GetTemplateFileDir(),
+                "type":self.GetTemplateFileType()
                 }

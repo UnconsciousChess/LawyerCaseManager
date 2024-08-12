@@ -107,9 +107,9 @@ class Api:
             Result["templateFileResult"] = "PathNotExist"
             StartTemplateFileInput = False
         # 判断输入的文件是否是txt文件
-        if not TemplateFilesPath.endswith(".txt"):
-            print("Error: The file is not a txt file!")
-            Result["templateFileResult"] = "NotTxtFile"
+        if not TemplateFilesPath.endswith(".json"):
+            print("Error: The file is not a json file!")
+            Result["templateFileResult"] = "NotJson"
             StartTemplateFileInput = False
 
         # 开始预读取模板文件信息
@@ -148,6 +148,8 @@ class Api:
                 filetypes.append(("Excel files", "*.xlsx"))
             elif type == "Word":
                 filetypes.append(("Word files", "*.docx"))
+            elif type == "Json":
+                filetypes.append(("Json files", "*.json"))
 
         # #  获取文件路径
         SelectedFilePath = filedialog.askopenfilename(title=title,filetypes=filetypes)
@@ -177,6 +179,12 @@ class Api:
             elif type == "Excel":
                 filetypes.append(("Excel files", "*.xlsx"))
                 defaultextension = ".xlsx"
+            elif type == "Word":
+                filetypes.append(("Word files", "*.docx"))
+                defaultextension = ".docx"
+            elif type == "Json":
+                filetypes.append(("Json files", "*.json"))
+                defaultextension = ".json"
 
         #  获取文件路径
         SelectedFilePath = filedialog.asksaveasfilename(title=title,
@@ -441,7 +449,7 @@ class Api:
     def backEndAddTemplateFileData(self) -> str:
 
         # 调用GetOpenFilepath方法获取txt文件路径
-        TemplateFilePath = self.GetOpenFilepath(title="请选择模板列表文件",filetype="Text")
+        TemplateFilePath = self.GetOpenFilepath(title="请选择模板列表文件",filetype="Json")
         # 导入模板文件类TemplateFile
         from source.Generator import ReadTemplateList
 
@@ -502,17 +510,24 @@ class Api:
         return "Fail"
 
     def backEndOutputTemplateFileData(self) -> str:
-        import time
+        import json
         # 调出文本框来输入文件名
-        OutputPath = self.GetSaveFilepath(title="选择模板列表保存路径",filetype="Text")
+        OutputPath = self.GetSaveFilepath(title="选择模板列表保存路径",filetype="Json")
         # 判断OutputPath是否存在,如果不存在则返回错误
         if OutputPath == "":
             return "Cancel" 
+        templateFiles = []
+
         with open(OutputPath, "w" , encoding='utf-8') as f:
             for templateFile in self._templateFiles:
-                f.write(templateFile.OutputTemplateFileToString())
-                f.write("\n")
-            return "Success"
+                templateFiles.append(templateFile.OutputTemplateFileToJsonDict())
+            # 将templateFiles写入到文件中
+            json.dump(templateFiles,
+                      f, 
+                      ensure_ascii=False,
+                      indent=4)
+
+        return "Success"
         
     # =====  下面是和TemplateFileEditForm交互的方法  =====
     def backEndChooseTemplateFile(self) -> dict:

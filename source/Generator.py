@@ -18,24 +18,21 @@ def ReadTemplateList(TemplateListDir) -> list[TemplateFile]:
     # 返回一个列表，列表中的每个元素都是一个TemplateFile对象  
     TemplateFilesList = []
 
-    # 读入合法的每一行的格式为
-    # TemplateFileStage|TemplateFileDir@TemplateFileType
+    # 导入json库
+    import json
+    
     with open(TemplateListDir,"r",encoding="utf-8") as f:
-        lines = f.readlines()
+        templatefiles = json.load(f)
+
         # 对文本进行逐行读取并判定
-        for line in lines:
-            if line == "\n":            # 如果是空行，则跳过
-                continue
-            if line.startswith("#"):    # 如果是注释行，则跳过
-                continue
-            else:                      #如果不是空行则调用函数进行处理
-                # 初始化一个TemplateFile对象
-                TemplateFileObj = TemplateFile()
-                # 直接将该行字符串放入TemplateFile对象的set方法中进行处理
-                SetResult = TemplateFileObj.SetTemplateFileFromString(line)
-                # 如果SetResult是Success,则将处理好的TemplateFile对象放入列表中
-                if SetResult == "Success":
-                    TemplateFilesList.append(TemplateFileObj)
+        for templatefile in templatefiles:
+            # 实例化一个TemplateFile对象
+            TemplateFileObj = TemplateFile()
+            # 调用SetTemplateFileFromJsonDict方法，将读取到的json转化为TemplateFile对象
+            Result = TemplateFileObj.SetTemplateFileFromJsonDict(templatefile)
+            # 如果Result是Success,则将处理好的TemplateFile对象放入列表中
+            if Result == "Success":
+                TemplateFilesList.append(TemplateFileObj)
 
     return TemplateFilesList
 
