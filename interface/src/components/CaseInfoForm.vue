@@ -26,21 +26,35 @@ const showDescriptionList = ref(false);
 
 // 设定阶段的选择
 const stageOptions = ref([
-	{value: "一审", label: "一审阶段"},
-	{value: "二审", label: "二审阶段"},
-	{value: "再审", label: "再审阶段"},
-	{value: "执行", label: "执行阶段"},
-	{value: "仲裁", label: "仲裁阶段"},
+	{
+		value: "一审",
+		label: "一审阶段",
+	},
+	{
+		value: "二审",
+		label: "二审阶段",
+	},
+	{
+		value: "再审",
+		label: "再审阶段",
+	},
+	{
+		value: "执行",
+		label: "执行阶段",
+	},
+	{
+		value: "仲裁",
+		label: "仲裁阶段",
+	},
 ]);
 
 const caseAgentStageCheckboxOptions = ref([
-	"一审立案",  
+	"一审立案",
 	"一审庭审",
 	"二审",
 	"执行",
 	"再审",
 ]);
-
 
 // 设定表单的校验规则
 const caseFormRules = ref({
@@ -205,8 +219,8 @@ function onSubmit() {
 	// 如果采取的是文件上传
 	if (componentsConfig.value.inputInfoByFile == true) {
 		console.log("onSubmit()：当前导入模式为-从文件中导入案件信息");
-		// 将案件信息传递给父组件
-		emit("updateCaseData", caseForm.value);
+		// // 将案件信息传递给父组件
+		// emit("updateCaseData", caseForm.value);
 
 		// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端，如果没有就提示未链接到后端
 		if (typeof pywebview === "undefined") {
@@ -214,7 +228,9 @@ function onSubmit() {
 			return;
 		} else {
 			// 如果是文件路径输入模式，则将文件的路径以及文件夹生成路径传递给后端
-			pywebview.api.inputCaseFromTxt(caseForm.value.inputCaseInfoByFilePath); //关于pywebview的部分在组合前后端的时候再使用
+			pywebview.api.inputSingleCaseFromJson(
+				caseForm.value.inputCaseInfoByFilePath
+			); //关于pywebview的部分在组合前后端的时候再使用
 			return;
 		}
 	}
@@ -226,40 +242,36 @@ function onSubmit() {
 		caseFormRef.value.validate((valid) => {
 			if (valid) {
 				//如果表单校验通过
-				console.log("onSubmit()：表单校验通过");
-				// 遍历原告列表，将原告的名字连接为一个字符串
-				let plaintiffsName = "";
-				for (let i = 0; i < caseForm.value.plaintiffs.length; i++) {
-					plaintiffsName += caseForm.value.plaintiffs[i].litigantName + "、";
-				}
-				// 去掉最后一个顿号
-				plaintiffsName = plaintiffsName.substring(0, plaintiffsName.length - 1);
+				ElMessage({
+					message: "表单校验通过",
+					type: "success",
+				});
 
-				// 遍历被告列表，将被告的名字连接为一个字符串
-				let defendantsName = "";
-				for (let i = 0; i < caseForm.value.defendants.length; i++) {
-					defendantsName += caseForm.value.defendants[i].litigantName + "、";
-				}
-				// 去掉最后一个顿号
-				defendantsName = defendantsName.substring(0, defendantsName.length - 1);
-
-				// 将原告和被告的名字赋值给案件信息的字典
-				caseForm.value.litigantsName = plaintiffsName + " 诉 " + defendantsName;
-
-				// 将案件信息的字典传递给父组件
-				emit("updateCaseData", caseForm.value);
-
-				// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端，如果没有就提示未链接到后端
+				// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端
+				// 如果没有就提示未链接到后端
 				if (typeof pywebview === "undefined") {
 					console.log("onSubmit()：未链接到后端");
 					return;
 				} else {
-					// 将案件信息的字典传递给后端
-					pywebview.api.inputCaseFromFrontEndForm(caseForm.value);
+					if (propData.propMode == "create") {
+						// 将案件信息的字典传递给后端
+						pywebview.api.inputSingleCaseFromFrontEndForm(caseForm.value);
+					}
+					else if (propData.propMode == "edit") {
+						// 将案件信息的字典传递给后端,更新案件信息
+						pywebview.api.updateSingleCaseFromFrontEndForm(caseForm.value);
+					}
+
+					// 触发父组件的事件，让其从后端更新案件信息
+					emit("updateCaseData");
 					return;
 				}
 			} else {
-				console.log("onSubmit()：表单校验失败");
+				// 如果表单校验不通过
+				ElMessage({
+					message: "表单校验不通过",
+					type: "error",
+				});
 				return;
 			}
 		});
@@ -278,6 +290,7 @@ function caseFormInfoInitiation(propData) {
 		// 如果有传递过来的案件信息，则将其赋值给表单
 		let caseData = propData.propCaseData;
 
+		caseForm.value.agentFixedFee = caseData.agentFixedFee;
 		caseForm.value.caseAgentStage = caseData.caseAgentStage;
 		caseForm.value.caseId = caseData.caseId;
 		caseForm.value.causeOfAction = caseData.causeOfAction;
@@ -336,11 +349,12 @@ function caseFormInfoInitiation(propData) {
 		// 因为是编辑模式，所以默认需要文件导入
 		componentsConfig.value.inputInfoByFile = true;
 
-		// 所有信息回归初始值（似乎引起了bug）
+		// 所有信息回归初始值
+		caseForm.value.agentFixedFee = null;
 		caseForm.value.caseId = "";
 		caseForm.value.causeOfAction = "";
 		caseForm.value.litigationAmount = "";
-		caseForm.value.stages = [1];
+		caseForm.value.stages = [{stageName: "", courtName: "", caseNumber: ""}];
 		caseForm.value.caseAgentStage = [];
 		caseForm.value.caseType = "";
 		caseForm.value.mediationIntention = true;
@@ -505,12 +519,10 @@ watchEffect(() => {
 				v-model="caseForm.caseAgentStage"
 				@change="console.log(caseForm.caseAgentStage)"
 			>
-				<!-- <el-checkbox value=1 label="一审立案阶段" />
-				<el-checkbox value=2 label="一审庭审阶段" />
-				<el-checkbox value=3 label="二审阶段" />
-				<el-checkbox value=4 label="执行阶段" />
-				<el-checkbox value=5 label="再审阶段" /> -->
-				<el-checkbox v-for="(stage, index) in caseAgentStageCheckboxOptions" :value="index+1">
+				<el-checkbox
+					v-for="(stage, index) in caseAgentStageCheckboxOptions"
+					:value="index + 1"
+				>
 					{{ stage }}
 				</el-checkbox>
 			</el-checkbox-group>

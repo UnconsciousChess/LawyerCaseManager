@@ -83,6 +83,7 @@
 				:propCaseData="currentEditRow"
 				:propMode="caseInfoFormMode"
 				@updateCaseData="updateCaseDataFromCaseInfoForm"
+				@newCaseData="createNewCaseDataFromCaseInfoForm"
 			/>
 		</el-scrollbar>
 	</el-dialog>
@@ -393,7 +394,7 @@ async function handleBulkLoadingData() {
 	}
 	// 如果连接了后端，则调用后端的函数
 	else {
-		let backendResult = await pywebview.api.inputAllCasesFromTxt();
+		let backendResult = await pywebview.api.inputAllCasesFromJson();
 		if (backendResult == "Success") {
 			// 如果后端返回成功，则刷新数据
 			console.log("后端批量加载案件成功");
@@ -408,7 +409,7 @@ async function handleBulkLoadingData() {
 async function handleBulkOutputData() {
 	console.log("批量导出案件");
 	// 如果未连接后端，则只测试前端
-	if (typeof pywebview === "undefined") {
+	if (typeof pywebview === undefined) {
 		console.log("handleBulkOutputData()：未连接后端，目前只测试前端");
 	}
 	// 如果连接了后端，则调用后端的函数outputAllCasesInfoToTxt
@@ -431,69 +432,24 @@ function handleEditData(val) {
 }
 
 // 收到子组件的编辑数据以后，父组件中的数据进行更新
-async function updateCaseDataFromCaseInfoForm(data) {
+function updateCaseDataFromCaseInfoForm() {
 	console.log("更新案件信息");
-	console.log(data);
+
 	// 将对话框隐藏
 	dialogEditDataVisible.value = false;
-	// 前端的父组件更新数据。获取要更新的数据的index
-	var updateItemIndex = tableData.value.findIndex(
-		(item) => item.caseId === data.caseId
-	);
-	// 对应的tableData更新数据
-	tableData.value[updateItemIndex].agentFixedFee = data.agentFixedFee;
 
-	tableData.value[updateItemIndex].caseAgentStage = data.caseAgentStage;
-
-	tableData.value[updateItemIndex].caseFolderGeneratedPath =
-		data.caseFolderGeneratedPath;
-
-	// caseId无须更新,留空
-
-	tableData.value[updateItemIndex].caseType = data.caseType;
-
-	tableData.value[updateItemIndex].causeOfAction = data.causeOfAction;
-
-	tableData.value[updateItemIndex].claimText = data.claimText;
-
-	tableData.value[updateItemIndex].defendants = data.defendants;
-
-	tableData.value[updateItemIndex].factAndReason = data.factAndReason;
-
-	tableData.value[updateItemIndex].litigantsName = data.litigantsName;
-
-	tableData.value[updateItemIndex].litigationAmount = data.litigationAmount;
-
-	tableData.value[updateItemIndex].mediationIntention = data.mediationIntention;
-
-	tableData.value[updateItemIndex].plaintiffs = data.plaintiffs;
-
-	tableData.value[updateItemIndex].rejectMediationReasonText =
-		data.rejectMediationReasonText;
-
-	tableData.value[updateItemIndex].riskAgentPostFeeRate =
-		data.riskAgentPostFeeRate;
-
-	tableData.value[updateItemIndex].riskAgentStatus = data.riskAgentStatus;
-	
-	tableData.value[updateItemIndex].riskAgentUpfrontFee =
-		data.riskAgentUpfrontFee;
-
-	tableData.value[updateItemIndex].stages = data.stages;
-
-	tableData.value[updateItemIndex].thirdParties = data.thirdParties;
-
-	tableData.value[updateItemIndex].title =
-		data.causeOfAction + "一案，编号：" + data.caseId;
+	// 从后端刷新数据 
+	getTableData()
 }
+
 
 // 删除数据的前置函数，作用是打开对话框，提示是否删除，最终确认后调用下面的deleteData
 function handleDeleteData(val) {
-	// console.log("当前要输出的案件id为" + val.caseId);
+
 	dialogDeleteDataVisible.value = true;
+
 	// 将当前要删除的案件的对象传递给currentDeleteRow，便于接下来的组件调用
 	currentDeleteRow.value = val;
-	// console.log(currentDeleteRow.value);
 }
 
 // 具体删除数据的函数
