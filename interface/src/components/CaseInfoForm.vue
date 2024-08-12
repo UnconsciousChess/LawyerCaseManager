@@ -8,29 +8,7 @@ const litigantFormPlaintiff = ref(null);
 const litigantFormDefendant = ref(null);
 
 // 定义表单数据
-const caseForm = ref({
-
-	caseId: "", //案件ID
-	causeOfAction: "", //案由
-	litigationAmount: "", //标的额
-	caseAgentStage: [], //委托阶段
-	caseType: 0, //案件类型
-	mediationIntention: false, //调解意愿
-	caseFolderGeneratedPath: "", //案件文件夹生成路径
-	stages: [], //案件各阶段信息
-	riskAgentStatus: true, //风险收费
-	riskAgentUpfrontFee: "", //前期风险收费金额
-	riskAgentPostFeeRate: "", //后期风险收费比例
-
-	factAndReason: "", //事实与理由
-	claimText: "", //诉讼请求
-	rejectMediationReasonText: "", //拒绝调解理由
-
-	plaintiffs: [], //原告列表
-	defendants: [], //被告列表
-
-	inputCaseInfoByFilePath: "", //案件信息文件路径（用于文件导入模式）
-});
+const caseForm = ref({});
 
 const componentsConfig = ref({
 	inputInfoByFile: true,
@@ -54,6 +32,15 @@ const stageOptions = ref([
 	{value: "执行", label: "执行阶段"},
 	{value: "仲裁", label: "仲裁阶段"},
 ]);
+
+const caseAgentStageCheckboxOptions = ref([
+	"一审立案",  
+	"一审庭审",
+	"二审",
+	"执行",
+	"再审",
+]);
+
 
 // 设定表单的校验规则
 const caseFormRules = ref({
@@ -291,12 +278,12 @@ function caseFormInfoInitiation(propData) {
 		// 如果有传递过来的案件信息，则将其赋值给表单
 		let caseData = propData.propCaseData;
 
+		caseForm.value.caseAgentStage = caseData.caseAgentStage;
 		caseForm.value.caseId = caseData.caseId;
-
 		caseForm.value.causeOfAction = caseData.causeOfAction;
 		caseForm.value.stages = caseData.stages;
 		caseForm.value.litigationAmount = caseData.litigationAmount;
-		caseForm.value.caseAgentStage = caseData.caseAgentStage;
+
 		caseForm.value.caseType = caseData.caseType.toString();
 
 		caseForm.value.mediationIntention = caseData.mediationIntention;
@@ -335,6 +322,7 @@ function caseFormInfoInitiation(propData) {
 
 		// 因为是编辑模式，所以默认显示描述列表
 		showDescriptionList.value = true;
+		console.log(caseForm.value);
 	}
 
 	// 新建案件的创建模式
@@ -350,13 +338,11 @@ function caseFormInfoInitiation(propData) {
 
 		// 所有信息回归初始值（似乎引起了bug）
 		caseForm.value.caseId = "";
-		// caseForm.value.caseCourtCode = "";
 		caseForm.value.causeOfAction = "";
 		caseForm.value.litigationAmount = "";
-		caseForm.value.stages = [];
+		caseForm.value.stages = [1];
 		caseForm.value.caseAgentStage = [];
 		caseForm.value.caseType = "";
-		// caseForm.value.courtName = "";
 		caseForm.value.mediationIntention = true;
 		caseForm.value.caseFolderGeneratedPath = "";
 		caseForm.value.riskAgentStatus = false;
@@ -406,10 +392,7 @@ watchEffect(() => {
 			>
 		</el-form-item>
 
-		<el-form-item
-			v-if="componentsConfig.inputInfoByFileSwitchStatus"
-
-		>
+		<el-form-item v-if="componentsConfig.inputInfoByFileSwitchStatus">
 			<el-switch
 				@change="ChangeInputStatus"
 				v-model="componentsConfig.inputInfoByFile"
@@ -518,12 +501,18 @@ watchEffect(() => {
 
 		<el-form-item v-if="inputInfoByFrontEndStatus">
 			委托阶段：
-			<el-checkbox-group v-model="caseForm.caseAgentStage">
-				<el-checkbox value="1"> 一审立案阶段 </el-checkbox>
-				<el-checkbox value="2"> 一审开庭阶段 </el-checkbox>
-				<el-checkbox value="3"> 二审阶段 </el-checkbox>
-				<el-checkbox value="4"> 执行阶段 </el-checkbox>
-				<el-checkbox value="5"> 再审阶段 </el-checkbox>
+			<el-checkbox-group
+				v-model="caseForm.caseAgentStage"
+				@change="console.log(caseForm.caseAgentStage)"
+			>
+				<!-- <el-checkbox value=1 label="一审立案阶段" />
+				<el-checkbox value=2 label="一审庭审阶段" />
+				<el-checkbox value=3 label="二审阶段" />
+				<el-checkbox value=4 label="执行阶段" />
+				<el-checkbox value=5 label="再审阶段" /> -->
+				<el-checkbox v-for="(stage, index) in caseAgentStageCheckboxOptions" :value="index+1">
+					{{ stage }}
+				</el-checkbox>
 			</el-checkbox-group>
 		</el-form-item>
 
@@ -535,7 +524,6 @@ watchEffect(() => {
 				<el-radio value="3">执行案件</el-radio>
 			</el-radio-group>
 		</el-form-item>
-
 
 		<el-form-item
 			v-if="inputInfoByFrontEndStatus"

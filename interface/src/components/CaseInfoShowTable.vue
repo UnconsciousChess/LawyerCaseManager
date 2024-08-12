@@ -423,6 +423,8 @@ function handleEditData(val) {
 	dialogEditDataVisible.value = true;
 	// 将当前要编辑的案件的对象传递给currentEditRow，便于接下来的组件调用
 	currentEditRow.value = val;
+	
+	
 	// 改变caseInfoFormMode为edit（有edit和create两种模式）
 	caseInfoFormMode.value = "edit";
 	// caseInfoFormRef.value.caseFormInfoInitiation();
