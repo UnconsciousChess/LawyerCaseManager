@@ -163,98 +163,87 @@ class Api:
 
 
 
-    # ===== 下面是和 CaseInfoForm 组件交互的方法 =====
+    # ===== 下面是和 CaseInfoShowTable 组件交互的方法 =====
 
     # ==输入类==
 
     # 该方法用于根据前端输入的案件信息，生成一个新的案件
-    def inputCaseFromFrontEndForm(self,CaseFormDict) -> str:
+    def inputSingleCaseFromFrontEndForm(self,CaseFormDict) -> str:
         # 导入案件类Case
         from library.CaseClass import Case
+        # 实例化一个Case对象
         case = Case()
-        # 将CaseFormDict中的数据，调用InputCaseInfoFromFrontEnd方法导入到当前case对象中
-        case.InputCaseInfoFromFrontEnd(CaseFormDict)
-        # 将案件对象添加到案件列表中
+        # 将CaseFormDict中的数据，调用相应方法去生成当前case对象
+        case.InputCaseInfoFromDict(CaseFormDict)
+        # 将案件对象添加到self._case中
         self._cases.append(case)
 
         return "Success"
     
-    # 该方法用于前端输入一个txt文件的路径，然后生成对应的新的案件
-    def inputCaseFromTxt(self,TxtPath) -> str:
+    # 该方法用于根据前端输入的案件信息，更新一个已有的案件
+    def updateSingleCaseFromFrontEndForm(self,CaseFormDict) -> str:
+        # 导入案件类Case
+        from library.CaseClass import Case
 
-        # 判断输入的两个路径是否存在
-        if not os.path.exists(TxtPath):
+        # 遍历案件列表
+        for case in self._cases:
+            # 如果案件ID相同，则更新案件信息
+            if case.GetCaseId() == CaseFormDict["caseId"]:
+                # 调用Case对象的UpdateCaseInfoFromDict方法，更新案件信息
+                case.InputCaseInfoFromDict(CaseFormDict)
+                return "Success"
+        # 如果遍历完，都没有找到对应的案件，则返回Fail
+        return "Fail"
+
+    def inputSingleCaseFromJson(self,JsonPath) -> str:
+
+        # 判断输入的路径是否存在
+        if not os.path.exists(JsonPath):
             print("Error: The path is not exist!")
             return "PathNotExist"
         
-        # 判断输入的文件是否是txt文件
-        if not TxtPath.endswith(".txt"):
-            print("Error: The file is not a txt file!")
-            return "NotTxtFile"
-        
         # 导入案件类Case
         from library.CaseClass import Case
-        case = Case()
-        # 将CaseFormDict中的数据，调用InputCaseInfoFromTxt方法将txt导入到当前case对象中
-        case.InputCaseInfoFromTxt(TxtPath)
-        # 将案件对象添加到案件列表中
-        self._cases.append(case)
-        print("案件导入成功！")
+        import json
 
-        return "Success"
-    
-    # 该方法用于读入一个包含多个案件信息的txt文件，批量生成新的案件信息
-    def inputAllCasesFromTxt(self) -> str:
-        InputPath = self.GetOpenFilepath(title="请选择案件信息输入文件",filetype="Text")
+        # 打开文件
+        with open(JsonPath,"r",encoding='utf-8') as f:
+            CaseDict = json.load(f)
+            # 实例化一个Case对象
+            case = Case()
+            # 将案件内容调用case对象的InputCaseInfoFromDict方法，将信息导入到当前case对象中
+            case.InputCaseInfoFromDict(CaseDict)
+            # 如果该案件的案件Id与列表中的案件均不相同，则将案件对象添加到self._case中
+            if case.GetCaseId() not in [case.GetCaseId() for case in self._cases]:
+                self._cases.append(case)
+            else:
+                print(f"编号为{case.GetCaseId()}的案件已存在，无需重复导入！")
+
+
+    # 该方法用于前端输入一个json文件的路径，然后生成对应的新的案件    
+    def inputAllCasesFromJson(self) -> str:
+        InputPath = self.GetOpenFilepath(title="请选择案件信息输入文件",filetype="Json")
         # 判断输入的路径是否存在
         if not os.path.exists(InputPath):
             print("Error: The path is not exist!")
             return "Fail"
-        # 判断输入的文件是否是txt文件
-        if not InputPath.endswith(".txt"):
-            print("Error: The file is not a txt file!")
+        # 判断输入的文件是否是json文件
+        if not InputPath.endswith(".json"):
+            print("Error: The file is not a json file!")
             return "Fail"
         
         # 导入案件类Case
         from library.CaseClass import Case
+        import json
 
         # 打开文件
         with open(InputPath,"r",encoding='utf-8') as f:
-            CaseContentList = []
-            CurrentCaseContent = []
-            # 读取文件内容
-            Content = f.readlines()
-            # 将文件内容分成不同的CaseContent，并放入CaseContentList中
-            for line in Content:
-                # 如果读取到案件开始符，则跳过
-                if "$CaseStart$" in line:
-                    continue
-                # 如果当前行以#开头，则跳过
-                elif line.startswith("#"):
-                    continue
-                # 如果当前行为空行，则跳过
-                elif line == "\n":
-                    continue
-                # 如果读取到案件结束符，则将当前案件内容添加到CaseContentList中，同时清空当前案件内容
-                elif "$CaseEnd$" in line:
-                    CaseContentList.append(CurrentCaseContent)
-                    CurrentCaseContent = []
-                    continue
-                # 如果当前行不为空，则将当前行添加到当前案件内容中
-                else:
-                    # 去掉当前行的换行符
-                    line = line.strip("\n")
-                    CurrentCaseContent.append(line)
-
-            # 循环读取每个案件的CaseContent，注意CaseContent也是一个列表
-            for CaseContent in CaseContentList:
-                # 如果案件内容为空，则跳过
-                if CaseContent == "": 
-                    continue
+            CaseList = json.load(f)
+            for CaseDict in CaseList:
                 # 实例化一个Case对象
                 case = Case()
-                # 将案件内容调用case对象的InputCaseInfoFromStringList方法，将信息导入到当前case对象中
-                case.InputCaseInfoFromStringList(CaseContent)
+                # 将案件内容调用case对象的InputCaseInfoFromDict方法，将信息导入到当前case对象中
+                case.InputCaseInfoFromDict(CaseDict)
                 # 如果该案件的案件Id与列表中的案件均不相同，则将案件对象添加到self._case中
                 if case.GetCaseId() not in [case.GetCaseId() for case in self._cases]:
                     self._cases.append(case)
@@ -408,7 +397,7 @@ class Api:
             return "Fail"
 
 
-    # ===== 下面是和CaseInfoEditForm组件交互的方法 =====
+    # ===== 下面是和CaseInfoForm组件交互的方法 =====
 
     # ==输入类==
     # 该方法用于从一个txt中读取当事人信息，然后生成对应的新的当事人

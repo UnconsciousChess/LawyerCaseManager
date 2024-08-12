@@ -267,32 +267,29 @@ class Case():
     
 
 
-
-
     def SetStage(self,StageInfo):
         # 如果输入的是一个Stage对象，就直接赋值
         if isinstance(StageInfo,Stage):
+            # 如原本已存在该阶段的，直接更新
+            for stage in self._Stages:
+                if stage.GetStageName() == StageInfo.GetStageName():
+                    stage = StageInfo
+                    return
+            
+            # 如不存在该阶段的，则将该阶段添加到案件中
             self._Stages.append(StageInfo)
+            return
 
-        # 如果输入的是一个字符串，就先用分号分隔字符串，再逐个调用InputStageByString方法
-        # elif isinstance(StageInfo,str):
-        #     # 以分号分隔字符串,形成一个阶段信息字符串列表
-        #     StageInfoList = [i.strip() for i in StageInfo.split(";")]
-        #     for StageString in StageInfoList:
-        #         if StageString == "":
-        #             continue
-        #         # 实例化一个阶段对象
-        #         stage = Stage()
-        #         # 调用阶段对象的读取方法
-        #         if stage.InputStageByString(StageString) == "Success":
-        #             # 调用添加阶段的方法，将该阶段添加到案件中
-        #             self._Stages.append(stage)
-        #         else:
-        #             print("输入的阶段信息【%s】不符合规范" % StageString)
 
         # 如果输入的是一个字典，就调用InputStageByDict方法
         elif isinstance(StageInfo,dict):
-            # 实例化一个阶段对象
+            # 如原本已存在该阶段的，直接更新
+            for stage in self._Stages:
+                if stage.GetStageName() == StageInfo["stageName"]:
+                    stage.InputStageByDict(StageInfo)
+                    return
+                                
+            # 如不存在该阶段的，则新建一个阶段对象
             stage = Stage()
             # 调用阶段对象的读取方法
             if stage.InputStageByDict(StageInfo) == "Success":
@@ -303,17 +300,25 @@ class Case():
 
         # 如果输入的是一个列表，就逐个调用InputStageByDict方法
         elif isinstance(StageInfo,list):
-            for stageinfo in StageInfo:
-                # 实例化一个阶段对象
-                stage = Stage()
-                # 调用阶段对象的读取方法
-                if stage.InputStageByDict(stageinfo) == "Success":
-                    # 调用添加阶段的方法，将该阶段添加到案件中
-                    self._Stages.append(stage)
+            StageInfoList = StageInfo
+
+            for info in StageInfoList:
+                # 如原本已存在该阶段的，直接更新
+                for stage in self._Stages:
+                    if stage.GetStageName() == info["stageName"]:
+                        stage.InputStageByDict(info)
+                        break
                 else:
-                    print("输入的阶段信息【%s】不符合规范" % stageinfo)  
+                    # 如原本不存在该阶段的，实例化一个阶段对象
+                    stage = Stage()
+                    # 调用阶段对象的读取方法
+                    if stage.InputStageByDict(info) == "Success":
+                        # 调用添加阶段的方法，将该阶段添加到案件中
+                        self._Stages.append(stage)
+                    else:
+                        print("输入的阶段信息【%s】不符合规范" % info)  
         else:
-            print("输入的阶段信息类型错误，请输入字符串、字典或列表")
+            print("输入的阶段信息类型错误，请输入stage对象、字典或列表")
 
 
     # 诉讼请求设定方法
@@ -569,7 +574,7 @@ class Case():
    
     # ===========Input方法：下面定义批量输入案件信息的方法=============
 
-    # 设定一个类的内部方法，对于参数键名和键值，分别进行处理（键值为中文，来源于txt和excel文件）
+    # 设定一个类的内部方法，对于参数键名和键值，分别进行处理
     def SetCaseInfoWithKeyAndValue(self,Key,Value):
         # 根据Key的不同，调用不同的设定方法
         if Key == 'caseId' :
@@ -640,146 +645,8 @@ class Case():
                 litigant.InputLitigantInfoFromDict(LitigantDict)
                 # 调用AppendLitigant方法，添加该诉讼参与人到对应的列表中
                 self.AppendLitigant(litigant)
-        
 
-
-        
-
-
-    # 设定一个类的内部方法，针对从前端读回来的信息（字典），逐个键值对进行处理，本方法后期重点维护  
-    def InputCaseInfoFromWebDict(self,Key,Value):
-
-        # 案件类型
-        if Key == 'caseType':
-            self.SetCaseType(Value)
-
-        # 诉讼标的额
-        elif Key == 'litigationAmount':
-            self.SetLitigationAmount(Value)
-
-        # 案由
-        elif Key == 'caurseOfAction':
-            self.SetCauseOfAction(Value)
-
-        # 各阶段信息
-        elif Key == 'stages':
-            self.SetStage(Value)
-
-        # 诉讼请求
-        elif Key == 'claimText':
-            self.SetClaimText(Value)
-
-        # 事实与理由
-        elif Key == 'factAndReasonText':
-            self.SetFactAndReasonText(Value)
-
-        # 案件文件所在文件夹路径
-        elif Key == 'caseFolderGeneratedPath':
-            self.SetCaseFolderPath(Value)
-
-        # 调解意愿
-        elif Key == 'mediationIntention':
-            self.SetMediationIntention(Value)
-
-        # 拒绝调解理由            
-        elif Key == 'rejectMediationReasonText':
-            self.SetRejectMediationReasonText(Value)
-
-        # 原告信息（目前是测试只有一个人的时候）
-        elif Key == 'plaintiffInfoPath':
-            plaintiff = Litigant()
-            plaintiff.InputLitigantInfoFromTxt(Value)
-            
-            # 将该参与人设置为原告
-            plaintiff.SetLitigantPosition(1)
-            # 测试用，将原告选定为我方当事人(应当删除)
-
-            plaintiff.SetOurClient(True)
-            # 再次读取原告信息并添加到原告列表中 
-            plaintiff.InputLitigantInfoFromTxt(Value)
-            self.AppendLitigant(plaintiff)
-        
-        # 被告信息（目前是测试只有一个人的时候）
-        elif Key == 'defendantInfoPath':
-            defendant = Litigant()
-            defendant.InputLitigantInfoFromTxt(Value)
-            # 将该参与人设置为被告
-            defendant.SetLitigantPosition(2)
-            # 测试用，将被告选定为对方当事人（应当删除）
-            defendant.SetOurClient(False)
-            # 再次读取被告信息并添加到被告列表中 
-            defendant.InputLitigantInfoFromTxt(Value)
-            self.AppendLitigant(defendant)
-
-        # 案件代理的阶段
-        elif Key == 'caseAgentStage':
-            # 进来的value就是一个列表，因此可以直接调用SetCaseAgentStage方法
-            self.SetCaseAgentStage(Value)
-
-        # 风险代理情况
-        elif Key == 'riskAgentStatus':
-            self.SetRiskAgentStatus(Value)
-
-        # 风险代理前期费用
-        elif Key == 'riskAgentUpfrontFee':
-            self.SetRiskAgentUpfrontFee(Value)
-
-        # 风险代理后期比例
-        elif Key == 'riskAgentPostFeeRate':
-            self.SetRiskAgentPostFeeRate(Value)
-
-        # 非风险代理的固定费用
-        elif Key == 'agentFixedFee':
-            pass
-            # self.SetAgentFixedFeeByList(FixedFeeList)
-
-
-    # 设定一个方法从字符串的列表中读取案件信息（主要便于前端的批量读入）
-    def InputCaseInfoFromStringList(self,CaseInfoStringList,DebugMode=False):
-        # 判断是否为列表
-        if not isinstance(CaseInfoStringList,list):
-            if DebugMode:
-                print("输入的案件信息不是列表")
-            return
-
-        # 逐个读取列表中的字符串
-        for line in CaseInfoStringList:
-            # 判断是否有等于号，没有则跳过
-            if "=" not in line:
-                continue
-            # 以等于号分割字符串
-            Key,Value = line.split("=")
-            # 对上述分割出来的键值对进行处理
-            self.SetCaseInfoWithKeyAndValue(Key,Value)
-
-    # 读取一个txt文档的路径来输入上述案件信息(准备废弃)
-    def InputCaseInfoFromTxt(self,CaseInfoFilePath,DebugMode=False):
-        # 判断路径是否存在
-        if not os.path.exists(CaseInfoFilePath):
-            print("文件路径不存在")
-            return
-        
-        # 路径存在，则读取文件
-        with open(CaseInfoFilePath,"r",encoding="utf-8") as f:
-            CaseInfoLines = f.readlines()
-        # 去除行的空格
-        CaseInfoLines = [i.strip() for i in CaseInfoLines]
-        # 逐行读取文件
-        for line in CaseInfoLines:
-            # 判断是否为空行，是则跳过
-            if line == "":
-                continue
-            # 判断是否为以#开头的注释行，是则跳过
-            if line[0] == "#":
-                continue
-            # 判断是否有等于号，没有则跳过
-            if "=" not in line:
-                continue
-            # 以等于号分割字符串
-            Key,Value = line.split("=")
-            # 对上述分割出来的键值对进行处理
-            self.SetCaseInfoWithKeyAndValue(Key,Value)
-    
+    # 基于上面的方法，定义一个从字典中输入案件信息的方法
     def InputCaseInfoFromDict(self,CaseInfoDict,DebugMode=False) -> str:
         # 判断传入的参数是否为字典
         if not isinstance(CaseInfoDict,dict):
@@ -791,7 +658,8 @@ class Case():
             self.SetCaseInfoWithKeyAndValue(Key,Value)
 
 
-    # 读取一个excel文档的路径来输入上述案件信息
+
+    # 读取一个excel文档的路径来输入上述案件信息，目前非重点
     def InputCaseInfoFromExcel(self,CaseInfoFilePath,DebugMode=False):
         from openpyxl import load_workbook
         wb = load_workbook(CaseInfoFilePath)
@@ -809,13 +677,7 @@ class Case():
                 # 对上述分割出来的键值对进行处理
                 self.SetCaseInfoWithKeyAndValue(Key,Value)
 
-    # 从应用的前端中输入案件信息,重点维护
-    def InputCaseInfoFromFrontEnd(self,CaseInfoDict,DebugMode=False):
-        # 判断传入的参数是否为字典
-        if isinstance(CaseInfoDict,dict):
-            # 对于字典中的逐个键值对读取，并调用SetCaseInfoWithKeyAndValue方法对键值对进行处理
-            for Key,Value in CaseInfoDict.items():
-                self.InputCaseInfoFromWebDict(Key,Value)
+
 
 
     # ===========Output方法：下面定义输出案件信息的方法=============
