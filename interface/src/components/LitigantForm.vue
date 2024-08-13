@@ -298,10 +298,10 @@
 					litigantForm.litigantAddress
 				}}</el-descriptions-item>
 				<el-descriptions-item label="是否我方">{{
-					litigantForm.isOurClient
+					isOurClientMessage
 				}}</el-descriptions-item>
 				<el-descriptions-item label="原告类型">{{
-					litigantForm.litigantType
+					litigantTypeMessage
 				}}</el-descriptions-item>
 				<el-descriptions-item
 					v-if="litigantForm.litigantType == 'Company'"
@@ -359,10 +359,10 @@
 					litigantForm.litigantAddress
 				}}</el-descriptions-item>
 				<el-descriptions-item label="是否我方">{{
-					litigantForm.isOurClient
+					isOurClientMessage
 				}}</el-descriptions-item>
 				<el-descriptions-item label="被告类型">{{
-					litigantForm.litigantType
+					litigantTypeMessage
 				}}</el-descriptions-item>
 				<el-descriptions-item
 					v-if="litigantForm.litigantType == 'Company'"
@@ -405,6 +405,27 @@ const litigantForm = ref({});
 const getInfoByPath = ref(false);
 
 const showDescriptionListAndHideForm = ref(null);
+
+
+const isOurClientMessage = computed(() => {
+	if (litigantForm.value.isOurClient == true) {
+		return "是";
+	} else {
+		return "否";
+	}
+});
+
+const litigantTypeMessage = computed(() => {
+	if (litigantForm.value.litigantType == "Company") {
+		return "法人";
+	} 
+	else if (litigantForm.value.litigantType == "Person") {
+		return "自然人";
+	}
+	else {
+		return "非法人组织";
+	}
+});
 
 // 检查身份证号码是否合法
 function checkIdNumber() {
