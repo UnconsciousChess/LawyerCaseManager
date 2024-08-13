@@ -49,7 +49,7 @@
 					<el-row width="70" :gutter="50">
 						<el-col :span="20">
 							<el-input
-								v-model="litigantForm.litigantIdNumber"
+								v-model="litigantForm.litigantIdCode"
 								style="max-width: 400px"
 							/>
 						</el-col>
@@ -151,7 +151,7 @@
 					<el-row width="50" :gutter="50">
 						<el-col :span="20">
 							<el-input
-								v-model="litigantForm.litigantIdNumber"
+								v-model="litigantForm.litigantIdCode"
 								style="max-width: 300px"
 							/>
 						</el-col>
@@ -223,7 +223,7 @@
 					litigantForm.litigantName
 				}}</el-descriptions-item>
 				<el-descriptions-item label="原告证件号码">{{
-					litigantForm.litigantIdNumber
+					litigantForm.litigantIdCode
 				}}</el-descriptions-item>
 				<el-descriptions-item label="原告电话号码">{{
 					litigantForm.litigantPhoneNumber
@@ -268,7 +268,7 @@
 					litigantForm.litigantName
 				}}</el-descriptions-item>
 				<el-descriptions-item label="被告证件号码">{{
-					litigantForm.litigantIdNumber
+					litigantForm.litigantIdCode
 				}}</el-descriptions-item>
 				<el-descriptions-item label="被告电话号码">{{
 					litigantForm.litigantPhoneNumber
@@ -304,7 +304,7 @@ const props = defineProps({
 
 const litigantForm = ref({
 	litigantName: "",
-	litigantIdNumber: "",
+	litigantIdCode: "",
 	litigantPhoneNumber: "",
 	litigantAddress: "",
 	litigantPosition: "",
@@ -318,7 +318,7 @@ const showDescriptionListAndHideForm = ref(null);
 
 // 检查身份证号码是否合法
 function checkIdNumber() {
-	let result = checkIdNumberValid(litigantForm.value.litigantIdNumber);
+	let result = checkIdNumberValid(litigantForm.value.litigantIdCode);
 	// 下面是测试部分，后面将控制台打印改为弹窗提示
 	if (result == false) {
 		console.log("该身份号码不合法");
@@ -420,7 +420,7 @@ function checkInfo() {
 onMounted(() => {
 	// 赋值
 	litigantForm.value.litigantName = props.litigant.litigantName;
-	litigantForm.value.litigantIdNumber = props.litigant.litigantIdNumber;
+	litigantForm.value.litigantIdCode = props.litigant.litigantIdCode;
 	litigantForm.value.litigantPhoneNumber = props.litigant.litigantPhoneNumber;
 	litigantForm.value.litigantAddress = props.litigant.litigantAddress;
 	litigantForm.value.litigantPosition = props.litigant.litigantPosition;

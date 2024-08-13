@@ -482,95 +482,56 @@ class Case():
 
 
     # 添加诉讼参与人的方法
-    def AppendLitigant(self,ALitigant,PrintLogMode=False) -> bool:
+    def AppendLitigant(self,ALitigant) -> bool:
         # 先判断添加进来的东西是什么
         if isinstance(ALitigant,Litigant):
             # 判断诉讼地位是原告、被告还是第三人
             # 原告1  被告2  第三人3
+
+            # 如果是原告
             if ALitigant.GetLitigantPosition() == 1:
-                self._PlaintiffList.append(ALitigant)
-                if PrintLogMode:
-                    print("添加原告【%s】成功" % ALitigant.GetName())   
+                for index , plaintiff in enumerate(self._PlaintiffList):
+                    if plaintiff.GetId() == ALitigant.GetId():
+                        # 将PlaintiffList里面该原告的信息更新,即用新的Litigant对象替换掉原来的
+                        self._PlaintiffList[index] = ALitigant
+                        break
+                # 如果PlaintiffList里面没有该原告的信息，则认为该litigant是新的原告，添加到PlaintiffList里面
+                else:
+                    self._PlaintiffList.append(ALitigant)
+
                 return True
+            
+            # 如果是被告
             elif ALitigant.GetLitigantPosition()  == 2:
-                self._DefendantList.append(ALitigant)
-                if PrintLogMode:
-                    print("添加被告【%s】成功" % ALitigant.GetName())
+                for index , defendant in enumerate(self._DefendantList):
+                    if defendant.GetId() == ALitigant.GetId():
+                        # 将DefendantList里面该被告的信息更新,即用新的Litigant对象替换掉原来的
+                        self._DefendantList[index] = ALitigant
+                        break
+                # 如果DefendantList里面没有该被告的信息，则认为该litigant是新的被告，添加到DefendantList里面
+                else:
+                    self._DefendantList.append(ALitigant)
+
                 return True
+
+            # 如果是第三人
             elif ALitigant.GetLitigantPosition() == 3:
-                self._LegalThirdPartyList.append(ALitigant)
-                if PrintLogMode:
-                    print("添加第三人【%s】成功" % ALitigant.GetName()) 
+                for index , thirdparty in enumerate(self._LegalThirdPartyList):
+                    if thirdparty.GetId() == ALitigant.GetId():
+                        # 将LegalThirdPartyList里面该第三人的信息更新,即用新的Litigant对象替换掉原来的
+                        self._LegalThirdPartyList[index] = ALitigant
+                        break
+                # 如果LegalThirdPartyList里面没有该第三人的信息，则认为该litigant是新的第三人，添加到LegalThirdPartyList里面
+                else:
+                    self._LegalThirdPartyList.append(ALitigant)
+
                 return True
+            
+            # 如果诉讼地位不是1、2、3，则返回False
             else:
-                if PrintLogMode:
-                    print("当前添加的诉讼参与人【%s】缺失诉讼地位参数LitigantPosition，无法添加到列表之中" % ALitigant.GetName())
                 return False
             
-    # 设定诉讼参与人的方法
-    def SetLitigant(self,LitigantInformation,DebugMode=False):
-        # 先判断litigantinformation是什么类型
-        if not isinstance(LitigantInformation,str):
-            if DebugMode:
-                print("SetLitigant报错：输入的诉讼参与人信息为字符串，无法设定")
-            return
-        # 判断输入的是否为一个路径,如果是路径，就调用Litigant的读取方法来读取该路径的信息
-        if os.path.exists(LitigantInformation):
-            # 实例化一个诉讼参与人对象
-            litigant = Litigant()
-            # 调用诉讼参与人的读取方法
-            litigant.InputLitigantInfoFromTxt(LitigantInformation)
-            # 调用添加诉讼参与人的方法，将该诉讼参与人添加到案件中
-            self.AppendLitigant(litigant)
-        # 如果不是路径，就代表是直接用分号分隔的信息，需要直接进行处理
-        else:
-            # 如果有中文冒号，就替换成英文冒号
-            if "：" in LitigantInformation:
-                LitigantInformation = LitigantInformation.replace("：",":")
-            # 以分号分割字符串,形成一个列表,列表中每一个元素为当前诉讼参与人的一项信息，格式为key:value
-            LitigantInfoList = [i.strip() for i in LitigantInformation.split(";")]
-            # 实例化一个诉讼参与人对象
-            litigant = Litigant()
-            # 逐个键值对进行处理
-            for litigantinfo in LitigantInfoList:
-                # 以冒号分割字符串,形成一个键值对
-                Key,Value = litigantinfo.split(":")
-                # 诉讼参与人的姓名属性
-                if Key == "Name":
-                    litigant.SetName(Name=Value)
-                # 诉讼参与人的身份证号码属性
-                if Key == "IdCode":
-                    litigant.SetIdCode(IdCode=Value)
-                # 诉讼参与人的地址属性
-                if Key == "Location":
-                    litigant.SetLocation(Location=Value)
-                # 诉讼参与人的联系方式属性
-                if Key == "ContactNumber":
-                    litigant.SetContactNumber(ContactNumber=Value)
-                # 诉讼参与人在诉讼中的地位属性
-                if Key == "LitigantPosition":
-                    litigant.SetLitigantPosition(LitigantPosition=Value)
-                # 诉讼参与人是否为我方当事人
-                if Key == "OurClient":
-                    litigant.SetOurClient(OurClient=Value)
-                # 法定代表人名称
-                if Key == "LegalRepresentative":
-                    litigant.SetLegalRepresentative(LegalRepresentative=Value)
-                # 法定代表人身份证号码  
-                if Key == "LegalRepresentativeIdCode":
-                    litigant.SetLegalRepresentativeIdCode(LegalRepresentativeIdCode=Value)
 
-            
-            # 先根据规则设置诉讼参与人的类型属性
-            litigant.SetLitigantTypeByRule()
-            # 再根据规则设置诉讼参与人的性别属性
-            litigant.SetSexByRule()
-
-            # 最后调用添加诉讼参与人的方法，将该诉讼参与人添加到案件中
-            self.AppendLitigant(litigant)
-
-
-        
    
     # ===========Input方法：下面定义批量输入案件信息的方法=============
 

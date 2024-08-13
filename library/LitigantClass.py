@@ -42,7 +42,7 @@ class Litigant():
         # 12.诉讼代理人属性（一个列表）
         self._LawsuitRepresentative = []
         # 13.id属性，用于标识该诉讼参与人的唯一性
-        self._LitigantId = generate(size=10,alphabet="0123456789")
+        self._Id = generate(size=10,alphabet="0123456789")
 
     # ===========下面是Get方法 ===========
 
@@ -94,8 +94,8 @@ class Litigant():
     def GetLegalRepresentativeIdCode(self):
         return self._LegalRepresentativeIdCode
     # 定义外部获取诉讼参与人id的方法
-    def GetLitigantId(self):
-        return self._LitigantId
+    def GetId(self):
+        return self._Id
     
 
     # =========== 下面是Set方法 ===========
@@ -279,73 +279,11 @@ class Litigant():
 
     # =============== 下面是Input方法 ===============
 
-    # 定义通过一个txt的方法用于输入诉讼参与人信息
-    # 该方法在后续如不需要的话，可废弃
-    def InputLitigantInfoFromTxt(self,InfoFile,LitigantPosition=""):
-        # 判断路径是否存在
-        if not os.path.exists(InfoFile):
-            print("InputLitigantInfoFromTxt函数报错：输入的文件路径不存在")
-            return
-        # 读取文件到LitigantInfoLines列表中
-        with open(file=InfoFile,mode="r",encoding="utf-8") as f:
-            LitigantInfoLines = f.readlines()
-        # 去除换行符
-        LitigantInfoLines = [line.strip() for line in LitigantInfoLines]
-        # 遍历每一行信息
-        for line in LitigantInfoLines:
-            # 判断是否为空行
-            if line == "":
-                continue
-            # 判断是否为注释行
-            if line[0] == "#":
-                continue
-            # 判断是否为赋值行
-            if "=" not in line:
-                continue
-            # 将赋值行按照等号分割成两部分，key和information
-            key,information = line.split("=")
-            # 诉讼参与人的姓名属性
-            if key == "Name":
-                self.SetName(Name=information)
-            # 诉讼参与人的身份证号码属性
-            if key == "IdCode":
-                self.SetIdCode (IdCode=information)
-            # 诉讼参与人的地址属性
-            if key == "Location":
-                self.SetLocation(Location=information)
-            # 诉讼参与人的联系方式属性
-            if key == "ContactNumber":
-                self.SetContactNumber(ContactNumber=information)
-            # 诉讼参与人在诉讼中的地位属性
-            if key == "LitigantPosition":
-                self.SetLitigantPosition(LitigantPosition=information)
-            # 诉讼参与人是否为我方当事人
-            if key == "OurClient":
-                self.SetOurClient(OurClient=information)
-            # 法定代表人名称
-            if key == "LegalRepresentative":
-                self.SetLegalRepresentative(LegalRepresentative=information)
-            # 法定代表人身份证号码  
-            if key == "LegalRepresentativeIdCode":
-                self.SetLegalRepresentativeIdCode(LegalRepresentativeIdCode=information)
-
-        # 如果传入了LitigantPosition参数，就直接设置诉讼参与人的地位属性，方便前端传入
-        if LitigantPosition != "":
-            if LitigantPosition == "plaintiff":
-                self.SetLitigantPosition(1)
-            elif LitigantPosition == "defendant":
-                self.SetLitigantPosition(2)
-        
-        # 根据规则设置诉讼参与人的类型属性
-        self.SetLitigantTypeByRule()
-        # 根据规则设置诉讼参与人的性别属性
-        self.SetSexByRule()
-
     def InputLitigantInfoFromDict(self,InfoDict):
         for key,value in InfoDict.items():
             if key == "litigantName":
                 self.SetName(value)
-            if key == "litigantIdNumber":
+            if key == "litigantIdCode":
                 self.SetIdCode(value)
             if key == "litigantAddress":
                 self.SetLocation(value)
@@ -362,10 +300,10 @@ class Litigant():
                 self.SetOurClient(value)
             if key == "legalRepresentative":
                 self.SetLegalRepresentative(value)
-            if key == "legalRepresentativeIdNumber":
+            if key == "legalRepresentativeIdCode":
                 self.SetLegalRepresentativeIdCode(value)
             if key == "id":
-                self._LitigantId = value
+                self._Id = value
             if key == "litigantType":
                 self.SetLitigantType(value)
             
@@ -454,7 +392,7 @@ class Litigant():
                 print(str(self._Name)+"不是我方当事人"+"\n")
 
             # 输出id
-            print(str(self._Name)+"的id为"+str(self._LitigantId)+"\n")
+            print(str(self._Name)+"的id为"+str(self._Id)+"\n")
             return 
 
     # 定义将当前诉讼参与人各项信息输出为字典的方法
@@ -463,11 +401,11 @@ class Litigant():
 
         # 返回的字典中的键值对应的是前端需要的字段
         LitigantInfoDict["litigantName"] = self.GetName()
-        LitigantInfoDict["litigantIdNumber"] = self.GetIdCode()
+        LitigantInfoDict["litigantIdCode"] = self.GetIdCode()
         LitigantInfoDict["litigantAddress"] = self.GetLocation()
         LitigantInfoDict["litigantPhoneNumber"] = self.GetContactNumber()
         LitigantInfoDict["litigantIsOurClient"] = self.IsOurClient()
-        LitigantInfoDict["id"] = self.GetLitigantId()
+        LitigantInfoDict["id"] = self.GetId()
         LitigantInfoDict["litigantType"] = self.GetLitigantType()  
 
         # 根据诉讼地位设置诉讼地位属性的字符串，分别为plaintiff、defendant、thirdParty
@@ -481,7 +419,7 @@ class Litigant():
         # 如果是公司具有法定代表人属性
         if self.GetLitigantType() == 2 or self.GetLitigantType() == 3:
             LitigantInfoDict["legalRepresentative"] = self.GetLegalRepresentative()
-            LitigantInfoDict["legalRepresentativeIdNumber"] = self.GetLegalRepresentativeIdCode()
+            LitigantInfoDict["legalRepresentativeIdCode"] = self.GetLegalRepresentativeIdCode()
 
         # 对字典进行排序
         LitigantInfoDict = dict(sorted(LitigantInfoDict.items(),key=lambda x:x[0]))
@@ -646,7 +584,7 @@ class Lawyer():
     def OutputLawyerInfoToDict(self) -> dict:
         LawyerInfoDict = {}
         LawyerInfoDict["lawyerName"] = self.GetName()
-        LawyerInfoDict["lawyerIdNumber"] = self.GetIdCode()
+        LawyerInfoDict["lawyerIdCode"] = self.GetIdCode()
         LawyerInfoDict["lawyerAddress"] = self.GetLocation()
         LawyerInfoDict["lawyerPhoneNumber"] = self.GetContactNumber()
         LawyerInfoDict["lawyerLicense"] = self.GetLawyerLicense()

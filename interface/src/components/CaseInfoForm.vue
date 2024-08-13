@@ -119,7 +119,7 @@ function ChangeInputStatus() {
 function onAddPlaintiff() {
 	caseForm.value.plaintiffs.push({
 		litigantName: "",
-		litigantIdNumber: "",
+		litigantIdCode: "",
 		litigantPhoneNumber: "",
 		litigantPosition: "plaintiff",
 		id: Date.now(),
@@ -131,7 +131,7 @@ function onAddPlaintiff() {
 function onAddDefendant() {
 	caseForm.value.defendants.push({
 		litigantName: "",
-		litigantIdNumber: "",
+		litigantIdCode: "",
 		litigantPhoneNumber: "",
 		litigantPosition: "defendant",
 		id: Date.now(),
@@ -166,8 +166,8 @@ const getCurrentplaintiffData = (plaintiffData, id) => {
 	);
 	// 赋值
 	caseForm.value.plaintiffs[index].litigantName = plaintiffData.litigantName;
-	caseForm.value.plaintiffs[index].litigantIdNumber =
-		plaintiffData.litigantIdNumber;
+	caseForm.value.plaintiffs[index].litigantIdCode =
+		plaintiffData.litigantIdCode;
 	caseForm.value.plaintiffs[index].litigantPhoneNumber =
 		plaintiffData.litigantPhoneNumber;
 };
@@ -182,8 +182,8 @@ const getCurrentDefendantData = (defendantData, id) => {
 
 	// 赋值
 	caseForm.value.defendants[index].litigantName = defendantData.litigantName;
-	caseForm.value.defendants[index].litigantIdNumber =
-		defendantData.litigantIdNumber;
+	caseForm.value.defendants[index].litigantIdCode =
+		defendantData.litigantIdCode;
 	caseForm.value.defendants[index].litigantPhoneNumber =
 		defendantData.litigantPhoneNumber;
 };
