@@ -9,10 +9,14 @@ sys.dont_write_bytecode = True
 # 导入nanoid模块
 from nanoid import generate
 
+# 导入json模块
+import json
+
 # 导入诉讼参与人类
 from .LitigantClass import *
 from .Stage import *
 
+import json
 class Case():
 
     def __init__(self) -> None:
@@ -22,7 +26,7 @@ class Case():
         # 诉讼标的额
         self._LitigationAmount = 0
         # 案由
-        self._CaseOfAction = ""      
+        self._CauseOfAction = ""      
         # 案件阶段(列表，每个元素为一个阶段对象)
         self._Stages = []
         # 上传文件列表
@@ -59,16 +63,9 @@ class Case():
 
         # 下面通过读取文件得到一些通用列表,并作为类的属性
 
-        # 准备所有合法法院名称的列表，方便进行对比，以防止输入的法院名称有误
-        # with open(r"Data\PublicInfomationList\CourtNameList.txt","r",encoding="utf-8") as f:
-        #     StandardJurisdictionList = f.readlines()
-        #     # 去除每个法院名称的换行符
-        #     self._StandardJurisdictionList = [i.strip() for i in StandardJurisdictionList]
-        # 准备所有合法民事案由的列表，方便进行对比，以防止输入的案由有误
-        with open(r"Data\PublicInfomationList\CauseOfActionList.txt","r",encoding="utf-8") as f:
-            CaseOfActionList = f.readlines()
-            # 去除每个案由的换行符，并放到列表CauseOf中
-            self._CaseOfActionList = [i.strip() for i in CaseOfActionList]
+        # 准备所有合法案由的列表，方便进行对比，以防止输入的案由有误
+        with open(r"Data\PublicInfomationList\CauseOfActions-China.json","r",encoding="utf-8") as f:
+            self._CauseOfActionList = json.load(f)
 
 
     # 下面是案件类的外部方法,包括:
@@ -87,7 +84,7 @@ class Case():
         return self._LitigationAmount
     # 案由
     def GetCauseOfAction(self):
-        return self._CaseOfAction
+        return self._CauseOfAction
     # 案件阶段
     def GetStages(self):
         return self._Stages
@@ -255,15 +252,15 @@ class Case():
             return
 
     # 案由设定方法
-    def SetCauseOfAction(self,CaseOfAction,debugmode=False):
+    def SetCauseOfAction(self,CauseOfAction,debugmode=False):
 
-        if (CaseOfAction in self._CaseOfActionList):
-            self._CaseOfAction = CaseOfAction
+        if (CauseOfAction in self._CauseOfActionList):
+            self._CauseOfAction = CauseOfAction
             if debugmode:
-                print("输入的案由【%s】添加成功" % CaseOfAction)
+                print("输入的案由【%s】添加成功" % CauseOfAction)
         else:
             if debugmode:
-                print(" SetCauseOfActionb报错：输入的【%s】名称不符合现有民事、行政、执行案由规定,请重新输入" % CaseOfAction)
+                print(" SetCauseOfActionb报错：输入的【%s】名称不符合现有民事、行政、执行案由规定,请重新输入" % CauseOfAction)
     
 
 

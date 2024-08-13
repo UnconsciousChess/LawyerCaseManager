@@ -1,4 +1,5 @@
 import os,sys
+import json
 
 # 不要生成字节码
 sys.dont_write_bytecode = True
@@ -13,11 +14,14 @@ class Stage:
         # 该阶段的案号
         self._CaseNumber = None
 
-        with open(r"Data\PublicInfomationList\CourtNameList.txt","r",encoding="utf-8") as f:
-            lines = f.readlines()
-        # 去除每个法院名称的换行符,并将其赋值给全局 StandardCourtList
+            
+        # 准备所有合法法院名称的列表，方便进行对比，以防止输入的法院名称有误
         global StandardCourtNamesList 
-        StandardCourtNamesList = [i.strip() for i in lines]
+        with open(r"Data\PublicInfomationList\Courts-China.json","r",encoding="utf-8") as f:
+            StandardCourtNamesList = json.load(f)
+        # 去除每个法院名称的换行符,并将其赋值给全局 StandardCourtList
+
+
 
     #  === Get方法 ===    
     def GetStageName(self):
