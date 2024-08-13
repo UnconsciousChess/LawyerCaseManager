@@ -108,6 +108,27 @@
 							</el-row>
 						</el-form-item>
 					</div>
+
+					<el-form-item label="原告银行账号">
+						<el-input
+							v-model="litigantForm.bankAccount.accountNumber"
+							style="max-width: 200px"
+						/>
+					</el-form-item>
+
+					<el-form-item label="原告银行账户名">
+						<el-input
+							v-model="litigantForm.bankAccount.accountName"
+							style="max-width: 200px"
+						/>
+					</el-form-item>
+
+					<el-form-item label="原告银行名称">
+						<el-input
+							v-model="litigantForm.bankAccount.bankName"
+							style="max-width: 200px"
+						/>
+					</el-form-item>
 				</div>
 
 				<el-form-item>
@@ -243,6 +264,26 @@
 							</el-row>
 						</el-form-item>
 					</div>
+					<el-form-item label="被告银行账号">
+						<el-input
+							v-model="litigantForm.bankAccount.accountNumber"
+							style="max-width: 200px"
+						/>
+					</el-form-item>
+
+					<el-form-item label="被告银行账户名">
+						<el-input
+							v-model="litigantForm.bankAccount.accountName"
+							style="max-width: 200px"
+						/>
+					</el-form-item>
+
+					<el-form-item label="被告银行名称">
+						<el-input
+							v-model="litigantForm.bankAccount.bankName"
+							style="max-width: 200px"
+						/>
+					</el-form-item>
 				</div>
 
 				<el-form-item>
@@ -313,6 +354,33 @@
 					label="原告法定代表人身份证号码"
 					>{{ litigantForm.legalRepresentativeIdCode }}</el-descriptions-item
 				>
+				<el-descriptions-item
+					v-if="
+						litigantForm.bankAccount.accountName != '' ||
+						litigantForm.bankAccount.accountNumber != '' ||
+						litigantForm.bankAccount.bankName != ''
+					"
+					label="原告银行账号"
+					>{{ litigantForm.bankAccount.accountNumber }}</el-descriptions-item
+				>
+				<el-descriptions-item
+					v-if="
+						litigantForm.bankAccount.accountName != '' ||
+						litigantForm.bankAccount.accountNumber != '' ||
+						litigantForm.bankAccount.bankName != ''
+					"
+					label="原告银行账户名"
+					>{{ litigantForm.bankAccount.accountName }}</el-descriptions-item
+				>
+				<el-descriptions-item
+					v-if="
+						litigantForm.bankAccount.accountName != '' ||
+						litigantForm.bankAccount.accountNumber != '' ||
+						litigantForm.bankAccount.bankName != ''
+					"
+					label="原告银行名称"
+					>{{ litigantForm.bankAccount.bankName }}</el-descriptions-item
+				>
 			</el-descriptions>
 
 			<el-button
@@ -374,6 +442,33 @@
 					label="被告法定代表人身份证号码"
 					>{{ litigantForm.legalRepresentativeIdCode }}</el-descriptions-item
 				>
+				<el-descriptions-item
+					v-if="
+						litigantForm.bankAccount.accountName != '' ||
+						litigantForm.bankAccount.accountNumber != '' ||
+						litigantForm.bankAccount.bankName != ''
+					"
+					label="被告银行账号"
+					>{{ litigantForm.bankAccount.accountNumber }}</el-descriptions-item
+				>
+				<el-descriptions-item
+					v-if="
+						litigantForm.bankAccount.accountName != '' ||
+						litigantForm.bankAccount.accountNumber != '' ||
+						litigantForm.bankAccount.bankName != ''
+					"
+					label="被告银行账户名"
+					>{{ litigantForm.bankAccount.accountName }}</el-descriptions-item
+				>
+				<el-descriptions-item
+					v-if="
+						litigantForm.bankAccount.accountName != '' ||
+						litigantForm.bankAccount.accountNumber != '' ||
+						litigantForm.bankAccount.bankName != ''
+					"
+					label="被告银行名称"
+					>{{ litigantForm.bankAccount.bankName }}</el-descriptions-item
+				>
 			</el-descriptions>
 
 			<el-button
@@ -406,7 +501,6 @@ const getInfoByPath = ref(false);
 
 const showDescriptionListAndHideForm = ref(null);
 
-
 const isOurClientMessage = computed(() => {
 	if (litigantForm.value.isOurClient == true) {
 		return "是";
@@ -418,11 +512,9 @@ const isOurClientMessage = computed(() => {
 const litigantTypeMessage = computed(() => {
 	if (litigantForm.value.litigantType == "Company") {
 		return "法人";
-	} 
-	else if (litigantForm.value.litigantType == "Person") {
+	} else if (litigantForm.value.litigantType == "Person") {
 		return "自然人";
-	}
-	else {
+	} else {
 		return "非法人组织";
 	}
 });
@@ -540,6 +632,16 @@ onMounted(() => {
 		props.litigant.legalRepresentativeIdCode;
 	litigantForm.value.litigantType = props.litigant.litigantType;
 	litigantForm.value.isOurClient = props.litigant.isOurClient;
+	if (props.litigant.bankAccount != null) {
+		litigantForm.value.bankAccount = props.litigant.bankAccount;
+	} else {
+		litigantForm.value.bankAccount = {
+			accountName: "",
+			accountNumber: "",
+			bankName: "",
+		};
+	}
+
 	litigantForm.value.id = props.litigant.id;
 
 	showDescriptionListAndHideForm.value = props.showDescriptionList;

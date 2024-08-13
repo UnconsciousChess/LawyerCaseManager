@@ -46,37 +46,33 @@ class BankAccount():
         
     # ======= Input方法 ======= #
 
-    # 直接通过一个txt用于输入银行账户信息
-    def InputInfoFromTxt(self,InfoFile) -> str:
-        # 先对传入的路径进行判断
-        if not os.path.exists(InfoFile):
-            return "PathNotExists"
-        if not os.path.isfile(InfoFile):
-            return "NotFile"
-        if InfoFile.endswith(".txt") == False:
-            return "NotTxtFile"
+    # 通过一个字典输入银行账户信息
+    def InputFromDict(self,InfoFile) -> str:
+
+        if not isinstance(InfoFile,dict):
+            return "Error"
         
-        # 读取文件到列表中
-        with open(file=InfoFile,mode="r",encoding="utf-8") as f:
-            BankAccountInfoLines = f.readlines()
-        # 去除每行的换行符
-        BankAccountInfoLines = [line.strip() for line in BankAccountInfoLines]
-        for line in BankAccountInfoLines:
-            # 判断是否为空行
-            if line == "":
-                continue
-            # 判断是否为注释行
-            if line[0] == "#":
-                continue
-            # 判断是否为信息行
-            key,information = line.split("=")
+        # 正式部分
+        for key, value in InfoFile.items():
             # 银行账户名
-            if key =="AccountName" :
-                self.SetAccountName(information)
+            if key == "accountName":
+                self.SetAccountName(value)
             # 银行账户号码
-            if key == "AccountNumber":
-                self.SetAccountNumber(information)
+            if key == "accountNumber":
+                self.SetAccountNumber(value)
             # 开户行名称
-            if key == "BankName":
-                self.SetBankName(information)
+            if key == "bankName":
+                self.SetBankName(value)
         return "Success"
+    
+
+    # ======= Output方法 ======= #
+
+    # 输出银行账户信息
+    def OutputToDict(self) -> dict:
+        Info = {
+            "accountName":self.GetAccountName(),
+            "accountNumber":self.GetAccountNumber(),
+            "bankName":self.GetBankName()
+        }
+        return Info

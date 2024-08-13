@@ -203,6 +203,8 @@ const getCurrentplaintiffData = (plaintiffData, id) => {
 		plaintiffData.legalRepresentativeIdCode;
 	caseForm.value.plaintiffs[index].isOurClient =
 		plaintiffData.isOurClient;
+	caseForm.value.plaintiffs[index].bankAccount =
+		plaintiffData.bankAccount;
 };
 
 const getCurrentDefendantData = (defendantData, id) => {
@@ -230,6 +232,8 @@ const getCurrentDefendantData = (defendantData, id) => {
 		defendantData.legalRepresentativeIdCode;
 	caseForm.value.defendants[index].isOurClient =
 		defendantData.isOurClient;
+	caseForm.value.defendants[index].bankAccount =
+		defendantData.bankAccount;
 };
 
 // 将该方法提供给子组件

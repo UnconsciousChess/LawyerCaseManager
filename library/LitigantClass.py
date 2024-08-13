@@ -76,7 +76,6 @@ class Litigant():
         if hasattr(self,"_BankAccount"):
             return self._BankAccount
         else:
-            # print("该诉讼参与人没有设置银行账户属性")
             return None
     # 定义外部获取是否为我方当事人的方法
     def IsOurClient(self):
@@ -220,12 +219,12 @@ class Litigant():
                 self._LitigantType = "Company"
                 return 
             else:
-                UnincorporatedOrganizationStr = (
+                UnincorporatedOrganizationStr = [
                     "厂","店","馆","部","行","中心"    #《个体工商户名称登记管理办法》第十条规定的个体工商户组织形式
                     "协会","商会","学会","研究会","促进会","联合会",   #《社会团体登记管理条例》第十二条第一款规定的社会团体
                     "基金会",    #《社会团体登记管理条例》第十二条第二款规定的基金会
                     "学校","大学","学院","医院","中心","院","园","所","馆","站","社"   #《社会团体登记管理条例》第十二条第三款规定的民办非企业单位
-                    )
+                ]
                 for str in UnincorporatedOrganizationStr:
                     if str in self._Name:
                         self._LitigantType = "Others"
@@ -233,41 +232,6 @@ class Litigant():
         # 如果名称小于6个字，就视为自然人
         else:
             self._LitigantType = "Person"
-            return
-
-
-    # ===========下面是Bind方法，用于绑定其他类的主体（共计2个）============
-
-    # 绑定代理律师的方法
-    def BindLawyer(self,LawsuitRepresentative,debug=False):
-        # 随后判断传进来的参数是不是Lawyer对象，如果是就可以绑定LawsuitRepresentative（诉讼代理人）属性
-        if isinstance(LawsuitRepresentative,Lawyer):
-            # 判断是否有2个代理人，如果有就不再绑定
-            if len(self._LawsuitRepresentative) == 2:
-                print("BindLawyer方法报错：%s已经有2个代理律师，无法再绑定" % self._Name)
-                return
-            # 如果当前诉讼参与人没有代理人，则绑定的律师不能是实习律师，必须先绑定一个非实习律师
-            if len(self._LawsuitRepresentative) == 0:
-                if LawsuitRepresentative.IsInternLawyer():
-                    print("BindLawyer方法报错：%s不能仅绑定实习律师" % self._Name)
-                    return
-            # 经过前面的条件过滤后，将传进来的代理人对象绑定到诉讼参与人的属性上
-            self._LawsuitRepresentative.append(LawsuitRepresentative)
-            print("BindLawyer方法信息：诉讼参与人%s已增加一个代理律师：%s" % (self._Name,self._LawsuitRepresentative._Name))
-            return
-
-    # 绑定银行账户的方法
-    def BindBankAccount(self,ABankAccount,debug=False):
-        # 随后判断传进来的参数是不是BankAccount对象，如果是就可以绑定BankAccount（银行账户）属性
-        if isinstance(ABankAccount,BankAccount):
-            self._BankAccount = ABankAccount
-            if debug:
-                print("BindBankAccount方法信息：诉讼参与人%s已绑定银行账户%s" % (self._Name,self._BankAccount._AccountNumber))
-            return
-        
-        else:
-            if debug:
-                print("传入的参数并非银行账户对象，无法绑定")
             return
 
 
@@ -302,6 +266,13 @@ class Litigant():
                 self._Id = value
             if key == "litigantType":
                 self.SetLitigantType(value)
+            if key == "bankAccount":
+                # 先判断是否有银行账户属性，如果没有就创建一个
+                if not hasattr(self,"_BankAccount"):
+                    self._BankAccount = BankAccount()
+                # 调用银行账户类的InputInfoFromDict方法
+                self._BankAccount.InputFromDict(value)
+
             
         # 根据规则设置诉讼参与人的类型属性
         if self._LitigantType == "":
@@ -326,6 +297,9 @@ class Litigant():
         LitigantInfoDict["id"] = self.GetId()
         LitigantInfoDict["litigantType"] = self.GetLitigantType()  
         LitigantInfoDict["litigantPosition"] = self.GetLitigantPosition()
+        # 如果有银行账户属性，就调用银行账户类的OutputToDict方法
+        if hasattr(self,"_BankAccount"):
+            LitigantInfoDict["bankAccount"] = self._BankAccount.OutputToDict()
 
 
         # 如果是公司具有法定代表人属性
