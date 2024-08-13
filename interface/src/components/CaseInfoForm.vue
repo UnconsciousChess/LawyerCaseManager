@@ -1,6 +1,8 @@
 <script setup>
 // 局部注册LitigantForm组件
 import LitigantForm from "./LitigantForm.vue";
+import courtData from "../../../data/PublicInfomationList/Courts-China.json";
+import causeOfActionData from "../../../data/PublicInfomationList/CauseOfActions-China.json";
 
 // 当事人表单实例（原告）
 const litigantFormPlaintiff = ref(null);
@@ -55,6 +57,9 @@ const caseAgentStageCheckboxOptions = ref([
 	"执行",
 	"再审",
 ]);
+
+const causeOfActions = ref(causeOfActionData);
+const courts = ref(courtData);
 
 // 设定表单的校验规则
 const caseFormRules = ref({
@@ -256,8 +261,7 @@ function onSubmit() {
 					if (propData.propMode == "create") {
 						// 将案件信息的字典传递给后端
 						pywebview.api.inputSingleCaseFromFrontEndForm(caseForm.value);
-					}
-					else if (propData.propMode == "edit") {
+					} else if (propData.propMode == "edit") {
 						// 将案件信息的字典传递给后端,更新案件信息
 						pywebview.api.updateSingleCaseFromFrontEndForm(caseForm.value);
 					}
@@ -428,12 +432,20 @@ watchEffect(() => {
 			</el-button>
 		</el-form-item>
 
-		<el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="案由"
-			prop="causeOfAction"
-		>
-			<el-input v-model.trim="caseForm.causeOfAction" style="width: 240px" />
+		<el-form-item v-if="inputInfoByFrontEndStatus" label="案由">
+			<el-select
+				v-model="caseForm.causeOfAction"
+				filterable
+				placeholder="请选择案由"
+				style="width: 220px"
+			>
+				<el-option
+					v-for="(causeOfAction, index) in causeOfActions"
+					:key="index"
+					:label="causeOfAction"
+					:value="causeOfAction"
+				></el-option>
+			</el-select>
 		</el-form-item>
 
 		<el-form-item
@@ -464,11 +476,19 @@ watchEffect(() => {
 						></el-option>
 					</el-select>
 
-					<el-input
+					<el-select
 						v-model="stage.courtName"
-						placeholder="请输入管辖法院"
+						filterable
+						placeholder="请选择管辖法院"
 						style="width: 200px; margin-right: 10px"
-					/>
+					>
+						<el-option
+							v-for="court in courts"
+							:key="court"
+							:label="court"
+							:value="court"
+						></el-option>
+					</el-select>
 
 					<el-input
 						v-model="stage.caseNumber"
