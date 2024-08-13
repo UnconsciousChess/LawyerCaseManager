@@ -83,7 +83,7 @@
 				:propCaseData="currentEditRow"
 				:propMode="caseInfoFormMode"
 				@updateCaseData="updateCaseDataFromCaseInfoForm"
-				@newCaseData="createNewCaseDataFromCaseInfoForm"
+
 			/>
 		</el-scrollbar>
 	</el-dialog>
