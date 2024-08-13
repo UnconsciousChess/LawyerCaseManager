@@ -42,7 +42,7 @@ class Case():
         # 被告主体列表,如被告[0]（被告一）、被告[1]（被告二）...
         self._DefendantList = []
         # 第三人主体列表,如第三人[0]（第三人一）、第三人[1]（第三人二）...
-        self._LegalThirdPartyList = []
+        self._ThirdPartyList = []
         # 调解意向
         self._MediationIntention = False
         # 拒绝调解理由
@@ -107,8 +107,8 @@ class Case():
     def GetDefendantList(self):
         return self._DefendantList
     # 第三人主体列表
-    def GetLegalThirdPartyList(self):
-        return self._LegalThirdPartyList
+    def GetThirdPartyList(self):
+        return self._ThirdPartyList
     # 调解意愿
     def GetMediationIntention(self):
         return self._MediationIntention
@@ -486,7 +486,7 @@ class Case():
             # 原告1  被告2  第三人3
 
             # 如果是原告
-            if ALitigant.GetLitigantPosition() == 1:
+            if ALitigant.GetLitigantPosition() == "plaintiff":
                 for index , plaintiff in enumerate(self._PlaintiffList):
                     if plaintiff.GetId() == ALitigant.GetId():
                         # 将PlaintiffList里面该原告的信息更新,即用新的Litigant对象替换掉原来的
@@ -499,7 +499,7 @@ class Case():
                 return True
             
             # 如果是被告
-            elif ALitigant.GetLitigantPosition()  == 2:
+            elif ALitigant.GetLitigantPosition()  == "defendant":
                 for index , defendant in enumerate(self._DefendantList):
                     if defendant.GetId() == ALitigant.GetId():
                         # 将DefendantList里面该被告的信息更新,即用新的Litigant对象替换掉原来的
@@ -512,19 +512,19 @@ class Case():
                 return True
 
             # 如果是第三人
-            elif ALitigant.GetLitigantPosition() == 3:
-                for index , thirdparty in enumerate(self._LegalThirdPartyList):
+            elif ALitigant.GetLitigantPosition() == "thirdParty":
+                for index , thirdparty in enumerate(self._ThirdPartyList):
                     if thirdparty.GetId() == ALitigant.GetId():
-                        # 将LegalThirdPartyList里面该第三人的信息更新,即用新的Litigant对象替换掉原来的
-                        self._LegalThirdPartyList[index] = ALitigant
+                        # 将ThirdPartyList里面该第三人的信息更新,即用新的Litigant对象替换掉原来的
+                        self._ThirdPartyList[index] = ALitigant
                         break
-                # 如果LegalThirdPartyList里面没有该第三人的信息，则认为该litigant是新的第三人，添加到LegalThirdPartyList里面
+                # 如果ThirdPartyList里面没有该第三人的信息，则认为该litigant是新的第三人，添加到ThirdPartyList里面
                 else:
-                    self._LegalThirdPartyList.append(ALitigant)
+                    self._ThirdPartyList.append(ALitigant)
 
                 return True
             
-            # 如果诉讼地位不是1、2、3，则返回False
+            # 如果诉讼地位不是"plaintiff"、"defendant"、"thirdParty"，则返回False
             else:
                 return False
             
@@ -678,11 +678,11 @@ class Case():
             index = 0
             for plaintiff in self.GetPlaintiffList():
                 index += 1
-                f.write("原告%d=Name:%s;IdCode=%s;Location=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n" 
+                f.write("原告%d=Name:%s;IdCode=%s;Address=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n" 
                         % (index,
                            plaintiff.GetName(),
                            plaintiff.GetIdCode(),
-                           plaintiff.GetLocation(),
+                           plaintiff.GetAddress(),
                            plaintiff.GetContactNumber(),
                            plaintiff.GetLitigantPosition(),
                            plaintiff.IsOurClient(),
@@ -693,11 +693,11 @@ class Case():
             index = 0
             for defendant in self.GetDefendantList():
                 index += 1
-                f.write("被告%d=Name:%s;IdCode=%s;Location=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n" 
+                f.write("被告%d=Name:%s;IdCode=%s;Address=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n" 
                         % (index,
                            defendant.GetName(),
                            defendant.GetIdCode(),
-                           defendant.GetLocation(),
+                           defendant.GetAddress(),
                            defendant.GetContactNumber(),
                            defendant.GetLitigantPosition(),
                            defendant.IsOurClient(),
@@ -706,13 +706,13 @@ class Case():
 
             # 写第三人主体列表
             index = 0
-            for thirdparty in self.GetLegalThirdPartyList():
+            for thirdparty in self.GetThirdPartyList():
                 index += 1
-                f.write("第三人%d=Name:%s;IdCode=%s;Location=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n"
+                f.write("第三人%d=Name:%s;IdCode=%s;Address=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n"
                         % (index,
                            thirdparty.GetName(),
                            thirdparty.GetIdCode(),
-                           thirdparty.GetLocation(),
+                           thirdparty.GetAddress(),
                            thirdparty.GetContactNumber(),
                            thirdparty.GetLitigantPosition(),
                            thirdparty.IsOurClient(),
@@ -791,10 +791,10 @@ class Case():
         else:
             ws.append(["被告主体列表",self.GetAllDefendantNames()])
         # 先判断第三人主体列表是否为空
-        if self.GetLegalThirdPartyList() == []:
+        if self.GetThirdPartyList() == []:
             ws.append(["第三人主体列表","无"])
         else:
-            ws.append(["第三人主体列表",self.GetLegalThirdPartyList()])
+            ws.append(["第三人主体列表",self.GetThirdPartyList()])
 
         # 根据调解意愿的布尔值，输出对应的字符串
         if self.GetMediationIntention() == True:
@@ -844,7 +844,7 @@ class Case():
                     % (index,
                         plaintiff.GetName(),
                         plaintiff.GetIdCode(),
-                        plaintiff.GetLocation(),
+                        plaintiff.GetAddress(),
                         plaintiff.GetContactNumber(),
                         plaintiff.GetLitigantPosition(),
                         plaintiff.IsOurClient(),
@@ -855,11 +855,11 @@ class Case():
         index = 0
         for defendant in self.GetDefendantList():
             index += 1
-            OutputStr += ("被告%d=Name:%s;IdCode:%s;Location:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n" 
+            OutputStr += ("被告%d=Name:%s;IdCode:%s;Address:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n" 
                     % (index,
                         defendant.GetName(),
                         defendant.GetIdCode(),
-                        defendant.GetLocation(),
+                        defendant.GetAddress(),
                         defendant.GetContactNumber(),
                         defendant.GetLitigantPosition(),
                         defendant.IsOurClient(),
@@ -868,13 +868,13 @@ class Case():
 
         # 写第三人主体列表
         index = 0
-        for thirdparty in self.GetLegalThirdPartyList():
+        for thirdparty in self.GetThirdPartyList():
             index += 1
-            OutputStr += ("第三人%d=Name:%s;IdCode:%s;Location:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n"
+            OutputStr += ("第三人%d=Name:%s;IdCode:%s;Address:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n"
                     % (index,
                         thirdparty.GetName(),
                         thirdparty.GetIdCode(),
-                        thirdparty.GetLocation(),
+                        thirdparty.GetAddress(),
                         thirdparty.GetContactNumber(),
                         thirdparty.GetLitigantPosition(),
                         thirdparty.IsOurClient(),
@@ -949,7 +949,7 @@ class Case():
 
         # 第三人主体列表（列表重新归零）
         LitigantList = []
-        for thirdparty in self.GetLegalThirdPartyList():
+        for thirdparty in self.GetThirdPartyList():
             LitigantList.append(thirdparty.OutputLitigantInfoToDict())
         OutputDict["thirdParties"] = LitigantList
 
@@ -984,7 +984,7 @@ class Case():
 
         # 第三人主体列表（列表重新归零）
         LitigantList = []
-        for thirdparty in self.GetLegalThirdPartyList():
+        for thirdparty in self.GetThirdPartyList():
             LitigantList.append(thirdparty.OutputLitigantInfoToFrontEnd())
         OutputDict["thirdParties"] = LitigantList
 
