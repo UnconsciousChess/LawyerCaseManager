@@ -58,8 +58,22 @@ const caseAgentStageCheckboxOptions = ref([
 	"再审",
 ]);
 
-const causeOfActions = ref(causeOfActionData);
-const courts = ref(courtData);
+
+
+const causeOfActionsOptions = ref(causeOfActionData.map((item) => {
+	return {
+		value: item,
+		label: item,
+	};
+})); 
+
+const courtsOptions = ref(courtData.map((item) => {
+	return {
+		value: item,
+		label: item,
+	};
+}));
+
 
 // 设定表单的校验规则
 const caseFormRules = ref({
@@ -433,19 +447,15 @@ watchEffect(() => {
 		</el-form-item>
 
 		<el-form-item v-if="inputInfoByFrontEndStatus" label="案由">
-			<el-select
+			<el-select-v2
 				v-model="caseForm.causeOfAction"
 				filterable
 				placeholder="请选择案由"
 				style="width: 220px"
-			>
-				<el-option
-					v-for="(causeOfAction, index) in causeOfActions"
-					:key="index"
-					:label="causeOfAction"
-					:value="causeOfAction"
-				></el-option>
-			</el-select>
+				:options = "causeOfActionsOptions"
+				:value = "causeOfActionsOptions.value"
+			/>
+
 		</el-form-item>
 
 		<el-form-item
@@ -476,19 +486,14 @@ watchEffect(() => {
 						></el-option>
 					</el-select>
 
-					<el-select
+					<el-select-v2
 						v-model="stage.courtName"
 						filterable
 						placeholder="请选择管辖法院"
 						style="width: 200px; margin-right: 10px"
-					>
-						<el-option
-							v-for="court in courts"
-							:key="court"
-							:label="court"
-							:value="court"
-						></el-option>
-					</el-select>
+						:options = "courtsOptions"
+						:value = "courtsOptions.value"
+					/>
 
 					<el-input
 						v-model="stage.caseNumber"
