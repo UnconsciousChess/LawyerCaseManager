@@ -37,62 +37,95 @@
 					/>
 				</el-form-item>
 
-				<el-form-item v-if="getInfoByPath == false" label="原告名字">
-					<el-input
-						v-model="litigantForm.litigantName"
-						prop="litigantName"
-						style="max-width: 300px"
-					/>
-				</el-form-item>
+				<div v-if="getInfoByPath == false">
+					<el-form-item label="是否我方">
+						<el-switch
+							v-model="litigantForm.isOurClient"
+							active-text="是"
+							inactive-text="否"
+						/>
+					</el-form-item>
 
-				<el-form-item v-if="getInfoByPath == false" label="原告身份证号码">
-					<el-row width="70" :gutter="50">
-						<el-col :span="20">
+					<el-form-item label="原告名字">
+						<el-input
+							v-model="litigantForm.litigantName"
+							prop="litigantName"
+							style="max-width: 300px"
+						/>
+					</el-form-item>
+
+					<el-form-item label="原告身份证号码">
+						<el-row width="70" :gutter="50">
+							<el-col :span="20">
+								<el-input
+									v-model="litigantForm.litigantIdCode"
+									style="max-width: 400px"
+								/>
+							</el-col>
+							<el-col :span="4">
+								<el-button color="#EFBA1B" @click="checkIdNumber"
+									>校验证件号码</el-button
+								>
+							</el-col>
+						</el-row>
+					</el-form-item>
+
+					<el-form-item label="原告电话号码">
+						<el-input
+							v-model="litigantForm.litigantPhoneNumber"
+							style="max-width: 400px"
+						/>
+					</el-form-item>
+
+					<el-form-item label="原告地址">
+						<el-input
+							v-model="litigantForm.litigantAddress"
+							style="max-width: 400px"
+						/>
+					</el-form-item>
+
+					<div v-if="litigantForm.litigantType == 'Company'">
+						<el-form-item label="法定代表人姓名">
 							<el-input
-								v-model="litigantForm.litigantIdCode"
-								style="max-width: 400px"
+								v-model="litigantForm.legalRepresentative"
+								style="max-width: 300px"
 							/>
-						</el-col>
-						<el-col :span="4">
-							<el-button color="#EFBA1B" @click="checkIdNumber"
-								>校验证件号码</el-button
-							>
-						</el-col>
-					</el-row>
-				</el-form-item>
+						</el-form-item>
 
-				<el-form-item v-if="getInfoByPath == false" label="原告电话号码">
-					<el-input
-						v-model="litigantForm.litigantPhoneNumber"
-						style="max-width: 400px"
-					/>
-				</el-form-item>
-
-				<el-form-item v-if="getInfoByPath == false" label="原告地址">
-					<el-input
-						v-model="litigantForm.litigantAddress"
-						style="max-width: 400px"
-					/>
-				</el-form-item>
+						<el-form-item label="法定代表人身份证号码">
+							<el-row width="50" :gutter="50">
+								<el-col :span="20">
+									<el-input
+										v-model="litigantForm.legalRepresentativeIdCode"
+										style="max-width: 300px"
+									/>
+								</el-col>
+								<el-col :span="4">
+									<el-button color="#216CF3" @click="checkIdNumber"
+										>校验证件号码</el-button
+									>
+								</el-col>
+							</el-row>
+						</el-form-item>
+					</div>
+				</div>
 
 				<el-form-item>
-					<el-row :gutter="60">
-						<el-col :span="6">
-							<el-button type="success" plain @click="sumbitCurrentlitigantInfo"
-								>提交该原告</el-button
-							>
-						</el-col>
-						<el-col :span="6">
-							<el-button type="danger" plain @click="deleteCurrentlitigantInfo"
-								>删除该原告</el-button
-							>
-						</el-col>
-						<el-col :span="6">
-							<el-button type="info" plain @click="checkInfo"
-								>该功能未完善</el-button
-							>
-						</el-col>
-					</el-row>
+					<el-button
+						type="success"
+						plain
+						@click="sumbitCurrentlitigantInfo"
+						style="margin-right: 15px"
+						>提交</el-button
+					>
+
+					<el-button
+						type="danger"
+						plain
+						@click="deleteCurrentlitigantInfo"
+						style="margin-right: 15px"
+						>删除</el-button
+					>
 				</el-form-item>
 
 				<!-- 下面是调试显示部分 -->
@@ -139,62 +172,95 @@
 					/>
 				</el-form-item>
 
-				<el-form-item v-if="getInfoByPath == false" label="被告名字">
-					<el-input
-						v-model="litigantForm.litigantName"
-						prop="litigantName"
-						style="max-width: 300px"
-					/>
-				</el-form-item>
+				<div v-if="getInfoByPath == false">
+					<el-form-item label="是否我方">
+						<el-switch
+							v-model="litigantForm.isOurClient"
+							active-text="是"
+							inactive-text="否"
+						/>
+					</el-form-item>
 
-				<el-form-item v-if="getInfoByPath == false" label="被告身份证号码">
-					<el-row width="50" :gutter="50">
-						<el-col :span="20">
+					<el-form-item label="被告名字">
+						<el-input
+							v-model="litigantForm.litigantName"
+							prop="litigantName"
+							style="max-width: 300px"
+						/>
+					</el-form-item>
+
+					<el-form-item label="被告身份证号码">
+						<el-row width="50" :gutter="50">
+							<el-col :span="20">
+								<el-input
+									v-model="litigantForm.litigantIdCode"
+									style="max-width: 300px"
+								/>
+							</el-col>
+							<el-col :span="4">
+								<el-button color="#216CF3" @click="checkIdNumber"
+									>校验证件号码</el-button
+								>
+							</el-col>
+						</el-row>
+					</el-form-item>
+
+					<el-form-item label="被告电话号码">
+						<el-input
+							v-model="litigantForm.litigantPhoneNumber"
+							style="max-width: 400px"
+						/>
+					</el-form-item>
+
+					<el-form-item label="被告地址">
+						<el-input
+							v-model="litigantForm.litigantAddress"
+							style="max-width: 400px"
+						/>
+					</el-form-item>
+
+					<div v-if="litigantForm.litigantType == 'Company'">
+						<el-form-item label="法定代表人姓名">
 							<el-input
-								v-model="litigantForm.litigantIdCode"
+								v-model="litigantForm.legalRepresentative"
 								style="max-width: 300px"
 							/>
-						</el-col>
-						<el-col :span="4">
-							<el-button color="#216CF3" @click="checkIdNumber"
-								>校验证件号码</el-button
-							>
-						</el-col>
-					</el-row>
-				</el-form-item>
+						</el-form-item>
 
-				<el-form-item v-if="getInfoByPath == false" label="被告电话号码">
-					<el-input
-						v-model="litigantForm.litigantPhoneNumber"
-						style="max-width: 400px"
-					/>
-				</el-form-item>
-
-				<el-form-item v-if="getInfoByPath == false" label="被告地址">
-					<el-input
-						v-model="litigantForm.litigantAddress"
-						style="max-width: 400px"
-					/>
-				</el-form-item>
+						<el-form-item label="法定代表人身份证号码">
+							<el-row width="50" :gutter="50">
+								<el-col :span="20">
+									<el-input
+										v-model="litigantForm.legalRepresentativeIdCode"
+										style="max-width: 300px"
+									/>
+								</el-col>
+								<el-col :span="4">
+									<el-button color="#216CF3" @click="checkIdNumber"
+										>校验证件号码</el-button
+									>
+								</el-col>
+							</el-row>
+						</el-form-item>
+					</div>
+				</div>
 
 				<el-form-item>
-					<el-row :gutter="60">
-						<el-col :span="6">
-							<el-button type="success" plain @click="sumbitCurrentlitigantInfo"
-								>提交该被告</el-button
-							>
-						</el-col>
-						<el-col :span="6">
-							<el-button type="danger" plain @click="deleteCurrentlitigantInfo"
-								>删除该被告</el-button
-							>
-						</el-col>
-						<el-col :span="6">
-							<el-button type="info" plain @click="checkInfo"
-								>该功能未完善</el-button
-							>
-						</el-col>
-					</el-row>
+					<el-button
+						type="success"
+						plain
+						@click="sumbitCurrentlitigantInfo"
+						style="margin-right: 15px"
+						>提交</el-button
+					>
+
+					<el-button
+						type="danger"
+						plain
+						@click="deleteCurrentlitigantInfo"
+						style="margin-right: 15px"
+						>删除</el-button
+					>
 				</el-form-item>
 			</el-form>
 		</el-card>
@@ -231,6 +297,22 @@
 				<el-descriptions-item label="原告地址">{{
 					litigantForm.litigantAddress
 				}}</el-descriptions-item>
+				<el-descriptions-item label="是否我方">{{
+					litigantForm.isOurClient
+				}}</el-descriptions-item>
+				<el-descriptions-item label="原告类型">{{
+					litigantForm.litigantType
+				}}</el-descriptions-item>
+				<el-descriptions-item
+					v-if="litigantForm.litigantType == 'Company'"
+					label="原告法定代表人姓名"
+					>{{ litigantForm.legalRepresentative }}</el-descriptions-item
+				>
+				<el-descriptions-item
+					v-if="litigantForm.litigantType == 'Company'"
+					label="原告法定代表人身份证号码"
+					>{{ litigantForm.legalRepresentativeIdCode }}</el-descriptions-item
+				>
 			</el-descriptions>
 
 			<el-button
@@ -276,6 +358,22 @@
 				<el-descriptions-item label="被告地址">{{
 					litigantForm.litigantAddress
 				}}</el-descriptions-item>
+				<el-descriptions-item label="是否我方">{{
+					litigantForm.isOurClient
+				}}</el-descriptions-item>
+				<el-descriptions-item label="被告类型">{{
+					litigantForm.litigantType
+				}}</el-descriptions-item>
+				<el-descriptions-item
+					v-if="litigantForm.litigantType == 'Company'"
+					label="被告法定代表人姓名"
+					>{{ litigantForm.legalRepresentative }}</el-descriptions-item
+				>
+				<el-descriptions-item
+					v-if="litigantForm.litigantType == 'Company'"
+					label="被告法定代表人身份证号码"
+					>{{ litigantForm.legalRepresentativeIdCode }}</el-descriptions-item
+				>
 			</el-descriptions>
 
 			<el-button
@@ -302,15 +400,7 @@ const props = defineProps({
 	showDescriptionList: Boolean,
 });
 
-const litigantForm = ref({
-	litigantName: "",
-	litigantIdCode: "",
-	litigantPhoneNumber: "",
-	litigantAddress: "",
-	litigantPosition: "",
-	litigantInfoPath: "",
-	id: 0,
-});
+const litigantForm = ref({});
 
 const getInfoByPath = ref(false);
 
@@ -424,6 +514,11 @@ onMounted(() => {
 	litigantForm.value.litigantPhoneNumber = props.litigant.litigantPhoneNumber;
 	litigantForm.value.litigantAddress = props.litigant.litigantAddress;
 	litigantForm.value.litigantPosition = props.litigant.litigantPosition;
+	litigantForm.value.legalRepresentative = props.litigant.legalRepresentative;
+	litigantForm.value.legalRepresentativeIdCode =
+		props.litigant.legalRepresentativeIdCode;
+	litigantForm.value.litigantType = props.litigant.litigantType;
+	litigantForm.value.isOurClient = props.litigant.isOurClient;
 	litigantForm.value.id = props.litigant.id;
 
 	showDescriptionListAndHideForm.value = props.showDescriptionList;

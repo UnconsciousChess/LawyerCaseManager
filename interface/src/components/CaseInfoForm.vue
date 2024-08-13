@@ -195,6 +195,14 @@ const getCurrentplaintiffData = (plaintiffData, id) => {
 		plaintiffData.litigantAddress;
 	caseForm.value.plaintiffs[index].litigantPosition =
 		plaintiffData.litigantPosition;
+	caseForm.value.plaintiffs[index].litigantType =
+		plaintiffData.litigantType;
+	caseForm.value.plaintiffs[index].legalRepresentative =
+		plaintiffData.legalRepresentative;
+	caseForm.value.plaintiffs[index].legalRepresentativeIdCode =
+		plaintiffData.legalRepresentativeIdCode;
+	caseForm.value.plaintiffs[index].isOurClient =
+		plaintiffData.isOurClient;
 };
 
 const getCurrentDefendantData = (defendantData, id) => {
@@ -214,6 +222,14 @@ const getCurrentDefendantData = (defendantData, id) => {
 		defendantData.litigantAddress;
 	caseForm.value.defendants[index].litigantPosition =
 		defendantData.litigantPosition;
+	caseForm.value.defendants[index].litigantType =
+		defendantData.litigantType;
+	caseForm.value.defendants[index].legalRepresentative =
+		defendantData.legalRepresentative;
+	caseForm.value.defendants[index].legalRepresentativeIdCode =
+		defendantData.legalRepresentativeIdCode;
+	caseForm.value.defendants[index].isOurClient =
+		defendantData.isOurClient;
 };
 
 // 将该方法提供给子组件
