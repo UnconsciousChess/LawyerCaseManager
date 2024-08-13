@@ -1,6 +1,5 @@
-// 导入区域代码
-import areaCodeSet from "./areaCode.js";
-
+// 导入区域代码（用json）
+import areaCodeArray from "../../../data/PublicInfomationList/CitizenIdentificationAreaCode.json" assert {type: "json"};
 
 // 该函数用来检验身份证中的出生日期是否合法
 const checkBirthdayValid = (birthday) => {
@@ -45,7 +44,7 @@ function checkIdNumberValid(idNumber) {
     // 将身份证前6位的地区代码提取出来
     let areaCode = Number(idNumber.slice(0, 6));
     // 判断地区代码是否合法,如果合法进入下一步
-    if (!areaCodeSet.has(areaCode)) {
+    if (areaCodeArray.indexOf(areaCode) == -1) {
         console.log("地区代码不合法");
         return passOrNot;
     }
@@ -85,6 +84,7 @@ function checkIdNumberValid(idNumber) {
     // 如果输入的校验码与以计算出来的校验码为index，在字符集中对应的value相等，则通过
     if (idCheckNum == charSet[caculatedCheckNum]) {
         passOrNot = true;
+        console.log("校验码通过，全部通过");
         return passOrNot;
     }
     // 否则，如果校验码为X，且计算出来的校验码为10，则通过
@@ -161,8 +161,6 @@ function checkEnterpriseIdNumberValid(enterpriseIdNumber) {
     // 最终返回结果
     return passOrNot;
 }
-
-
 
 
 
