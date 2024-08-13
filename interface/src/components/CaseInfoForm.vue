@@ -58,22 +58,23 @@ const caseAgentStageCheckboxOptions = ref([
 	"再审",
 ]);
 
+const causeOfActionsOptions = ref(
+	causeOfActionData.map((item) => {
+		return {
+			value: item,
+			label: item,
+		};
+	})
+);
 
-
-const causeOfActionsOptions = ref(causeOfActionData.map((item) => {
-	return {
-		value: item,
-		label: item,
-	};
-})); 
-
-const courtsOptions = ref(courtData.map((item) => {
-	return {
-		value: item,
-		label: item,
-	};
-}));
-
+const courtsOptions = ref(
+	courtData.map((item) => {
+		return {
+			value: item,
+			label: item,
+		};
+	})
+);
 
 // 设定表单的校验规则
 const caseFormRules = ref({
@@ -184,27 +185,35 @@ const getCurrentplaintiffData = (plaintiffData, id) => {
 		(plaintiff) => plaintiff.id === id
 	);
 	// 赋值
-	caseForm.value.plaintiffs[index].litigantName = plaintiffData.litigantName;
+	caseForm.value.plaintiffs[index].litigantName = 
+		plaintiffData.litigantName;
 	caseForm.value.plaintiffs[index].litigantIdCode =
 		plaintiffData.litigantIdCode;
 	caseForm.value.plaintiffs[index].litigantPhoneNumber =
 		plaintiffData.litigantPhoneNumber;
+	caseForm.value.plaintiffs[index].litigantAddress =
+		plaintiffData.litigantAddress;
+	caseForm.value.plaintiffs[index].litigantPosition =
+		plaintiffData.litigantPosition;
 };
 
 const getCurrentDefendantData = (defendantData, id) => {
-	// console.log(defendantData);
 	// 在被告列表中找到该被告的位置
 	var index = caseForm.value.defendants.findIndex(
 		(defendant) => defendant.id === id
 	);
-	// console.log("当前被告的位置为" + index);
 
 	// 赋值
-	caseForm.value.defendants[index].litigantName = defendantData.litigantName;
+	caseForm.value.defendants[index].litigantName = 
+		defendantData.litigantName;
 	caseForm.value.defendants[index].litigantIdCode =
 		defendantData.litigantIdCode;
 	caseForm.value.defendants[index].litigantPhoneNumber =
 		defendantData.litigantPhoneNumber;
+	caseForm.value.defendants[index].litigantAddress =
+		defendantData.litigantAddress;
+	caseForm.value.defendants[index].litigantPosition =
+		defendantData.litigantPosition;
 };
 
 // 将该方法提供给子组件
@@ -217,7 +226,6 @@ provide("getCurrentDefendantData", getCurrentDefendantData);
 
 // 选中“选择文件按钮”,调用后端python来弹出文件选择框
 async function promptFileSelection() {
-	console.log("选择文件按钮");
 	// 判断是否有pywebview对象
 	if (typeof pywebview === "undefined") {
 		console.log("未链接到后端");
@@ -353,6 +361,7 @@ function caseFormInfoInitiation(propData) {
 
 		// 因为是编辑模式，所以默认显示描述列表
 		showDescriptionList.value = true;
+
 		console.log(caseForm.value);
 	}
 
@@ -452,10 +461,9 @@ watchEffect(() => {
 				filterable
 				placeholder="请选择案由"
 				style="width: 220px"
-				:options = "causeOfActionsOptions"
-				:value = "causeOfActionsOptions.value"
+				:options="causeOfActionsOptions"
+				:value="causeOfActionsOptions.value"
 			/>
-
 		</el-form-item>
 
 		<el-form-item
@@ -491,8 +499,8 @@ watchEffect(() => {
 						filterable
 						placeholder="请选择管辖法院"
 						style="width: 200px; margin-right: 10px"
-						:options = "courtsOptions"
-						:value = "courtsOptions.value"
+						:options="courtsOptions"
+						:value="courtsOptions.value"
 					/>
 
 					<el-input
