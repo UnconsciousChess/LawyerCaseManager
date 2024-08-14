@@ -288,11 +288,11 @@ class Litigant():
 
         OutputStr = ""
 
-        OutputStr += "姓名：" + self.GetName() + "\n"
-
         if self.GetLitigantType() == "Person":
-            OutputStr += "身份证：" + self.GetIdCode() + "\n"
+            OutputStr += "姓名：" + self.GetName() + "\n"
+            OutputStr += "身份证号码：" + self.GetIdCode() + "\n"
         else:
+            OutputStr += "名称：" + self.GetName() + "\n"
             OutputStr += "统一社会信用代码：" + self.GetIdCode() + "\n"
         
         OutputStr += "联系地址：" + self.GetAddress() + "\n"
@@ -309,7 +309,7 @@ class Litigant():
         elif self.GetLitigantType() == "Company":
             OutputStr += "主体类型：法人" + "\n"
         elif self.GetLitigantType() == "Others":
-            OutputStr += "主体类型：非法人组织或其他" + "\n"
+            OutputStr += "主体类型：非法人组织" + "\n"
         
         if self.GetLitigantType() == "Company" or self.GetLitigantType() == "Others":
             if self.GetLegalRepresentative() != None:

@@ -627,29 +627,46 @@ class Case():
         OutputStr = ""
 
         # 逐个输出案件信息
-        OutputStr += "案件Id=%s\n" % self.GetCaseId()
-        OutputStr += "案件类型=%s\n" % self.GetCaseType()
-        OutputStr += "诉讼标的=%s\n" % self.GetLitigationAmount()
-        OutputStr += "案由=%s\n" % self.GetCauseOfAction()
-        OutputStr += "各阶段信息="
+        OutputStr += "案件Id：%s\n" % self.GetCaseId()
+
+        OutputStr += "案件文件夹路径：%s\n" % self.GetCaseFolderPath()
+
+        if self.GetCaseType() == 1:
+            OutputStr += "案件类型：民事案件\n"
+        elif self.GetCaseType() == 2:
+            OutputStr += "案件类型：行政案件\n"
+        elif self.GetCaseType() == 3:
+            OutputStr += "案件类型：执行案件\n"
+
+        OutputStr += "诉讼标的：%s\n" % self.GetLitigationAmount()
+
+        OutputStr += "案由：%s\n" % self.GetCauseOfAction()
+
+        OutputStr += "各阶段信息：\n"
         for stage in self.GetStages():
             OutputStr += "%s" % stage.OutputToString()
         OutputStr += "\n"
-        OutputStr += "诉讼请求=%s\n" % self.GetClaimText()
-        OutputStr += "事实与理由=%s\n" % self.GetFactAndReasonText()
-        OutputStr += "案件文件所在文件夹路径=%s\n" % self.GetCaseFolderPath()
 
-        OutputStr += "调解意愿=%s\n" % self.GetMediationIntention()
-        OutputStr += "拒绝调解理由=%s\n" % self.GetRejectMediationReasonText()
-        OutputStr += "案件代理阶段=%s\n" % self.GetCaseAgentStageStr()
+        OutputStr += "诉讼请求：%s\n" % self.GetClaimText()
+
+        OutputStr += "事实与理由：%s\n" % self.GetFactAndReasonText()
+
+        if self.GetMediationIntention() == True:
+            OutputStr += "调解意愿：愿意调解\n"
+        else:
+            OutputStr += "调解意愿：不愿意调解\n"
+
+        OutputStr += "拒绝调解理由：%s\n" % self.GetRejectMediationReasonText()
+
+        OutputStr += "案件代理阶段：%s\n" % self.GetCaseAgentStageStr()
 
         if self.GetRiskAgentStatus() == True:
-            OutputStr += "风险代理情况=1\n"
-            OutputStr += "风险代理前期费用=%s\n" % self.GetRiskAgentUpfrontFee()
-            OutputStr += "风险代理后期比例=%s\n" % self.GetRiskAgentPostFeeRate()
+            OutputStr += "采取风险收费\n"
+            OutputStr += "风险代理前期费用：%s\n" % self.GetRiskAgentUpfrontFee()
+            OutputStr += "风险代理后期比例：%s%%\n" % self.GetRiskAgentPostFeeRate()
         elif self.GetRiskAgentStatus() == False:
-            OutputStr += "风险代理情况=0\n"
-            OutputStr += "非风险代理的固定费用="
+            OutputStr += "采取固定收费\n"
+            OutputStr += "非风险代理的固定费用："
             if self.GetAgentFixedFee() == []:
                 OutputStr += "无\n"
             else:
