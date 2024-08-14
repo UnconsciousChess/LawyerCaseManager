@@ -68,7 +68,11 @@ class BankAccount():
 
     # ======= Output方法 ======= #
 
-    # 输出银行账户信息
+    # 输出银行账户信息到字符串
+    def OutputToStr(self) -> str:
+        return "户名: %s\n账号: %s\n开户行: %s\n" % (self.GetAccountName(),self.GetAccountNumber(),self.GetBankName())
+
+    # 输出银行账户信息到字典
     def OutputToDict(self) -> dict:
         Info = {
             "accountName":self.GetAccountName(),
