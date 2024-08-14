@@ -46,6 +46,14 @@
 						/>
 					</el-form-item>
 
+					<el-form-item label="原告主体类型">
+						<el-radio-group v-model="litigantForm.litigantType">
+							<el-radio value="Person" border>自然人</el-radio>
+							<el-radio value="Company" border>法人</el-radio>
+							<el-radio value="Others" border>非法人组织</el-radio>
+						</el-radio-group>
+					</el-form-item>
+
 					<el-form-item label="原告名字">
 						<el-input
 							v-model="litigantForm.litigantName"
@@ -84,7 +92,12 @@
 						/>
 					</el-form-item>
 
-					<div v-if="litigantForm.litigantType == 'Company'">
+					<div
+						v-if="
+							litigantForm.litigantType == 'Company' ||
+							litigantForm.litigantType == 'Others'
+						"
+					>
 						<el-form-item label="法定代表人姓名">
 							<el-input
 								v-model="litigantForm.legalRepresentative"
@@ -202,6 +215,14 @@
 						/>
 					</el-form-item>
 
+					<el-form-item label="被告主体类型">
+						<el-radio-group v-model="litigantForm.litigantType">
+							<el-radio value="Person" border>自然人</el-radio>
+							<el-radio value="Company" border>法人</el-radio>
+							<el-radio value="Others" border>非法人组织</el-radio>
+						</el-radio-group>
+					</el-form-item>
+
 					<el-form-item label="被告名字">
 						<el-input
 							v-model="litigantForm.litigantName"
@@ -240,7 +261,12 @@
 						/>
 					</el-form-item>
 
-					<div v-if="litigantForm.litigantType == 'Company'">
+					<div
+						v-if="
+							litigantForm.litigantType == 'Company' ||
+							litigantForm.litigantType == 'Others'
+						"
+					>
 						<el-form-item label="法定代表人姓名">
 							<el-input
 								v-model="litigantForm.legalRepresentative"
