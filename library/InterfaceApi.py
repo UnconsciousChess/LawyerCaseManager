@@ -62,8 +62,8 @@ class Api:
                 for case in cases:
                     # 实例化一个Case对象
                     caseObj = Case()
-                    # 将案件信息调用case对象的InputCaseInfoFromDict方法，将信息导入到当前case对象中
-                    caseObj.InputCaseInfoFromDict(case)
+                    # 将案件信息调用case对象的InputFromDict方法，将信息导入到当前case对象中
+                    caseObj.InputFromDict(case)
                     
                     self._cases.append(caseObj)
                 
@@ -174,7 +174,7 @@ class Api:
         # 实例化一个Case对象
         case = Case()
         # 将CaseFormDict中的数据，调用相应方法去生成当前case对象
-        case.InputCaseInfoFromDict(CaseFormDict)
+        case.InputFromDict(CaseFormDict)
         # 将案件对象添加到self._case中
         self._cases.append(case)
 
@@ -190,7 +190,7 @@ class Api:
             # 如果案件ID相同，则更新案件信息
             if case.GetCaseId() == CaseFormDict["caseId"]:
                 # 调用Case对象的UpdateCaseInfoFromDict方法，更新案件信息
-                case.InputCaseInfoFromDict(CaseFormDict)
+                case.InputFromDict(CaseFormDict)
                 return "Success"
         # 如果遍历完，都没有找到对应的案件，则返回Fail
         return "Fail"
@@ -211,8 +211,8 @@ class Api:
             CaseDict = json.load(f)
             # 实例化一个Case对象
             case = Case()
-            # 将案件内容调用case对象的InputCaseInfoFromDict方法，将信息导入到当前case对象中
-            case.InputCaseInfoFromDict(CaseDict)
+            # 将案件内容调用case对象的InputFromDict方法，将信息导入到当前case对象中
+            case.InputFromDict(CaseDict)
             # 如果该案件的案件Id与列表中的案件均不相同，则将案件对象添加到self._case中
             if case.GetCaseId() not in [case.GetCaseId() for case in self._cases]:
                 self._cases.append(case)
@@ -242,8 +242,8 @@ class Api:
             for CaseDict in CaseList:
                 # 实例化一个Case对象
                 case = Case()
-                # 将案件内容调用case对象的InputCaseInfoFromDict方法，将信息导入到当前case对象中
-                case.InputCaseInfoFromDict(CaseDict)
+                # 将案件内容调用case对象的InputFromDict方法，将信息导入到当前case对象中
+                case.InputFromDict(CaseDict)
                 # 如果该案件的案件Id与列表中的案件均不相同，则将案件对象添加到self._case中
                 if case.GetCaseId() not in [case.GetCaseId() for case in self._cases]:
                     self._cases.append(case)
@@ -256,16 +256,6 @@ class Api:
 
     # ==输出类==
 
-    # 该方法用于输出指定案件的信息到Excel，并保存到案件文件夹中
-    def outputCaseInfoToExcel(self,caseId) -> str:
-        # 判断案件列表是否为空
-        if len(self._cases) == 0:
-            return "CaseListIsEmpty"
-        # 如果案件列表不为空，则根据caseId找到对应案件
-        for case in self._cases:
-            if case.GetCaseId() == caseId:
-                case.OutputCaseInfoToExcel()
-                return "Success"
 
     # 该方法用于输出指定案件的信息到txt，并保存到案件文件夹中        
     def outputCaseInfoToTxt(self,caseId) -> str:
@@ -275,31 +265,10 @@ class Api:
         # 如果案件列表不为空，则根据caseId找到对应案件
         for case in self._cases:
             if case.GetCaseId() == caseId:
-                case.OutputCaseInfoToTxt()
+                case.OutputToTxt()
                 return "Success"
 
-    # 该方法用于输出所有案件的信息到一个txt(可能要废弃)
-    def outputAllCasesToTxt(self) -> str:
-        OutputFileName = self.GetSaveFilepath(title="导出案件信息",filetype="Text")
-        print(OutputFileName)
-
-        # 判断OutputFileName是否为空，如果空就视为取消
-        if OutputFileName == "":
-            return "Cancel"
-        
-        with open(OutputFileName,"w",encoding='utf-8') as f:
-            if len(self._cases) == 0:
-                f.write("[空空如也]案件列表为空")
-                print("案件列表为空！") 
-                return "Success"
-            else:
-                for case in self._cases:
-                    f.write("$CaseStart$\n")
-                    f.write(case.OutputCaseInfoToStr())
-                    f.write("$CaseEnd$\n\n")
-                print("全部案件信息输出成功！")
-            return "Success"
-
+    # 该方法用于输出所有案件的信息到json，并保存到案件文件夹中
     def outputAllCasesToJson(self) -> str:
         OutputFileName = self.GetSaveFilepath(title="导出案件信息",filetype="Json")
         print(OutputFileName)
@@ -316,7 +285,7 @@ class Api:
             else:
                 CaseList = []
                 for case in self._cases:
-                    CaseList.append(case.OutputCaseInfoToDict())
+                    CaseList.append(case.OutputToDict())
                 json.dump(CaseList,
                           f, 
                           ensure_ascii=False,
@@ -328,10 +297,11 @@ class Api:
     def outputAllCaseInfoToFrontEnd(self) -> list:
         CaseList = []
         for case in self._cases:
-            CaseList.append(case.OutputCaseInfoToDict())
+            CaseList.append(case.OutputToDict())
         # 返回案件列表
         return CaseList
     
+
     # 该方法用于对接前端的文书生成按钮，用于生成案件文件夹及对应的文件模板
     def documentsGenerate(self,caseId,templateFilesIdList) -> str:
         # 先将对应caseId的案件对象找到，赋值给TargetCase
@@ -595,7 +565,7 @@ class Api:
     def testCasesOutput(self) -> None:
         # 输出案件信息
         for case in self._cases:
-            print(case.OutputCaseInfoToStr())
+            print(case.OutputToStr())
         return 
     
     def testTemplateFilesOutput(self) -> None:

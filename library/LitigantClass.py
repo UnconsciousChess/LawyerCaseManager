@@ -237,7 +237,7 @@ class Litigant():
 
     # =============== 下面是Input方法 ===============
 
-    def InputLitigantInfoFromDict(self,InfoDict):
+    def InputFromDict(self,InfoDict):
 
         # 判断传入的参数是否为字典
         if not isinstance(InfoDict,dict):
@@ -285,7 +285,7 @@ class Litigant():
     # ========== 下面是Output方法 ========== 
 
     # 定义将当前诉讼参与人各项信息输出为字典的方法
-    def OutputLitigantInfoToDict(self) -> dict:
+    def OutputToDict(self) -> dict:
         LitigantInfoDict = {}
 
         # 返回的字典中的键值对应的是前端需要的字段

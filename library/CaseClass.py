@@ -533,7 +533,7 @@ class Case():
     # ===========Input方法：下面定义批量输入案件信息的方法=============
 
     # 设定一个类的内部方法，对于参数键名和键值，分别进行处理
-    def SetCaseInfoWithKeyAndValue(self,Key,Value):
+    def InputWithKeyAndValue(self,Key,Value):
         # 根据Key的不同，调用不同的设定方法
         if Key == 'caseId' :
             # 如果案件Id为空，则自动生成一个
@@ -600,12 +600,12 @@ class Case():
                 # 实例化一个诉讼参与人对象
                 litigant = Litigant()
                 # 调用诉讼参与人的读取方法
-                litigant.InputLitigantInfoFromDict(LitigantDict)
+                litigant.InputFromDict(LitigantDict)
                 # 调用AppendLitigant方法，添加该诉讼参与人到对应的列表中
                 self.AppendLitigant(litigant)
 
     # 基于上面的方法，定义一个从字典中输入案件信息的方法
-    def InputCaseInfoFromDict(self,CaseInfoDict,DebugMode=False) -> str:
+    def InputFromDict(self,CaseInfoDict,DebugMode=False) -> str:
         # 判断传入的参数是否为字典
         if not isinstance(CaseInfoDict,dict):
             if DebugMode:
@@ -613,35 +613,15 @@ class Case():
             return "Error"
         # 对于字典中的逐个键值对读取，并调用SetCaseInfoWithKeyAndValue方法对键值对进行处理
         for Key,Value in CaseInfoDict.items():
-            self.SetCaseInfoWithKeyAndValue(Key,Value)
+            self.InputWithKeyAndValue(Key,Value)
 
-
-
-    # 读取一个excel文档的路径来输入上述案件信息，目前非重点
-    def InputCaseInfoFromExcel(self,CaseInfoFilePath,DebugMode=False):
-        from openpyxl import load_workbook
-        wb = load_workbook(CaseInfoFilePath)
-        ws = wb.active
-        # 读取第一列的数据
-        for row in ws.iter_rows(min_row=1,max_row=ws.max_row,min_col=1,max_col=1,values_only=True):
-            for cell in row:
-                # 判断是否为空行，是则跳过
-                if cell == "":
-                    continue
-                # 第一列的数据是键名
-                Key = cell.value
-                # 第二列的数据是键值
-                Value = ws.cell(row=cell.row,column=2).value
-                # 对上述分割出来的键值对进行处理
-                self.SetCaseInfoWithKeyAndValue(Key,Value)
-
-
+        return "Success"
 
 
     # ===========Output方法：下面定义输出案件信息的方法=============
 
     # 输出案件信息到txt文件
-    def OutputCaseInfoToTxt(self,DebugMode=False) -> None:
+    def OutputToTxt(self,DebugMode=False) -> None:
         # 输出文件路径=案件文件夹路径中获取
         OutputFilePath = self.GetCaseFolderPath() 
         # 判断路径是否存在
@@ -657,170 +637,11 @@ class Case():
 
         # 写入文件
         with open(file=OutputFilePath,mode="w",encoding="utf-8") as f:
-            # 逐个输出案件信息
-            if self.GetCaseType() == 1:
-                f.write("案件类型=民事案件\n")
-            elif self.GetCaseType() == 2:
-                f.write("案件类型=行政案件\n")
-            elif self.GetCaseType() == 3:
-                f.write("案件类型=执行案件\n")
-            f.write("诉讼标的=%s元\n" % self.GetLitigationAmount())
-            f.write("案由=%s\n" % self.GetCauseOfAction())
-            f.write("各阶段信息=")
-            for stage in self.GetStages():
-                f.write("%s" % stage.OutputToString())
-            f.write("\n")
-            f.write("诉讼请求=%s\n" % self.GetClaimText())
-            f.write("事实与理由=%s\n" % self.GetFactAndReasonText())
-            f.write("案件文件所在文件夹路径=%s\n" % self.GetCaseFolderPath())
-
-            # 写原告主体列表
-            index = 0
-            for plaintiff in self.GetPlaintiffList():
-                index += 1
-                f.write("原告%d=Name:%s;IdCode=%s;Address=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n" 
-                        % (index,
-                           plaintiff.GetName(),
-                           plaintiff.GetIdCode(),
-                           plaintiff.GetAddress(),
-                           plaintiff.GetContactNumber(),
-                           plaintiff.GetLitigantPosition(),
-                           plaintiff.IsOurClient(),
-                           plaintiff.GetLegalRepresentative(),
-                            plaintiff.GetLegalRepresentativeIdCode()))
-
-            # 写被告主体列表
-            index = 0
-            for defendant in self.GetDefendantList():
-                index += 1
-                f.write("被告%d=Name:%s;IdCode=%s;Address=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n" 
-                        % (index,
-                           defendant.GetName(),
-                           defendant.GetIdCode(),
-                           defendant.GetAddress(),
-                           defendant.GetContactNumber(),
-                           defendant.GetLitigantPosition(),
-                           defendant.IsOurClient(),
-                           defendant.GetLegalRepresentative(),
-                           defendant.GetLegalRepresentativeIdCode()))
-
-            # 写第三人主体列表
-            index = 0
-            for thirdparty in self.GetThirdPartyList():
-                index += 1
-                f.write("第三人%d=Name:%s;IdCode=%s;Address=%s;ContactNumber=%s;LitigantPosition=%s;OurClient=%s;LegalRepresentative=%s;LegalRepresentativeIdCode=%s\n"
-                        % (index,
-                           thirdparty.GetName(),
-                           thirdparty.GetIdCode(),
-                           thirdparty.GetAddress(),
-                           thirdparty.GetContactNumber(),
-                           thirdparty.GetLitigantPosition(),
-                           thirdparty.IsOurClient(),
-                           thirdparty.GetLegalRepresentative(),
-                           thirdparty.GetLegalRepresentativeIdCode()))
-
-            f.write("调解意愿=%s\n" % self.GetMediationIntention())
-            f.write("拒绝调解理由=%s\n" % self.GetRejectMediationReasonText())
-            f.write("案件代理的阶段:%s\n" % self.GetCaseAgentStageStr())
-            if self.GetRiskAgentStatus() == True:
-                f.write("本案为风险代理。\n")
-                f.write("风险代理前期费用=%s元\n" % self.GetRiskAgentUpfrontFee())
-                f.write("风险代理后期比例=%s%%\n" % self.GetRiskAgentPostFeeRate())
-            else:
-                f.write("非风险代理的固定费用=")
-                if self.GetAgentFixedFee() == []:
-                    f.write("无\n")
-                else:
-                    for fee in self.GetAgentFixedFee():
-                        f.write("%s," % fee)
-
-    
-    # 输出案件信息到excel文件
-    def OutputCaseInfoToExcel(self) -> None:
-        from openpyxl import Workbook
-        from openpyxl.styles import Font,Alignment
-
-
-        # 输出文件路径=案件文件夹路径中获取
-        OutputFilePath = self.GetCaseFolderPath()
-        # 判断路径是否存在
-        if not os.path.exists(OutputFilePath):
-            return
-        # 判断路径是否以\结尾,如果不是则加上\
-        if not OutputFilePath.endswith("\\"):
-            OutputFilePath += "\\"
-        wb = Workbook()
-        ws = wb.active
-        # 表头
-        ws.append(["案件具体属性","对应值"])
-        # 调整表头格式，方便看
-        for cell in ws[1]:
-            # 将表头的字体加粗
-            cell.font = Font(bold=True)
-            # 居中
-            cell.alignment = Alignment(horizontal='center',vertical='center')
-        # 逐行输出案件信息
-        # 根据案件类型的数字，输出对应的字符串
-
-        if self.GetCaseType() == 1:
-            ws.append(["案件类型","民事案件"])
-        elif self.GetCaseType() == 2:
-            ws.append(["案件类型","行政案件"])
-        elif self.GetCaseType() == 3:
-            ws.append(["案件类型","执行案件"])
-
-        ws.append(["诉讼标的",self.GetLitigationAmount()])
-        ws.append(["案由",self.GetCauseOfAction()])
-
-        StageStr = ""
-        for stage in self.GetStages():
-            StageStr += stage.OutputToString()
-        ws.append(["各阶段情况",StageStr])
-
-        ws.append(["诉讼请求",self.GetClaimText()])
-        ws.append(["事实与理由",self.GetFactAndReasonText()])
-        ws.append(["案件文件所在文件夹路径",self.GetCaseFolderPath()])
-        # 先判断原告主体列表是否为空
-        if self.GetPlaintiffList() == []:
-            ws.append(["原告主体列表","无"])
-        else:
-            ws.append(["原告主体列表",self.GetAllPlaintiffNames()])
-        # 先判断被告主体列表是否为空
-        if self.GetDefendantList() == []:
-            ws.append(["被告主体列表","无"])
-        else:
-            ws.append(["被告主体列表",self.GetAllDefendantNames()])
-        # 先判断第三人主体列表是否为空
-        if self.GetThirdPartyList() == []:
-            ws.append(["第三人主体列表","无"])
-        else:
-            ws.append(["第三人主体列表",self.GetThirdPartyList()])
-
-        # 根据调解意愿的布尔值，输出对应的字符串
-        if self.GetMediationIntention() == True:
-            ws.append(["调解意愿","愿意调解"])
-        else:
-            ws.append(["调解意愿","拒绝调解"])
-
-        ws.append(["拒绝调解理由",self.GetRejectMediationReasonText()])
-        ws.append(["案件代理的阶段",self.GetCaseAgentStageStr()])
-        if self.GetRiskAgentStatus() == True:
-            ws.append(["风险代理前期费用",self.GetRiskAgentUpfrontFee()])
-            ws.append(["风险代理后期比例",self.GetRiskAgentPostFeeRate()])
-        # else:
-        #     ws.append(["非风险代理的固定费用",self.GetAgentFixedFee()])
-
-
-        # 设定文件名
-        # OutputName = self.GetAllPlaintiffNames() + "诉" + self.GetAllDefendantNames() + "案件信息.xlsx"
-        OutputName = "案件信息.xlsx"
-        # 保存文件
-        wb.save(OutputFilePath + OutputName)
-        print("案件信息已经保存到%s" % (OutputFilePath + OutputName))
+            f.write(self.OutputToStr())
 
 
     # 输出案件信息为字符串
-    def OutputCaseInfoToStr(self) -> str:
+    def OutputToStr(self) -> str:
         # 初始化输出字符串
         OutputStr = ""
 
@@ -902,7 +723,7 @@ class Case():
         return OutputStr
 
     # 输出案件信息到前端（直接输出字典）
-    def OutputCaseInfoToDict(self,DebugMode=False) -> dict:
+    def OutputToDict(self,DebugMode=False) -> dict:
         # 需要返回的字典初始化
         OutputDict = {}
 
@@ -938,19 +759,19 @@ class Case():
         # 原告主体列表（列表归零）
         LitigantList = []
         for plaintiff in self.GetPlaintiffList():
-            LitigantList.append(plaintiff.OutputLitigantInfoToDict())
+            LitigantList.append(plaintiff.OutputToDict())
         OutputDict["plaintiffs"] = LitigantList
 
         # 被告主体列表（列表重新归零）
         LitigantList = []
         for defendant in self.GetDefendantList():
-            LitigantList.append(defendant.OutputLitigantInfoToDict())
+            LitigantList.append(defendant.OutputToDict())
         OutputDict["defendants"] = LitigantList
 
         # 第三人主体列表（列表重新归零）
         LitigantList = []
         for thirdparty in self.GetThirdPartyList():
-            LitigantList.append(thirdparty.OutputLitigantInfoToDict())
+            LitigantList.append(thirdparty.OutputToDict())
         OutputDict["thirdParties"] = LitigantList
 
         # 原告名字字符串
@@ -966,27 +787,3 @@ class Case():
         return OutputDict
     
 
-    # 输出当前案件的当事人信息到前端（直接输出字典，这个方法暂时不知道有什么用）
-    def OutputLitigantInfoToFrontEnd(self,DebugMode=False) -> dict:
-        # 需要返回的字典初始化
-        OutputDict = {}
-        # 原告主体列表（列表归零）
-        LitigantList = []
-        for plaintiff in self.GetPlaintiffList():
-            LitigantList.append(plaintiff.OutputLitigantInfoToFrontEnd())
-        OutputDict["plaintiffs"] = LitigantList 
-        
-        # 被告主体列表（列表重新归零）
-        LitigantList = []
-        for defendant in self.GetDefendantList():
-            LitigantList.append(defendant.OutputLitigantInfoToFrontEnd())
-        OutputDict["defendants"] = LitigantList
-
-        # 第三人主体列表（列表重新归零）
-        LitigantList = []
-        for thirdparty in self.GetThirdPartyList():
-            LitigantList.append(thirdparty.OutputLitigantInfoToFrontEnd())
-        OutputDict["thirdParties"] = LitigantList
-
-        # 返回字典
-        return OutputDict
