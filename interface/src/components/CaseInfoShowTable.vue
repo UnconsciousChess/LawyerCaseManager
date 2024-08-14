@@ -17,33 +17,73 @@
 		</el-table-column>
 		<el-table-column prop="index" label="序号" width="55" />
 		<el-table-column prop="causeOfAction" label="案由" width="180" />
-		<!-- <el-table-column prop="caseCourtCode" label="案号" width="200" /> -->
 		<el-table-column prop="litigantsName" label="当事人" width="350" />
-		<el-table-column fixed="right" label="操作" width="450">
+		<el-table-column fixed="right" label="功能菜单" width="450">
 			<template #default="{row}">
-				<el-button type="primary" size="small" @click="handleEditData(row)"
-					>编辑</el-button
-				>
-				<el-button type="danger" size="small" @click="handleDeleteData(row)"
-					>删除</el-button
-				>
-				<el-button type="success" size="small" @click="handleOutputData(row)"
-					>导出</el-button
-				>
-				<el-button color="#626aef" size="small" disabled>上传</el-button>
+				<el-dropdown size="small" placement="bottom" style="margin-right: 10px">
+					<el-button size="small" plain type="warning"> 案件操作</el-button>
+					<template #dropdown>
+						<el-dropdown-menu>
+							<el-dropdown-item>
+								<el-button
+									type="primary"
+									size="small"
+									@click="handleEditData(row)"
+									>编辑</el-button
+								>
+							</el-dropdown-item>
+							<el-dropdown-item>
+								<el-button
+									type="danger"
+									size="small"
+									@click="handleDeleteData(row)"
+									>删除</el-button
+								>
+							</el-dropdown-item>
+						</el-dropdown-menu>
+					</template>
+				</el-dropdown>
+
+				<el-dropdown size="small" placement="bottom" style="margin-right: 10px">
+					<el-button size="small" plain type="primary">输出</el-button>
+					<template #dropdown>
+						<el-dropdown-menu>
+							<el-dropdown-item>
+								<el-button
+									type="success"
+									size="small"
+									@click="handleOutputData(row)"
+									>导出</el-button
+								>
+							</el-dropdown-item>
+							<el-dropdown-item>
+								<el-button color="#626aef" size="small" disabled
+									>上传</el-button
+								>
+							</el-dropdown-item>
+						</el-dropdown-menu>
+					</template>
+				</el-dropdown>
+
+				<el-dropdown size="small" placement="bottom" style="margin-right: 10px">
+					<el-button size="small" plain type="success">文书</el-button>
+					<template #dropdown>
+						<el-dropdown-menu>
+							<el-dropdown-item @click="handleDocumentsGenerate(row)">
+								文书生成
+							</el-dropdown-item>
+							<el-dropdown-item @click="handleDocumentsMerge(row)">
+								文书合并
+							</el-dropdown-item>
+						</el-dropdown-menu>
+					</template>
+				</el-dropdown>
+
 				<el-button
-					type="warning"
+					color="#f7b824"
 					size="small"
-					plain
-					@click="handleDocumentsGenerate(row)"
-					>文书生成</el-button
-				>
-				<el-button
-					type="info"
-					size="small"
-					plain
-					@click="handleDocumentsMerge(row)"
-					>文书合并</el-button
+					@click="handleOpenCaseFolder(row)"
+					>打开文件夹</el-button
 				>
 			</template>
 		</el-table-column>
@@ -83,7 +123,6 @@
 				:propCaseData="currentEditRow"
 				:propMode="caseInfoFormMode"
 				@updateCaseData="updateCaseDataFromCaseInfoForm"
-
 			/>
 		</el-scrollbar>
 	</el-dialog>
@@ -165,7 +204,6 @@ const currentExpandedRow = ref(0);
 // 这个列表是存放展开的行的caseId（即rowkey）
 const expandRowKeys = ref([]);
 
-
 // 以下变量是用于控制各个对话框的显示的布尔值
 const dialogOutputDataVisible = ref(false);
 const dialogDeleteDataVisible = ref(false);
@@ -223,7 +261,6 @@ function createNewCase() {
 
 // 从后端获取数据
 async function getTableData() {
-
 	// 如果未连接后端，则只测试前端,并只导入默认数据
 	if (typeof pywebview === "undefined") {
 		console.log("getTableData()：未连接后端，目前只测试前端");
@@ -236,12 +273,11 @@ async function getTableData() {
 	}
 	// 如果连接了后端，则从后端获取数据(实际工作流程)
 	else {
-
 		let result = await pywebview.api.appStartInit();
 		console.log(result);
 
 		// 开始获取数据
-		pywebview.api.SendAllCasesList().then((cases) => {
+		await pywebview.api.pushAllCasesToList().then((cases) => {
 			// 遍历cases，将数据根据一定的规则添加到tableData中
 			for (let i = 0; i < cases.length; i++) {
 				// 对比案件的id，如果相同则不添加，改为更新
@@ -424,8 +460,7 @@ function handleEditData(val) {
 	dialogEditDataVisible.value = true;
 	// 将当前要编辑的案件的对象传递给currentEditRow，便于接下来的组件调用
 	currentEditRow.value = val;
-	
-	
+
 	// 改变caseInfoFormMode为edit（有edit和create两种模式）
 	caseInfoFormMode.value = "edit";
 	// caseInfoFormRef.value.caseFormInfoInitiation();
@@ -438,14 +473,12 @@ function updateCaseDataFromCaseInfoForm() {
 	// 将对话框隐藏
 	dialogEditDataVisible.value = false;
 
-	// 从后端刷新数据 
-	getTableData()
+	// 从后端刷新数据
+	getTableData();
 }
-
 
 // 删除数据的前置函数，作用是打开对话框，提示是否删除，最终确认后调用下面的deleteData
 function handleDeleteData(val) {
-
 	dialogDeleteDataVisible.value = true;
 
 	// 将当前要删除的案件的对象传递给currentDeleteRow，便于接下来的组件调用
@@ -498,10 +531,8 @@ function handleOutputData(val) {
 	currentOutputRow.value = val;
 }
 
-
 // 输出数据到txt
 function outputToJson(val) {
-
 	// 将对话框隐藏
 	dialogOutputDataVisible.value = false;
 
@@ -515,10 +546,8 @@ function outputToJson(val) {
 	}
 }
 
-
 // 输出数据到txt
 function outputToTxt(val) {
-
 	// 将对话框隐藏
 	dialogOutputDataVisible.value = false;
 
@@ -529,6 +558,17 @@ function outputToTxt(val) {
 	// 如果连接了后端，则调用后端的函数(实际运行环境)
 	else {
 		pywebview.api.outputSingleCaseToTxt(val.caseId);
+	}
+}
+
+function handleOpenCaseFolder(val) {
+	// 如果未连接后端，则只测试前端
+	if (typeof pywebview === "undefined") {
+		console.log("handleOpenCaseFolder()：未连接后端，目前只测试前端");
+	}
+	// 如果连接了后端，则调用后端的函数(实际运行环境)
+	else {
+		pywebview.api.openCaseFolder(val.caseId);
 	}
 }
 
