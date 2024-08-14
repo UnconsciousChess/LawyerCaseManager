@@ -638,50 +638,6 @@ class Case():
         OutputStr += "诉讼请求=%s\n" % self.GetClaimText()
         OutputStr += "事实与理由=%s\n" % self.GetFactAndReasonText()
         OutputStr += "案件文件所在文件夹路径=%s\n" % self.GetCaseFolderPath()
-        # 写原告主体列表
-        index = 0
-        for plaintiff in self.GetPlaintiffList():
-            index += 1
-            OutputStr += ("原告%d=Name:%s;IdCode:%s;Location:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n" 
-                    % (index,
-                        plaintiff.GetName(),
-                        plaintiff.GetIdCode(),
-                        plaintiff.GetAddress(),
-                        plaintiff.GetContactNumber(),
-                        plaintiff.GetLitigantPosition(),
-                        plaintiff.IsOurClient(),
-                        plaintiff.GetLegalRepresentative(),
-                        plaintiff.GetLegalRepresentativeIdCode()))
-
-        # 写被告主体列表
-        index = 0
-        for defendant in self.GetDefendantList():
-            index += 1
-            OutputStr += ("被告%d=Name:%s;IdCode:%s;Address:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n" 
-                    % (index,
-                        defendant.GetName(),
-                        defendant.GetIdCode(),
-                        defendant.GetAddress(),
-                        defendant.GetContactNumber(),
-                        defendant.GetLitigantPosition(),
-                        defendant.IsOurClient(),
-                        defendant.GetLegalRepresentative(),
-                        defendant.GetLegalRepresentativeIdCode()))
-
-        # 写第三人主体列表
-        index = 0
-        for thirdparty in self.GetThirdPartyList():
-            index += 1
-            OutputStr += ("第三人%d=Name:%s;IdCode:%s;Address:%s;ContactNumber:%s;LitigantPosition:%s;OurClient:%s;LegalRepresentative:%s;LegalRepresentativeIdCode:%s\n"
-                    % (index,
-                        thirdparty.GetName(),
-                        thirdparty.GetIdCode(),
-                        thirdparty.GetAddress(),
-                        thirdparty.GetContactNumber(),
-                        thirdparty.GetLitigantPosition(),
-                        thirdparty.IsOurClient(),
-                        thirdparty.GetLegalRepresentative(),
-                        thirdparty.GetLegalRepresentativeIdCode()))
 
         OutputStr += "调解意愿=%s\n" % self.GetMediationIntention()
         OutputStr += "拒绝调解理由=%s\n" % self.GetRejectMediationReasonText()
@@ -699,7 +655,30 @@ class Case():
             else:
                 for fee in self.GetAgentFixedFee():
                     OutputStr += "%s," % fee
-        
+
+        OutputStr += "\n=== 当事人信息 ===\n"
+
+        # 原告列表
+        index = 0
+        for plaintiff in self.GetPlaintiffList():
+            index += 1
+            OutputStr += "原告" + str(index) + "\n" 
+            OutputStr += plaintiff.OutputToStr() + "\n"
+
+        # 被告列表
+        index = 0
+        for defendant in self.GetDefendantList():
+            index += 1
+            OutputStr += "被告" + str(index) + "\n"
+            OutputStr += defendant.OutputToStr() + "\n"
+
+        # 第三人列表
+        index = 0
+        for thirdparty in self.GetThirdPartyList():
+            index += 1
+            OutputStr += "第三人" + str(index) + "\n"
+            OutputStr += thirdparty.OutputToStr() + "\n"
+
         # 最终输出
         return OutputStr
 
@@ -763,7 +742,6 @@ class Case():
         # 字典排序
         OutputDict = dict(sorted(OutputDict.items(),key=lambda x:x[0]))
         
-        # print(OutputDict)
         # 返回字典
         return OutputDict
     

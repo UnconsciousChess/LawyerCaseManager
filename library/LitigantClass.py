@@ -284,6 +284,47 @@ class Litigant():
 
     # ========== 下面是Output方法 ========== 
 
+    def OutputToStr(self) -> str:
+
+        OutputStr = ""
+
+        OutputStr += "姓名：" + self.GetName() + "\n"
+
+        if self.GetLitigantType() == "Person":
+            OutputStr += "身份证：" + self.GetIdCode() + "\n"
+        else:
+            OutputStr += "统一社会信用代码：" + self.GetIdCode() + "\n"
+        
+        OutputStr += "联系地址：" + self.GetAddress() + "\n"
+        
+        OutputStr += "联系方式：" + self.GetContactNumber() + "\n"
+
+        if self.IsOurClient():
+            OutputStr += "是否为我方当事人：是" + "\n"
+        else:
+            OutputStr += "是否为我方当事人：否" + "\n"
+
+        if self.GetLitigantType() == "Person":
+            OutputStr += "主体类型：自然人" + "\n"
+        elif self.GetLitigantType() == "Company":
+            OutputStr += "主体类型：法人" + "\n"
+        elif self.GetLitigantType() == "Others":
+            OutputStr += "主体类型：非法人组织或其他" + "\n"
+        
+        if self.GetLitigantType() == "Company" or self.GetLitigantType() == "Others":
+            if self.GetLegalRepresentative() != None:
+                OutputStr += "法定代表人：" + self.GetLegalRepresentative() + "\n"
+            if self.GetLegalRepresentativeIdCode() != None:
+                OutputStr += "法定代表人身份证：" + self.GetLegalRepresentativeIdCode() + "\n"
+        
+        # 如果有银行账户属性，就调用银行账户类的OutputToStr方法输出
+        if hasattr(self,"_BankAccount"):
+            if self._BankAccount.GetAccountName() != "":
+                OutputStr += "银行账户：" + "\n" + self._BankAccount.OutputToStr() + "\n"
+
+        return OutputStr
+   
+   
     # 定义将当前诉讼参与人各项信息输出为字典的方法
     def OutputToDict(self) -> dict:
         LitigantInfoDict = {}
@@ -297,15 +338,15 @@ class Litigant():
         LitigantInfoDict["id"] = self.GetId()
         LitigantInfoDict["litigantType"] = self.GetLitigantType()  
         LitigantInfoDict["litigantPosition"] = self.GetLitigantPosition()
-        # 如果有银行账户属性，就调用银行账户类的OutputToDict方法
-        if hasattr(self,"_BankAccount"):
-            LitigantInfoDict["bankAccount"] = self._BankAccount.OutputToDict()
-
 
         # 如果是公司具有法定代表人属性
         if self.GetLitigantType() == "Company" or self.GetLitigantType() == "Others":
             LitigantInfoDict["legalRepresentative"] = self.GetLegalRepresentative()
             LitigantInfoDict["legalRepresentativeIdCode"] = self.GetLegalRepresentativeIdCode()
+
+        # 如果有银行账户属性，就调用银行账户类的OutputToDict方法
+        if hasattr(self,"_BankAccount"):
+            LitigantInfoDict["bankAccount"] = self._BankAccount.OutputToDict()
 
         # 对字典的键值进行排序
         LitigantInfoDict = dict(sorted(LitigantInfoDict.items(),key=lambda x:x[0]))
