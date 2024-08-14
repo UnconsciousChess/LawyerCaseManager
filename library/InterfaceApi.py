@@ -1,4 +1,6 @@
 import os,sys
+import json
+
 
 # 不要生成字节码
 sys.dont_write_bytecode = True
@@ -258,26 +260,49 @@ class Api:
 
 
     # 该方法用于输出指定案件的信息到txt，并保存到案件文件夹中        
-    def outputCaseInfoToTxt(self,caseId) -> str:
+    def outputSingleCaseToTxt(self,caseId) -> str:
         # 判断案件列表是否为空
         if len(self._cases) == 0:
             return "CaseListIsEmpty"
         # 如果案件列表不为空，则根据caseId找到对应案件
         for case in self._cases:
             if case.GetCaseId() == caseId:
-                case.OutputToTxt()
-                return "Success"
+                # 写入文件
+                with open(file=case.GetCaseFolderPath() + "案件信息output.txt",
+                          mode="w",encoding="utf-8") as f:
+                    f.write(case.OutputToStr())
+                    return "Success"
+        # 如果遍历完，都没有找到对应的案件，则返回Fail
+        return "Fail"
 
+    # 该方法用于输出单一案件的信息到json，并保存到案件文件夹中
+    def outputSingleCaseToJson(self,caseId) -> str:
+        # 判断案件列表是否为空
+        if len(self._cases) == 0:
+            return "CaseListIsEmpty"
+        # 如果案件列表不为空，则根据caseId找到对应案件
+        for case in self._cases:
+            if case.GetCaseId() == caseId:
+                # 写入文件
+                with open(case.GetCaseFolderPath() + f"\\{case.GetCaseId()}案件信息.json",
+                          mode="w",encoding='utf-8') as f:
+                    json.dump(case.OutputToDict(),
+                              f, 
+                              ensure_ascii=False,
+                              indent=4)
+                    return "Success"
+        # 如果遍历完，都没有找到对应的案件，则返回Fail
+        return "Fail"
+    
     # 该方法用于输出所有案件的信息到json，并保存到案件文件夹中
     def outputAllCasesToJson(self) -> str:
         OutputFileName = self.GetSaveFilepath(title="导出案件信息",filetype="Json")
-        print(OutputFileName)
+
 
         # 判断OutputFileName是否为空，如果空就视为取消
         if OutputFileName == "":
             return "Cancel"
         
-        import json
 
         with open(OutputFileName,"w",encoding='utf-8') as f:
             if len(self._cases) == 0:
@@ -293,8 +318,8 @@ class Api:
                 print("全部案件信息输出成功！")
             return "Success"
 
-    # 该方法用于输出当前所有案件信息成一个列表并推送到前端
-    def outputAllCaseInfoToFrontEnd(self) -> list:
+    # 该方法用于输出当前所有案件信息成一个列表并推到前端
+    def SendAllCasesList(self) -> list:
         CaseList = []
         for case in self._cases:
             CaseList.append(case.OutputToDict())

@@ -113,11 +113,11 @@
 		width="500"
 		align-center
 	>
-		<el-button type="primary" @click="outputToExcel(currentOutputRow)"
-			>输出当前案件信息为Excel文件</el-button
+		<el-button type="primary" @click="outputToJson(currentOutputRow)"
+			>案件信息保存为JSON文件</el-button
 		>
 		<el-button type="success" @click="outputToTxt(currentOutputRow)"
-			>输出当前案件信息为Txt文件</el-button
+			>案件信息保存为TXT文件</el-button
 		>
 	</el-dialog>
 
@@ -240,8 +240,8 @@ async function getTableData() {
 		let result = await pywebview.api.appStartInit();
 		console.log(result);
 
-		// 开始获取数据的过程
-		pywebview.api.outputAllCaseInfoToFrontEnd().then((cases) => {
+		// 开始获取数据
+		pywebview.api.SendAllCasesList().then((cases) => {
 			// 遍历cases，将数据根据一定的规则添加到tableData中
 			for (let i = 0; i < cases.length; i++) {
 				// 对比案件的id，如果相同则不添加，改为更新
@@ -497,35 +497,38 @@ function handleOutputData(val) {
 	// 将当前要输出的案件的对象传递给currentOutputRow，便于接下来的组件调用
 	currentOutputRow.value = val;
 }
-// 输出数据到excel
-function outputToExcel(val) {
+
+
+// 输出数据到txt
+function outputToJson(val) {
+
 	// 将对话框隐藏
 	dialogOutputDataVisible.value = false;
-	console.log("输出案件信息到excel");
-	// console.log(val.caseId)
+
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
-		console.log("outputToExcel()：未连接后端，目前只测试前端");
+		console.log("outputToJson()：未连接后端，目前只测试前端");
 	}
 	// 如果连接了后端，则调用后端的函数(实际运行环境)
 	else {
-		pywebview.api.outputCaseInfoToExcel(val.caseId);
+		pywebview.api.outputSingleCaseToJson(val.caseId);
 	}
 }
 
+
 // 输出数据到txt
 function outputToTxt(val) {
+
 	// 将对话框隐藏
 	dialogOutputDataVisible.value = false;
-	// console.log("输出案件信息到txt");
-	// console.log(val.caseId)
+
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
 		console.log("outputToTxt()：未连接后端，目前只测试前端");
 	}
 	// 如果连接了后端，则调用后端的函数(实际运行环境)
 	else {
-		pywebview.api.outputCaseInfoToTxt(val.caseId);
+		pywebview.api.outputSingleCaseToTxt(val.caseId);
 	}
 }
 

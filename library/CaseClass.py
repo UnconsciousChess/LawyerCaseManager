@@ -529,11 +529,8 @@ class Case():
                 return False
             
 
-   
-    # ===========Input方法：下面定义批量输入案件信息的方法=============
-
-    # 设定一个类的内部方法，对于参数键名和键值，分别进行处理
-    def InputWithKeyAndValue(self,Key,Value):
+    # 设定一个类的综合内部方法，对于参数键名和键值，分别进行处理
+    def SetByKeyAndValue(self,Key,Value):
         # 根据Key的不同，调用不同的设定方法
         if Key == 'caseId' :
             # 如果案件Id为空，则自动生成一个
@@ -603,8 +600,11 @@ class Case():
                 litigant.InputFromDict(LitigantDict)
                 # 调用AppendLitigant方法，添加该诉讼参与人到对应的列表中
                 self.AppendLitigant(litigant)
+   
+    # ===========Input方法：下面定义批量输入案件信息的方法=============
 
-    # 基于上面的方法，定义一个从字典中输入案件信息的方法
+
+    # 定义一个从字典中批量输入案件信息的方法
     def InputFromDict(self,CaseInfoDict,DebugMode=False) -> str:
         # 判断传入的参数是否为字典
         if not isinstance(CaseInfoDict,dict):
@@ -613,31 +613,12 @@ class Case():
             return "Error"
         # 对于字典中的逐个键值对读取，并调用SetCaseInfoWithKeyAndValue方法对键值对进行处理
         for Key,Value in CaseInfoDict.items():
-            self.InputWithKeyAndValue(Key,Value)
+            self.SetByKeyAndValue(Key,Value)
 
         return "Success"
 
 
     # ===========Output方法：下面定义输出案件信息的方法=============
-
-    # 输出案件信息到txt文件
-    def OutputToTxt(self,DebugMode=False) -> None:
-        # 输出文件路径=案件文件夹路径中获取
-        OutputFilePath = self.GetCaseFolderPath() 
-        # 判断路径是否存在
-        if not os.path.exists(OutputFilePath):
-            if DebugMode:
-                print("文件路径不存在")
-
-        # 判断路径是否以\结尾,如果不是则加上\
-        if not OutputFilePath.endswith("\\"):
-            OutputFilePath += "\\output.txt"
-        else:
-            OutputFilePath += "output.txt"
-
-        # 写入文件
-        with open(file=OutputFilePath,mode="w",encoding="utf-8") as f:
-            f.write(self.OutputToStr())
 
 
     # 输出案件信息为字符串
@@ -722,7 +703,7 @@ class Case():
         # 最终输出
         return OutputStr
 
-    # 输出案件信息到前端（直接输出字典）
+    # 输出案件信息成一个字典，便于后续转换为json，或直接提供给前端
     def OutputToDict(self,DebugMode=False) -> dict:
         # 需要返回的字典初始化
         OutputDict = {}
