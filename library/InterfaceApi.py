@@ -261,6 +261,9 @@ class Api:
 
     # 该方法用于输出指定案件的信息到txt，并保存到案件文件夹中        
     def outputSingleCaseToTxt(self,caseId) -> str:
+
+        OutputFileName = "案件信息output.txt"
+        
         # 判断案件列表是否为空
         if len(self._cases) == 0:
             return "CaseListIsEmpty"
@@ -268,7 +271,7 @@ class Api:
         for case in self._cases:
             if case.GetCaseId() == caseId:
                 # 写入文件
-                with open(file=case.GetCaseFolderPath() + "案件信息output.txt",
+                with open(file=os.path.join(case.GetCaseFolderPath(),OutputFileName),
                           mode="w",encoding="utf-8") as f:
                     f.write(case.OutputToStr())
                     return "Success"
@@ -277,6 +280,9 @@ class Api:
 
     # 该方法用于输出单一案件的信息到json，并保存到案件文件夹中
     def outputSingleCaseToJson(self,caseId) -> str:
+
+        OutputFileName = f"{caseId}案件信息.json"
+
         # 判断案件列表是否为空
         if len(self._cases) == 0:
             return "CaseListIsEmpty"
@@ -284,7 +290,7 @@ class Api:
         for case in self._cases:
             if case.GetCaseId() == caseId:
                 # 写入文件
-                with open(case.GetCaseFolderPath() + f"\\{case.GetCaseId()}案件信息.json",
+                with open(file=os.path.join(case.GetCaseFolderPath(),OutputFileName),
                           mode="w",encoding='utf-8') as f:
                     json.dump(case.OutputToDict(),
                               f, 
