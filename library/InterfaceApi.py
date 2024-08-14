@@ -263,7 +263,7 @@ class Api:
     def outputSingleCaseToTxt(self,caseId) -> str:
 
         OutputFileName = "案件信息output.txt"
-        
+
         # 判断案件列表是否为空
         if len(self._cases) == 0:
             return "CaseListIsEmpty"
@@ -325,7 +325,7 @@ class Api:
             return "Success"
 
     # 该方法用于输出当前所有案件信息成一个列表并推到前端
-    def SendAllCasesList(self) -> list:
+    def pushAllCasesToList(self) -> list:
         CaseList = []
         for case in self._cases:
             CaseList.append(case.OutputToDict())
@@ -381,6 +381,20 @@ class Api:
         else:
             print("案件文件夹及对应的文件模板生成成功！")
             return "Success"
+        
+    def openCaseFolder(self,CaseId) -> str:
+        # 遍历案件列表
+        for case in self._cases:
+            # 如果案件ID相同，则打开案件文件夹
+            if case.GetCaseId() == CaseId:
+                # 判断案件文件夹是否存在
+                if os.path.exists(case.GetCaseFolderPath()):
+                    os.startfile(case.GetCaseFolderPath())
+                    return "Success"
+                else:
+                    return "CaseFolderNotExist"
+        # 如果遍历完，都没有找到对应的案件，则返回CaseIdNotExist
+        return "CaseIdNotExist"
     
     # ==删除类==
     # 该方法用于后端的数据中删除指定案件
