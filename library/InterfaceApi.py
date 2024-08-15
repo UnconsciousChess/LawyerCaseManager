@@ -87,10 +87,7 @@ class Api:
             from source.Generator import ReadTemplateList
 
             TemplateFileList = ReadTemplateList(TemplateFilesPath)
-            
-            for TemplateFile in TemplateFileList:
-                self._templateFiles.append(TemplateFile)
-
+            self._templateFiles = TemplateFileList
             Result["templateFileResult"] = "Success"
 
         # 如果案件信息和模板文件信息都导入成功，则视为初始化成功
@@ -335,14 +332,15 @@ class Api:
 
     # 该方法用于对接前端的文书生成按钮，用于生成案件文件夹及对应的文件模板
     def documentsGenerate(self,caseId,templateFilesIdList) -> str:
-        # 先将对应caseId的案件对象找到，赋值给TargetCase
-        for case in self._cases:
-            if case.GetCaseId() == caseId:
-                TargetCase = case
-                break
 
         # 导入自写包FolderCreator
-        from source.Generator import FolderCreator
+        from source.Generator import FolderCreator,FilesGenerator
+
+        # 先将对应caseId的案件对象对应的index找到，赋值给TargetCaseIndex
+        for index,case in enumerate(self._cases):
+            if case.GetCaseId() == caseId:
+                TargetCaseIndex = index
+                break
 
         # 检查templateFiles是否为空
         if len(self._templateFiles) == 0:
@@ -356,39 +354,53 @@ class Api:
                 if templateFile.GetTemplateFileId() == templateFileId:
                     TargetTemplateFiles.append(templateFile)
                     break
-                    
-        if TargetCase.GetCaseFolderPath() == "":
-            # 如果当前案件文件夹路径为空，则获取文件夹路径
-            Result = FolderCreator(
-                        case=TargetCase,              
-                        OutputDir=self.GetFolderpath(title="请选择案件文件夹保存的文件夹"),   
-                        TemplateListOrTemplateListDir=TargetTemplateFiles,
-                        Initial=True,
+
+        # 如果当前案件文件夹路径为空，则获取一个文件夹路径并生成对应的文件夹信息
+        if self._cases[TargetCaseIndex].GetCaseFolderPath() == "":
+            OutputDir=self.GetFolderpath(title="请选择案件文件夹保存的文件夹")
+            # 其中项目文件夹名称由案件的原告、被告和案由组成
+            FolderName = self._cases[TargetCaseIndex].GetAllPlaintiffNames() + "诉" + self._cases[TargetCaseIndex].GetAllDefendantNames() + "-" + self._cases[TargetCaseIndex].GetCauseOfAction() + "一案"
+            OutputDir = os.path.join(OutputDir,FolderName)
+            # 创建案件项目文件夹
+            os.makedirs(OutputDir)
+            self._cases[TargetCaseIndex].SetCaseFolderPath(OutputDir)
+            
+        # 调用FolderCreator生成案件文件夹
+        Result = FolderCreator(
+                        case=self._cases[TargetCaseIndex],              
+                        OutputDir= self._cases[TargetCaseIndex].GetCaseFolderPath(),   
                         )
-        else:
-            # 如果当前案件文件夹路径不为空，则直接使用当前案件文件夹路径
-            Result = FolderCreator(
-                        case=TargetCase,              
-                        OutputDir=TargetCase.GetCaseFolderPath(),   
-                        TemplateListOrTemplateListDir=TargetTemplateFiles,
-                        Initial=False,
-                        )
-    
+        
         # 检查FolderCreator是否执行成功
         if Result != "Success":
-            print("Generator报错")
-            return "GeneratorError"
-        else:
-            print("案件文件夹及对应的文件模板生成成功！")
-            return "Success"
+            print("FolderCreator报错")
+            return Result
         
+        # 调用FilesGenerator生成文件
+        Result = FilesGenerator(
+                        case=self._cases[TargetCaseIndex],              
+                        OutputDir= self._cases[TargetCaseIndex].GetCaseFolderPath(),   
+                        RenderTemplatesList=TargetTemplateFiles
+                        )
+        
+        # 检查FilesGenerator是否执行成功
+        if Result != "Success":
+            print("FilesGenerator报错")
+            return Result      
+
+        # 如果FolderCreator和FilesGenerator都执行成功，则返回Success
+        print("案件文件夹及对应的文件模板生成成功！")
+        return "Success"
+
+    # 该方法用于打开案件的文件夹
     def openCaseFolder(self,CaseId) -> str:
         # 遍历案件列表
         for case in self._cases:
             # 如果案件ID相同，则打开案件文件夹
             if case.GetCaseId() == CaseId:
-                # 判断案件文件夹是否存在
+                # 判断案件文件夹的路径是否存在
                 if os.path.exists(case.GetCaseFolderPath()):
+                    # 调用系统的startfile方法打开文件夹
                     os.startfile(case.GetCaseFolderPath())
                     return "Success"
                 else:
