@@ -14,127 +14,134 @@ class TemplateFile():
 
     def __init__(self):
         # 模板文件的id
-        self._TemplateFileId = ""
+        self._Id = ""
         # 模板文件的名称
-        self._TemplateFileName = ""
+        self._FileName = ""
         # 模板文件的路径
-        self._TemplateFileDir = ""
+        self._Dir = ""
         # 模板文件的类型（直接复制或者docxtpl）
-        self._TemplateFileType = ""
+        self._RenderType = ""
         # 模板文件的阶段（委托、立案、审理、执行、归档）
-        self._TemplateFileStage = ""
+        self._RenderStage = ""
+        # 需要根据某个选项进行多次渲染的属性
+        self._MultiRenderList = []
 
     # ======= Get方法 ======= #
-    def GetTemplateFileId(self):
-        return self._TemplateFileId
+    def GetId(self) -> str:
+        return self._Id
     
-    def GetTemplateFileName(self):
-        return self._TemplateFileName
+    def GetFileName(self) -> str:
+        return self._FileName
 
-    def GetTemplateFileDir(self):
-        return self._TemplateFileDir
+    def GetDir(self) -> str:
+        return self._Dir
     
-    def GetTemplateFileType(self):
-        return self._TemplateFileType
+    def GetRenderType(self) -> str:
+        return self._RenderType
     
-    def GetTemplateFileStage(self):
-        return self._TemplateFileStage
+    def GetRenderStage(self)  -> str:
+        return self._RenderStage
+
+    def GetMultiRenderList(self) -> list:
+        return self._MultiRenderList
     
     # ======= Set方法 ======= #
-    def SetTemplateFileId(self,TemplateFileId,Debug=False) -> int:
+    def SetId(self,Id,Debug=False) -> int:
             
         # 输入检查
         # 检查id是否为字符串
-        if not isinstance(TemplateFileId,str):
+        if not isinstance(Id,str):
             if Debug:
-                print("TemplateFileId should be a string.")
+                print("Id should be a string.")
             return -1
         
         # 经过检查后，赋值
-        self._TemplateFileId = TemplateFileId
+        self._Id = Id
         return 0
     
-    def SetTemplateFileName(self,TemplateFileName,Debug=False) -> int:
+    def SetFileName(self,FileName,Debug=False) -> int:
 
         # 输入检查
         # 检查文件名是否为字符串
-        if not isinstance(TemplateFileName,str):
+        if not isinstance(FileName,str):
             if Debug:
-                print("TemplateFileName should be a string.")
+                print("FileName should be a string.")
             return -1
         
         # 经过检查后，赋值
-        self._TemplateFileName = TemplateFileName
+        self._FileName = FileName
         return 0
     
-    def SetTemplateFileDir(self,TemplateFileDir,Debug=False) -> int:
+    def SetDir(self,Dir,Debug=False) -> int:
 
         # 输入检查
         # 检查路径是否为字符串
-        if not isinstance(TemplateFileDir,str):
+        if not isinstance(Dir,str):
             if Debug:
-                print("TemplateFileDir should be a string.") 
+                print("Dir should be a string.") 
             return -1
         # 检查路径是否存在
-        if not os.path.exists(TemplateFileDir):
+        if not os.path.exists(Dir):
             if Debug:
-                print("TemplateFileDir does not exist.")
+                print("Dir does not exist.")
             return -1
         # 检查路径是否为文件
-        if not os.path.isfile(TemplateFileDir):
+        if not os.path.isfile(Dir):
             if Debug:
-                print("TemplateFileDir should be a file.")
+                print("Dir should be a file.")
             return -1
         # 检查文件是否为docx文件
-        if TemplateFileDir.split(".")[-1] != "docx":
+        if Dir.split(".")[-1] != "docx":
             if Debug:
-                print("TemplateFileDir should be a docx file.")
+                print("Dir should be a docx file.")
             return -1
 
         # 经过检查后，赋值
-        self._TemplateFileDir = TemplateFileDir
+        self._Dir = Dir
         return 0
     
-    def SetTemplateFileType(self,TemplateFileType,Debug=False) -> int:
+    def SetRenderType(self,RenderType,Debug=False) -> int:
 
         # 输入检查
         # 检查文件类型是否为字符串
-        if not isinstance(TemplateFileType,str):
+        if not isinstance(RenderType,str):
             if Debug:
-                print("TemplateFileType should be a string.")
+                print("RenderType should be a string.")
             return -1
         
         # 检查文件类型是否为directCopy或docxtpl
-        if TemplateFileType != "directCopy" and TemplateFileType != "docxtpl":
+        if RenderType != "directCopy" and RenderType != "docxtpl":
             if Debug:
-                print("TemplateFileType should be 'directCopy' or 'docxtpl'.")
+                print("RenderType should be 'directCopy' or 'docxtpl'.")
             return -1
         
         # 经过检查后，赋值
-        self._TemplateFileType = TemplateFileType
+        self._RenderType = RenderType
 
         return 0
 
-    def SetTemplateFileStage(self,TemplateFileStage,Debug=False) -> int:
+    def SetRenderStage(self,RenderStage,Debug=False) -> int:
 
         # 输入检查
         # 检查阶段是否为字符串
-        if not isinstance(TemplateFileStage,str):
+        if not isinstance(RenderStage,str):
             if Debug:
-                print("TemplateFileStage should be a string.")
+                print("RenderStage should be a string.")
             return -1
         
         # 检查阶段是否为委托、立案、审理、执行、归档 这五个阶段之一
-        if TemplateFileStage != "委托" and TemplateFileStage != "立案" and TemplateFileStage != "审理" and TemplateFileStage != "执行" and TemplateFileStage != "归档":
+        if RenderStage != "委托" and RenderStage != "立案" and RenderStage != "审理" and RenderStage != "执行" and RenderStage != "归档":
             if Debug:
-                print("TemplateFileStage should be '委托' or '立案' or '审理' or '执行' or '归档'.")
+                print("RenderStage should be '委托' or '立案' or '审理' or '执行' or '归档'.")
             return -1
         
         # 经过检查后，赋值
-        self._TemplateFileStage = TemplateFileStage
+        self._RenderStage = RenderStage
 
         return 0 
             
+    def SetMultiRenderList(self,MultiRenderList,Debug=False) -> int:
+        pass
 
     # ======= 更抽象一些的Set方法 ======= #
 
@@ -170,20 +177,20 @@ class TemplateFile():
         FileType = InputDict["type"]
 
         # 调用Set方法分别赋值
-        if self.SetTemplateFileStage(FileStage) == -1:
+        if self.SetRenderStage(FileStage) == -1:
             return "Error"
-        if self.SetTemplateFileDir(Filedir) == -1:
+        if self.SetDir(Filedir) == -1:
             return "Error"
-        if self.SetTemplateFileType(FileType) == -1:
+        if self.SetRenderType(FileType) == -1:
             return "Error"
         # 将文件名从路径中提取出来
         FileName = Filedir.split("\\")[-1]
         # 去掉后缀名
         FileName = FileName.split(".")[0]
-        if self.SetTemplateFileName(FileName) == -1:     
+        if self.SetFileName(FileName) == -1:     
             return "Error"
         # 生成id
-        if self.SetTemplateFileId(generate(alphabet='ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz', size=8)) == -1:
+        if self.SetId(generate(alphabet='ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz', size=8)) == -1:
             return "Error"
 
         # 全部正常运行，返回Success
@@ -224,15 +231,15 @@ class TemplateFile():
             return "Error"
         
         # 调用Set方法分别赋值
-        if self.SetTemplateFileName(InputDict["templateFileName"]) == -1:
+        if self.SetFileName(InputDict["templateFileName"]) == -1:
             return "Error"
-        if self.SetTemplateFileDir(InputDict["templateFileDir"]) == -1:
+        if self.SetDir(InputDict["templateFileDir"]) == -1:
             return "Error"
-        if self.SetTemplateFileType(InputDict["templateFileType"]) == -1:
+        if self.SetRenderType(InputDict["templateFileType"]) == -1:
             return "Error"
-        if self.SetTemplateFileStage(InputDict["templateFileStage"]) == -1:
+        if self.SetRenderStage(InputDict["templateFileStage"]) == -1:
             return "Error"
-        if self.SetTemplateFileId(InputDict["templateFileId"]) == -1:
+        if self.SetId(InputDict["templateFileId"]) == -1:
             return "Error"
         
         # 全部正常运行，返回Success
@@ -242,17 +249,17 @@ class TemplateFile():
 
     # 输出为字典，输出到前端
     def OutputTemplateFileToDict(self) -> dict:
-        return {"templateFileName":self.GetTemplateFileName(),
-                "templateFileDir":self.GetTemplateFileDir(),
-                "templateFileType":self.GetTemplateFileType(),
-                "templateFileStage":self.GetTemplateFileStage(),
-                "templateFileId":self.GetTemplateFileId()
+        return {"templateFileName":self.GetFileName(),
+                "templateFileDir":self.GetDir(),
+                "templateFileType":self.GetRenderType(),
+                "templateFileStage":self.GetRenderStage(),
+                "templateFileId":self.GetId()
                 }
 
     # 输出为字典，输出到json文件
     def OutputTemplateFileToJsonDict(self) -> dict:
         return { 
-                "stage":self.GetTemplateFileStage(),
-                "dir":self.GetTemplateFileDir(),
-                "type":self.GetTemplateFileType()
+                "stage":self.GetRenderStage(),
+                "dir":self.GetDir(),
+                "type":self.GetRenderType()
                 }

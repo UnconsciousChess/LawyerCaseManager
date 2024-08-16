@@ -78,7 +78,9 @@ def FolderCreator(case,OutputDir) -> str:
 
 
 # 生成文件
-def FilesGenerator(case,OutputDir,RenderTemplatesList) -> str:
+def FilesGenerator(case,
+                   OutputDir:str,
+                   RenderTemplatesList:list[TemplateFile]) -> str:
 
     # 检查传入的参数OutputDir
     if not isinstance(OutputDir,str):
@@ -102,16 +104,16 @@ def FilesGenerator(case,OutputDir,RenderTemplatesList) -> str:
     #从TemplateFilesList中找到对应阶段的文件，再根据该文件的属性进行文件生成
     for TemplateFile in RenderTemplatesList:
         # 如果该模板文件的FileType为directCopy，调用shutil.copy函数，复制该文件到当前文件夹下
-        if TemplateFile.GetTemplateFileType() == "directCopy":
+        if TemplateFile.GetRenderType() == "directCopy":
             shutil.copy(TemplateFile.GetTemplateFileDir(),
                         os.path.join(OutputDir,
-                                     TemplateFile.GetTemplateFileStage() + "阶段"))
+                                     TemplateFile.GetRenderStage() + "阶段"))
         # 如果该模板文件的FileType为docxtpl，调用RenderFileInDocxtpl函数，用模板来进行文书生成，并保存到当前文件夹下
-        elif TemplateFile.GetTemplateFileType() == "docxtpl":
+        elif TemplateFile.GetRenderType() == "docxtpl":
             RenderFileInDocxtpl(TemplateFileDir=TemplateFile.GetTemplateFileDir(),
                                 Case=case,
                                 OutputDir=os.path.join(OutputDir,
-                                     TemplateFile.GetTemplateFileStage() + "阶段"))
+                                     TemplateFile.GetRenderStage() + "阶段"))
                 
     return "Success"
 
