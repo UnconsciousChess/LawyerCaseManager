@@ -351,7 +351,7 @@ class Api:
         TargetTemplateFiles = []
         for templateFileId in templateFilesIdList:
             for templateFile in self._templateFiles:
-                if templateFile.GetTemplateFileId() == templateFileId:
+                if templateFile.GetId() == templateFileId:
                     TargetTemplateFiles.append(templateFile)
                     break
 
@@ -471,10 +471,10 @@ class Api:
         # 遍历模板文件列表
         for templateFile in TemplateFileList:
             # 如果模板文件ID相同，则跳过
-            if templateFile.GetTemplateFileId() in [File.GetTemplateFileId() for File in self._templateFiles]:
+            if templateFile.GetId() in [File.GetId() for File in self._templateFiles]:
                 continue
             # 如果模板文件名相同，则跳过
-            if templateFile.GetTemplateFileName() in [File.GetTemplateFileName() for File in self._templateFiles]:
+            if templateFile.GetFileName() in [File.GetFileName() for File in self._templateFiles]:
                 continue
 
             # 将TemplateFile对象添加到self._templateFiles中
@@ -490,7 +490,7 @@ class Api:
         # 如果self._templateFiles不为空，则将模板文件列表返回
         templateFiles = []
         for templateFile in self._templateFiles:
-            templateFiles.append(templateFile.OutputTemplateFileToDict())
+            templateFiles.append(templateFile.OutputToDict())
 
         return templateFiles
 
@@ -498,9 +498,9 @@ class Api:
         # 遍历模板文件列表
         for templateFile in self._templateFiles:
             # 如果模板文件ID相同，则更新模板文件信息
-            if templateFile.GetTemplateFileId() == TemplateFileId:
+            if templateFile.GetId() == TemplateFileId:
                 # 如果赋值成功，则返回Success
-                if templateFile.SetTemplateFileFromDict(data) == "Success":
+                if templateFile.InputFromDict(data) == "Success":
                     return "Success"
         return "Fail"
 
@@ -510,7 +510,7 @@ class Api:
         # 在案件列表中删除指定模板文件
         for templateFile in self._templateFiles:
             # 判断模板文件ID是否相同,如果相同则在后端也删除对应id的模板文件并返回
-            if templateFile.GetTemplateFileId() == TemplateFileId:
+            if templateFile.GetId() == TemplateFileId:
                 self._templateFiles.remove(templateFile)
                 return "Success"
             
@@ -524,11 +524,12 @@ class Api:
         # 判断OutputPath是否存在,如果不存在则返回错误
         if OutputPath == "":
             return "Cancel" 
+        
         templateFiles = []
 
         with open(OutputPath, "w" , encoding='utf-8') as f:
             for templateFile in self._templateFiles:
-                templateFiles.append(templateFile.OutputTemplateFileToJsonDict())
+                templateFiles.append(templateFile.OutputToDict())
             # 将templateFiles写入到文件中
             json.dump(templateFiles,
                       f, 
@@ -628,5 +629,5 @@ class Api:
     def testTemplateFilesOutput(self) -> None:
         # 输出templateFiles
         for templateFile in self._templateFiles:
-            print(templateFile.OutputTemplateFileToDict()) 
+            print(templateFile.OutputToDict()) 
         return 

@@ -8,13 +8,13 @@
 		<el-table-column type="selection" width="55" />
 
 		<el-table-column
-			prop="templateFileName"
+			prop="fileName"
 			label="文件名"
 			width="410"
 		></el-table-column>
 
 		<el-table-column
-			prop="templateFileStage"
+			prop="renderStage"
 			label="所属阶段"
 			width="100"
 		></el-table-column>
@@ -28,6 +28,8 @@
 </template>
 
 <script setup>
+import { render } from 'vue';
+
 
 
 const templateFilesData = ref([]);
@@ -63,14 +65,15 @@ async function GetTemplateFileData() {
 
             for (let i = 0; i < templateFiles.length; i++) {
                 // 对比id，如果有重复的数据则不添加
-                if (templateFilesData.value.findIndex((item) => item.templateFileId === templateFiles[i].templateFileId) !== -1) {
+                if (templateFilesData.value.findIndex((item) => item.id === templateFiles[i].id) !== -1) {
                     continue;
                 }
                 else {
                     templateFilesData.value.push({
-						templateFileId: templateFiles[i].templateFileId,
-                        templateFileName: templateFiles[i].templateFileName,
-                        templateFileStage: templateFiles[i].templateFileStage,
+						id: templateFiles[i].id,
+                        fileName: templateFiles[i].fileName,
+                        renderStage: templateFiles[i].renderStage,
+						renderType: templateFiles[i].renderType,
                     });
 
                 }
