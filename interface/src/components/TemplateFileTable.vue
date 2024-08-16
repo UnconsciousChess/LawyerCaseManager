@@ -25,17 +25,18 @@ async function GetTemplateFileData() {
 					// 对比id，如果有重复的数据则不添加
 					if (
 						templateFilesData.value.findIndex(
-							(item) => item.templateFileId === templateFiles[i].templateFileId
+							(item) => item.id === templateFiles[i].id
 						) !== -1
 					) {
 						continue;
 					} else {
 						templateFilesData.value.push({
-							templateFileId: templateFiles[i].templateFileId,
-							templateFileName: templateFiles[i].templateFileName,
-							templateFileDir: templateFiles[i].templateFileDir,
-							templateFileType: templateFiles[i].templateFileType,
-							templateFileStage: templateFiles[i].templateFileStage,
+							id: templateFiles[i].id,
+							fileName: templateFiles[i].fileName,
+							dir: templateFiles[i].dir,
+							renderType: templateFiles[i].renderType,
+							renderStage: templateFiles[i].renderStage,
+							multiRenderList: templateFiles[i].multiRenderList,
 						});
 					}
 				}
@@ -103,19 +104,17 @@ function handleEditData(val) {
 async function updateTemplateFileDataFromEditForm(data) {
 	// 获取要更新的数据的index
 	var updateItemIndex = templateFilesData.value.findIndex(
-		(item) => item.templateFileId === data.templateFileId
+		(item) => item.id === data.id
 	);
 
 	// 更新tableData中对应数组index的各项数据
-	templateFilesData.value[updateItemIndex].templateFileId = data.templateFileId;
-	templateFilesData.value[updateItemIndex].templateFileName =
-		data.templateFileName;
-	templateFilesData.value[updateItemIndex].templateFileDir =
-		data.templateFileDir;
-	templateFilesData.value[updateItemIndex].templateFileType =
-		data.templateFileType;
-	templateFilesData.value[updateItemIndex].templateFileStage =
-		data.templateFileStage;
+	templateFilesData.value[updateItemIndex].id = data.id;
+	templateFilesData.value[updateItemIndex].fileName = data.fileName;
+	templateFilesData.value[updateItemIndex].dir = data.dir;
+	templateFilesData.value[updateItemIndex].renderType = data.renderType;
+	templateFilesData.value[updateItemIndex].renderStage = data.renderStage;
+	templateFilesData.value[updateItemIndex].multiRenderList =
+		data.multiRenderList;
 
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
@@ -124,7 +123,7 @@ async function updateTemplateFileDataFromEditForm(data) {
 	// 将对应的id及其他数据，传递给后端(实际运行环境)
 	else {
 		let result = await pywebview.api.backEndUpdateTemplateFileData(
-			data.templateFileId,
+			data.id,
 			data
 		);
 		console.log(result);
@@ -151,7 +150,7 @@ async function deleteData(val) {
 
 	// 获取要删除的数据的index
 	var deleteItemIndex = templateFilesData.value.findIndex(
-		(item) => item.templateFileId === val.templateFileId
+		(item) => item.id === val.id
 	);
 
 	// 删除tableData中对应数组index的数据
@@ -163,22 +162,22 @@ async function deleteData(val) {
 	}
 	// 将对应的id传递给后端(实际运行环境)
 	else {
-		pywebview.api.backEndDeleteTemplateFileData(val.templateFileId);
+		pywebview.api.backEndDeleteTemplateFileData(val.id);
 	}
 }
 
 // 测试后端输出函数
-// function test(){
-//     console.log("test()：测试删除")
-//     // 如果未连接后端，则只测试前端
-//     if (typeof pywebview === 'undefined') {
-//         console.log("test()：未连接后端，目前只测试前端");
-//     }
-//     // 从后端获取数据(测试环境)
-//     else {
-//         pywebview.api.backEndTestOutput()
-//     }
-// }
+function test() {
+	console.log("test()：测试删除");
+	// 如果未连接后端，则只测试前端
+	if (typeof pywebview === "undefined") {
+		console.log("test()：未连接后端，目前只测试前端");
+	}
+	// 从后端获取数据(测试环境)
+	else {
+		pywebview.api.testTemplateFilesOutput();
+	}
+}
 
 // 加载页面时先调用一次GetTemplateFileData()获取初始数据
 onMounted(() => {
@@ -192,28 +191,20 @@ onMounted(() => {
 		style="width: 100%"
 		empty-text="暂无模板文件信息"
 	>
+		<el-table-column prop="id" label="ID" width="100"></el-table-column>
 		<el-table-column
-			prop="templateFileId"
-			label="ID"
-			width="100"
-		></el-table-column>
-		<el-table-column
-			prop="templateFileName"
+			prop="fileName"
 			label="文件名"
 			width="180"
 		></el-table-column>
+		<el-table-column prop="dir" label="文件路径" width="280"></el-table-column>
 		<el-table-column
-			prop="templateFileDir"
-			label="文件路径"
-			width="280"
-		></el-table-column>
-		<el-table-column
-			prop="templateFileType"
+			prop="renderType"
 			label="生成方式"
 			width="100"
 		></el-table-column>
 		<el-table-column
-			prop="templateFileStage"
+			prop="renderStage"
 			label="所属阶段"
 			width="100"
 		></el-table-column>
@@ -239,12 +230,12 @@ onMounted(() => {
 	</div>
 
 	<!-- 测试后端输出的代码 -->
-	<!-- 
-    <el-divider></el-divider>
 
-    <div>
-        <el-button type="primary" @click="test">测试后端输出</el-button>
-    </div> -->
+	<el-divider></el-divider>
+
+	<div>
+		<el-button type="primary" @click="test">测试后端输出</el-button>
+	</div>
 	<!-- 测试代码结束 -->
 
 	<!-- 下面是操作按钮以后的对话框 -->

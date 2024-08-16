@@ -55,8 +55,21 @@ class TemplateFile():
                 print("Id should be a string.")
             return -1
         
+        # 检查id是否为6位
+        if len(Id) != 6:
+            if Debug:
+                print("Id should be 6 characters.")
+            return -1
+        
+        # 检查id是否全部由大写字母构成
+        if not Id.isupper():
+            if Debug:
+                print("Id should be all uppercase.")
+            return -1
+        
         # 经过检查后，赋值
         self._Id = Id
+
         return 0
     
     def SetFileName(self,FileName,Debug=False) -> int:
@@ -68,8 +81,9 @@ class TemplateFile():
                 print("FileName should be a string.")
             return -1
         
-        # 经过检查后，赋值
-        self._FileName = FileName
+        # 赋值
+        self._FileName = FileName.strip()
+
         return 0
     
     def SetDir(self,Dir,Debug=False) -> int:
@@ -143,123 +157,87 @@ class TemplateFile():
     def SetMultiRenderList(self,MultiRenderList,Debug=False) -> int:
         pass
 
-    # ======= 更抽象一些的Set方法 ======= #
-
-    # 下面是对于读入文件中的每一行进行处理
-    def SetTemplateFileFromJsonDict(self,InputDict,Debug=False) -> str:
-        
-        # 检查是否为字典
-        if not isinstance(InputDict,dict):
-            if Debug:
-                print("SetTemplateFileFromDict函数报错:输入不是字典")
-            return "Error"
-        
-        # 检查是否有stage键
-        if "stage" not in InputDict:
-            if Debug:
-                print("SetTemplateFileFromDict函数报错:输入字典缺少键【stage】")
-            return "Error"
-        # 检查是否有path键
-        if "dir" not in InputDict:
-            if Debug:
-                print("SetTemplateFileFromDict函数报错:输入字典缺少键【path】")
-            return "Error"
-        # 检查是否有type键
-        if "type" not in InputDict:
-            if Debug:
-                print("SetTemplateFileFromDict函数报错:输入字典缺少键【type】")
-            return "Error"
-        
-
-        # 从字典中提取出stage、path、type
-        FileStage = InputDict["stage"]
-        Filedir = InputDict["dir"]
-        FileType = InputDict["type"]
-
-        # 调用Set方法分别赋值
-        if self.SetRenderStage(FileStage) == -1:
-            return "Error"
-        if self.SetDir(Filedir) == -1:
-            return "Error"
-        if self.SetRenderType(FileType) == -1:
-            return "Error"
-        # 将文件名从路径中提取出来
-        FileName = Filedir.split("\\")[-1]
-        # 去掉后缀名
-        FileName = FileName.split(".")[0]
-        if self.SetFileName(FileName) == -1:     
-            return "Error"
-        # 生成id
-        if self.SetId(generate(alphabet='ABCDEFGHIJKLMNPQRSTUVWXYZabcdefghijklmnpqrstuvwxyz', size=8)) == -1:
-            return "Error"
-
-        # 全部正常运行，返回Success
-        return "Success"
+    # ======= Input 方法 ======= #
 
     # 下面对于读入字典进行处理
-    def SetTemplateFileFromDict(self,InputDict,Debug=False) -> str:
+    def InputFromDict(self,InputDict,Debug=False) -> str|dict:
+
         # 检查是否为字典
         if not isinstance(InputDict,dict):
             if Debug:
                 print("SetTemplateFileFromDict函数报错:输入不是字典")
             return "Error"
         
+        # 错误信息字典初始化
+        ErrorResult = {
+            "setIdError": False,
+            "setFileNameError": False,
+            "setDirError": False,
+            "setRenderTypeError": False,
+            "setRenderStageError": False,
+            "setMultiRenderListError": False
+        }
+
         # 检查是否有templateFileName键
-        if "templateFileName" not in InputDict:
-            if Debug:
-                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileName】")
-            return "Error"
-        # 检查是否有templateFileDir键
-        if "templateFileDir" not in InputDict:
-            if Debug:
-                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileDir】")
-            return "Error"
-        # 检查是否有templateFileType键
-        if "templateFileType" not in InputDict:
-            if Debug:
-                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileType】")
-            return "Error"
-        # 检查是否有templateFileStage键
-        if "templateFileStage" not in InputDict:
-            if Debug:
-                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileStage】")
-            return "Error"
-        # 检查是否有templateFileId键
-        if "templateFileId" not in InputDict:
-            if Debug:
-                print("SetTemplateFileFromDict函数报错:输入字典缺少键【templateFileId】")
-            return "Error"
+        for key,value in InputDict.items():
+
+            if key == "id":
+                if self.SetId(value) == -1:
+                    ErrorResult["setIdError"] = True
+
+            elif key == "fileName":
+                if self.SetFileName(value) == -1:
+                    ErrorResult["setFileNameError"] = True
+
+            elif key == "dir":
+                if self.SetDir(value) == -1:
+                    ErrorResult["setDirError"] = True
+
+            elif key == "renderType":
+                if self.SetRenderType(value) == -1:
+                    ErrorResult["setRenderTypeError"] = True
+
+            elif key == "renderStage":
+                if self.SetRenderStage(value) == -1:
+                    ErrorResult["setRenderStageError"] = True
+
+            elif key == "multiRenderList":
+                if self.SetMultiRenderList(value) == -1:
+                    ErrorResult["setMultiRenderListError"] = True
         
-        # 调用Set方法分别赋值
-        if self.SetFileName(InputDict["templateFileName"]) == -1:
-            return "Error"
-        if self.SetDir(InputDict["templateFileDir"]) == -1:
-            return "Error"
-        if self.SetRenderType(InputDict["templateFileType"]) == -1:
-            return "Error"
-        if self.SetRenderStage(InputDict["templateFileStage"]) == -1:
-            return "Error"
-        if self.SetId(InputDict["templateFileId"]) == -1:
-            return "Error"
+        # 如果经过读取字典后，id为空，则生成一个id
+        if self.GetId() == "":
+            self.SetId(generate(alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ",size=6))
+
+        # 如果经过读取字典后，文件名为空，且路径属性不为空，则从路径中提取文件名
+        if self.GetFileName() == "" and hasattr(self,"_Dir") and self._Dir != "":
+                self.SetFileName(os.path.basename(self._Dir).split(".")[0])
+
+        # 如果有错误，返回错误信息
+        if True in ErrorResult.values():
+            return ErrorResult
         
-        # 全部正常运行，返回Success
-        return "Success"
+        else:
+            # 全部正常运行，返回Success
+            return "Success"
 
     # ======= Output方法 ======= #
 
     # 输出为字典，输出到前端
-    def OutputTemplateFileToDict(self) -> dict:
-        return {"templateFileName":self.GetFileName(),
-                "templateFileDir":self.GetDir(),
-                "templateFileType":self.GetRenderType(),
-                "templateFileStage":self.GetRenderStage(),
-                "templateFileId":self.GetId()
-                }
+    def OutputToDict(self) -> dict:
 
-    # 输出为字典，输出到json文件
-    def OutputTemplateFileToJsonDict(self) -> dict:
-        return { 
-                "stage":self.GetRenderStage(),
-                "dir":self.GetDir(),
-                "type":self.GetRenderType()
-                }
+        ReturnDict = { 
+            "id": self.GetId(),
+            "fileName": self.GetFileName(),
+            "dir": self.GetDir(),
+            "renderType": self.GetRenderType(),
+            "renderStage": self.GetRenderStage(),
+            "multiRenderList": self.GetMultiRenderList()
+        }
+
+        # 对key进行排序
+        ReturnDict = dict(sorted(ReturnDict.items(),key=lambda x:x[0]))
+
+        # 返回
+        return ReturnDict
+

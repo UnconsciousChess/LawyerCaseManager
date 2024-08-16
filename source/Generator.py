@@ -12,7 +12,8 @@ sys.dont_write_bytecode = True
 from source.RenderFile import RenderFileInDocxtpl
 from library.TemplateFile import TemplateFile
 
-def ReadTemplateList(TemplateListDir) -> list[TemplateFile]: 
+def ReadTemplateList(TemplateListDir:str) -> list[TemplateFile]: 
+
     # 本函数功能与效果：
     # 读取一个符合规则的JSON文件，该JSON文件中包含了模板文件的信息
     # 返回一个列表，列表中的每个元素都是一个TemplateFile对象  
@@ -22,14 +23,14 @@ def ReadTemplateList(TemplateListDir) -> list[TemplateFile]:
     import json
     
     with open(TemplateListDir,"r",encoding="utf-8") as f:
-        templatefiles = json.load(f)
+        templatefiles : list[dict] = json.load(f)
 
         # 对文本进行逐行读取并判定
         for templatefile in templatefiles:
             # 实例化一个TemplateFile对象
             TemplateFileObj = TemplateFile()
             # 调用SetTemplateFileFromJsonDict方法，将读取到的json转化为TemplateFile对象
-            Result = TemplateFileObj.SetTemplateFileFromJsonDict(templatefile)
+            Result = TemplateFileObj.InputFromDict(templatefile)
             # 如果Result是Success,则将处理好的TemplateFile对象放入列表中
             if Result == "Success":
                 TemplateFilesList.append(TemplateFileObj)
