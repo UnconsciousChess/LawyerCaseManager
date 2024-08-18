@@ -16,9 +16,16 @@
 			</template>
 		</el-table-column>
 		<el-table-column prop="index" label="序号" width="55" />
+		<el-table-column
+			prop="startTime"
+			label="开始时间"
+			sortable
+			:default-sort="{prop: 'startTime', order: 'descending'}"
+			width="120"
+		/>
 		<el-table-column prop="causeOfAction" label="案由" width="180" />
-		<el-table-column prop="litigantsName" label="当事人" width="350" />
-		<el-table-column fixed="right" label="功能菜单" width="450">
+		<el-table-column prop="litigantsName" label="当事人" width="300" />
+		<el-table-column label="功能菜单" width="350">
 			<template #default="{row}">
 				<el-dropdown size="small" placement="bottom" style="margin-right: 10px">
 					<el-button size="small" plain type="warning"> 案件操作</el-button>
@@ -106,10 +113,7 @@
 		<el-button type="primary" @click="testOutputCase"
 			>后端输出案件信息</el-button
 		>
-
-
 	</div>
-
 
 	<!-- 下面是按下按钮以后弹出的对话框 -->
 
@@ -362,11 +366,9 @@ async function getTableData() {
 						cases[i].causeOfAction + "一案，编号：" + cases[i].caseId;
 
 					tableData.value[updateItemIndex].startTime = cases[i].startTime;
-
 				} else {
 					// 如果没有相同的，则将数据添加到tableData中
 					tableData.value.push({
-
 						agentCondition: cases[i].agentCondition,
 
 						caseFolderGeneratedPath: cases[i].caseFolderGeneratedPath,
