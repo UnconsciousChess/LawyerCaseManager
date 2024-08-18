@@ -185,8 +185,7 @@ const getCurrentplaintiffData = (plaintiffData, id) => {
 		(plaintiff) => plaintiff.id === id
 	);
 	// 赋值
-	caseForm.value.plaintiffs[index].litigantName = 
-		plaintiffData.litigantName;
+	caseForm.value.plaintiffs[index].litigantName = plaintiffData.litigantName;
 	caseForm.value.plaintiffs[index].litigantIdCode =
 		plaintiffData.litigantIdCode;
 	caseForm.value.plaintiffs[index].litigantPhoneNumber =
@@ -195,16 +194,13 @@ const getCurrentplaintiffData = (plaintiffData, id) => {
 		plaintiffData.litigantAddress;
 	caseForm.value.plaintiffs[index].litigantPosition =
 		plaintiffData.litigantPosition;
-	caseForm.value.plaintiffs[index].litigantType =
-		plaintiffData.litigantType;
+	caseForm.value.plaintiffs[index].litigantType = plaintiffData.litigantType;
 	caseForm.value.plaintiffs[index].legalRepresentative =
 		plaintiffData.legalRepresentative;
 	caseForm.value.plaintiffs[index].legalRepresentativeIdCode =
 		plaintiffData.legalRepresentativeIdCode;
-	caseForm.value.plaintiffs[index].isOurClient =
-		plaintiffData.isOurClient;
-	caseForm.value.plaintiffs[index].bankAccount =
-		plaintiffData.bankAccount;
+	caseForm.value.plaintiffs[index].isOurClient = plaintiffData.isOurClient;
+	caseForm.value.plaintiffs[index].bankAccount = plaintiffData.bankAccount;
 };
 
 const getCurrentDefendantData = (defendantData, id) => {
@@ -214,8 +210,7 @@ const getCurrentDefendantData = (defendantData, id) => {
 	);
 
 	// 赋值
-	caseForm.value.defendants[index].litigantName = 
-		defendantData.litigantName;
+	caseForm.value.defendants[index].litigantName = defendantData.litigantName;
 	caseForm.value.defendants[index].litigantIdCode =
 		defendantData.litigantIdCode;
 	caseForm.value.defendants[index].litigantPhoneNumber =
@@ -224,16 +219,13 @@ const getCurrentDefendantData = (defendantData, id) => {
 		defendantData.litigantAddress;
 	caseForm.value.defendants[index].litigantPosition =
 		defendantData.litigantPosition;
-	caseForm.value.defendants[index].litigantType =
-		defendantData.litigantType;
+	caseForm.value.defendants[index].litigantType = defendantData.litigantType;
 	caseForm.value.defendants[index].legalRepresentative =
 		defendantData.legalRepresentative;
 	caseForm.value.defendants[index].legalRepresentativeIdCode =
 		defendantData.legalRepresentativeIdCode;
-	caseForm.value.defendants[index].isOurClient =
-		defendantData.isOurClient;
-	caseForm.value.defendants[index].bankAccount =
-		defendantData.bankAccount;
+	caseForm.value.defendants[index].isOurClient = defendantData.isOurClient;
+	caseForm.value.defendants[index].bankAccount = defendantData.bankAccount;
 };
 
 // 将该方法提供给子组件
@@ -260,7 +252,7 @@ async function promptFileSelection() {
 }
 
 // 提交案件信息到后端的方法
-function onSubmit() {
+async function onSubmit() {
 	// 先判断目前是采取何种形式提交信息
 
 	// 如果采取的是文件上传
@@ -287,32 +279,7 @@ function onSubmit() {
 		console.log("onSubmit()：当前导入模式为-从前端表单中导入案件信息");
 		// 先校验表单
 		caseFormRef.value.validate((valid) => {
-			if (valid) {
-				//如果表单校验通过
-				ElMessage({
-					message: "表单校验通过",
-					type: "success",
-				});
-
-				// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端
-				// 如果没有就提示未链接到后端
-				if (typeof pywebview === "undefined") {
-					console.log("onSubmit()：未链接到后端");
-					return;
-				} else {
-					if (propData.propMode == "create") {
-						// 将案件信息的字典传递给后端
-						pywebview.api.inputSingleCaseFromFrontEndForm(caseForm.value);
-					} else if (propData.propMode == "edit") {
-						// 将案件信息的字典传递给后端,更新案件信息
-						pywebview.api.updateSingleCaseFromFrontEndForm(caseForm.value);
-					}
-
-					// 触发父组件的事件，让其从后端更新案件信息
-					emit("updateCaseData");
-					return;
-				}
-			} else {
+			if (!valid) {
 				// 如果表单校验不通过
 				ElMessage({
 					message: "表单校验不通过",
@@ -321,6 +288,51 @@ function onSubmit() {
 				return;
 			}
 		});
+
+		//如果表单校验通过
+		ElMessage({
+			message: "表单校验通过",
+			type: "success",
+		});
+
+		// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端
+		// 如果没有就提示未链接到后端
+		if (typeof pywebview === "undefined") {
+			console.log("onSubmit()：未链接到后端");
+			return;
+		} else {
+			if (propData.propMode == "create") {
+				// 将案件信息的字典传递给后端
+				const result = await pywebview.api.inputSingleCaseFromFrontEndForm(
+					caseForm.value
+				);
+				console.log(result);
+				if (result == "Success") {
+					ElMessage({
+						message: "案件信息已经成功传递给后端",
+						type: "success",
+					});
+					// 触发父组件的事件，让其从后端更新案件信息
+					emit("updateCaseData");
+				}
+			} else if (propData.propMode == "edit") {
+				// 将案件信息的字典传递给后端,更新案件信息
+				const result = await pywebview.api.updateSingleCaseFromFrontEndForm(
+					caseForm.value
+				);
+				console.log(result);
+				if (result == "Success") {
+					ElMessage({
+						message: "案件信息已经成功传递给后端",
+						type: "success",
+					});
+					// 触发父组件的事件，让其从后端更新案件信息
+					emit("updateCaseData");
+				}
+			}
+
+			return;
+		}
 	}
 }
 
@@ -446,9 +458,11 @@ watchEffect(() => {
 	>
 		<el-form-item>
 			<el-button type="primary" plain @click="onAddPlaintiff"
-				>新增原告</el-button
-			>
-			<el-button type="info" plain @click="onAddDefendant">新增被告</el-button>
+				>新增原告<el-icon><CirclePlusFilled /></el-icon
+			></el-button>
+			<el-button type="info" plain @click="onAddDefendant"
+				>新增被告<el-icon><CirclePlusFilled /></el-icon
+			></el-button>
 			<el-button type="danger" @click="onSubmit(ruleFormRef)"
 				>提交案件信息</el-button
 			>
@@ -505,8 +519,8 @@ watchEffect(() => {
 				@click="
 					caseForm.stages.push({stageName: '', courtName: '', caseNumber: ''})
 				"
-				>新增案件阶段</el-button
-			>
+				>新增案件阶段<el-icon><CirclePlusFilled /></el-icon
+			></el-button>
 		</el-form-item>
 		<template v-for="stage in caseForm.stages">
 			<el-form-item v-if="inputInfoByFrontEndStatus" label="案件阶段">
