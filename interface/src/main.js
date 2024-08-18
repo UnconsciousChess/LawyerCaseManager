@@ -3,6 +3,8 @@ import App from './App.vue'
 // 导入router
 import {createMemoryHistory, createRouter} from 'vue-router'
 
+import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
 
 // 导入组件
 import Caculator from './components/Caculator.vue'
@@ -28,6 +30,11 @@ const router = createRouter({
 
 // 创建Vue实例app
 const app = createApp(App)
+
+// 注册ElementPlusIconsVue
+for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
+  app.component(key, component)
+}
 
 // app使用router
 app.use(router)
