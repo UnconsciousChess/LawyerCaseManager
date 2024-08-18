@@ -24,7 +24,7 @@ class TemplateFile():
         # 模板文件的阶段（委托、立案、审理、执行、归档）
         self._RenderStage = ""
         # 需要根据某个选项进行多次渲染的属性
-        self._MultiRenderList = []
+        self._MultiRenderOption = ""
 
     # ======= Get方法 ======= #
     def GetId(self) -> str:
@@ -42,8 +42,8 @@ class TemplateFile():
     def GetRenderStage(self)  -> str:
         return self._RenderStage
 
-    def GetMultiRenderList(self) -> list:
-        return self._MultiRenderList
+    def GetMultiRenderOption(self) -> str:
+        return self._MultiRenderOption
     
     # ======= Set方法 ======= #
     def SetId(self,Id,Debug=False) -> int:
@@ -154,8 +154,23 @@ class TemplateFile():
 
         return 0 
             
-    def SetMultiRenderList(self,MultiRenderList,Debug=False) -> int:
-        pass
+    def SetMultiRenderOption(self,MultiRenderOption,Debug=False) -> int:
+            
+            # 输入检查
+            # 检查是否为列表
+            if not isinstance(MultiRenderOption,str):
+                return -1
+            
+            if MultiRenderOption not in ["Us","Opponents","Courts",
+                            "CourtsAndUs","CourtsAndOpponents"]:
+                if Debug:
+                    print("Elements in MultiRenderOption should be 'Us' or 'Opponents' or 'Courts'.")
+                return -1
+            
+            # 经过检查后，赋值
+            self._MultiRenderOption = MultiRenderOption
+    
+            return 0
 
     # ======= Input 方法 ======= #
 
@@ -175,7 +190,7 @@ class TemplateFile():
             "setDirError": False,
             "setRenderTypeError": False,
             "setRenderStageError": False,
-            "setMultiRenderListError": False
+            "setMultiRenderOptionError": False
         }
 
         # 检查是否有templateFileName键
@@ -201,9 +216,9 @@ class TemplateFile():
                 if self.SetRenderStage(value) == -1:
                     ErrorResult["setRenderStageError"] = True
 
-            elif key == "multiRenderList":
-                if self.SetMultiRenderList(value) == -1:
-                    ErrorResult["setMultiRenderListError"] = True
+            elif key == "multiRenderOption":
+                if self.SetMultiRenderOption(value) == -1:
+                    ErrorResult["setMultiRenderOptionError"] = True
         
         # 如果经过读取字典后，id为空，则生成一个id
         if self.GetId() == "":
@@ -232,7 +247,7 @@ class TemplateFile():
             "dir": self.GetDir(),
             "renderType": self.GetRenderType(),
             "renderStage": self.GetRenderStage(),
-            "multiRenderList": self.GetMultiRenderList()
+            "multiRenderOption": self.GetMultiRenderOption()
         }
 
         # 对key进行排序

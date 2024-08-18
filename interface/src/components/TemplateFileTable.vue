@@ -36,7 +36,7 @@ async function GetTemplateFileData() {
 							dir: templateFiles[i].dir,
 							renderType: templateFiles[i].renderType,
 							renderStage: templateFiles[i].renderStage,
-							multiRenderList: templateFiles[i].multiRenderList,
+							multiRenderOption: templateFiles[i].multiRenderOption,
 						});
 					}
 				}
@@ -113,8 +113,8 @@ async function updateTemplateFileDataFromEditForm(data) {
 	templateFilesData.value[updateItemIndex].dir = data.dir;
 	templateFilesData.value[updateItemIndex].renderType = data.renderType;
 	templateFilesData.value[updateItemIndex].renderStage = data.renderStage;
-	templateFilesData.value[updateItemIndex].multiRenderList =
-		data.multiRenderList;
+	templateFilesData.value[updateItemIndex].multiRenderOption =
+		data.multiRenderOption;
 
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
