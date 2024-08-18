@@ -107,6 +107,8 @@ const caseFormRules = ref({
 	],
 });
 
+const caseFormRulesError = ref(null);
+
 // 接收父组件传递的方法
 const propData = defineProps({
 	propCaseData: Object,
@@ -278,6 +280,7 @@ async function onSubmit() {
 	else {
 		console.log("onSubmit()：当前导入模式为-从前端表单中导入案件信息");
 		// 先校验表单
+
 		caseFormRef.value.validate((valid) => {
 			if (!valid) {
 				// 如果表单校验不通过
@@ -285,53 +288,59 @@ async function onSubmit() {
 					message: "表单校验不通过",
 					type: "error",
 				});
-				return;
+				caseFormRulesError.value = true;
+			} else {
+				// 如果表单校验通过
+				ElMessage({
+					message: "表单校验通过",
+					type: "success",
+				});
+				caseFormRulesError.value = false;
 			}
 		});
 
-		//如果表单校验通过
-		ElMessage({
-			message: "表单校验通过",
-			type: "success",
-		});
-
-		// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端
-		// 如果没有就提示未链接到后端
-		if (typeof pywebview === "undefined") {
-			console.log("onSubmit()：未链接到后端");
+		// 如果表单校验不通过，则不提交
+		if (caseFormRulesError.value == true) {
+			console.log("表单校验不通过，不提交");
 			return;
 		} else {
-			if (propData.propMode == "create") {
-				// 将案件信息的字典传递给后端
-				const result = await pywebview.api.inputSingleCaseFromFrontEndForm(
-					caseForm.value
-				);
-				console.log(result);
-				if (result == "Success") {
-					ElMessage({
-						message: "案件信息已经成功传递给后端",
-						type: "success",
-					});
-					// 触发父组件的事件，让其从后端更新案件信息
-					emit("updateCaseData");
-				}
-			} else if (propData.propMode == "edit") {
-				// 将案件信息的字典传递给后端,更新案件信息
-				const result = await pywebview.api.updateSingleCaseFromFrontEndForm(
-					caseForm.value
-				);
-				console.log(result);
-				if (result == "Success") {
-					ElMessage({
-						message: "案件信息已经成功传递给后端",
-						type: "success",
-					});
-					// 触发父组件的事件，让其从后端更新案件信息
-					emit("updateCaseData");
+			console.log("表单校验通过，提交");
+			// 判断是否有pywebview对象，如果有则将案件信息的字典传递给后端
+			// 如果没有就提示未链接到后端
+			if (typeof pywebview === "undefined") {
+				console.log("onSubmit()：未链接到后端");
+				return;
+			} else {
+				if (propData.propMode == "create") {
+					// 将案件信息的字典传递给后端
+					const result = await pywebview.api.inputSingleCaseFromFrontEndForm(
+						caseForm.value
+					);
+					console.log(result);
+					if (result == "Success") {
+						ElMessage({
+							message: "案件信息已经成功传递给后端",
+							type: "success",
+						});
+						// 触发父组件的事件，让其从后端更新案件信息
+						emit("updateCaseData");
+					}
+				} else if (propData.propMode == "edit") {
+					// 将案件信息的字典传递给后端,更新案件信息
+					const result = await pywebview.api.updateSingleCaseFromFrontEndForm(
+						caseForm.value
+					);
+					console.log(result);
+					if (result == "Success") {
+						ElMessage({
+							message: "案件信息已经成功传递给后端",
+							type: "success",
+						});
+						// 触发父组件的事件，让其从后端更新案件信息
+						emit("updateCaseData");
+					}
 				}
 			}
-
-			return;
 		}
 	}
 }
