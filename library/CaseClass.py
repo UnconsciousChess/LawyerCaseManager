@@ -52,6 +52,8 @@ class Case():
         self._CaseId = "Case-" + generate(alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', size=16)
         # 案件代理情况
         self._AgentCondition = None
+        # 案件开始时间
+        self._StartTime = None
 
         # 下面通过读取文件得到一些通用列表,并作为类的属性
 
@@ -113,6 +115,10 @@ class Case():
     # 案件代理情况
     def GetAgentCondition(self):
         return self._AgentCondition
+    # 案件开始时间
+    def GetStartTime(self):
+        return self._StartTime
+    
     
 
     # ===== Get方法：下面定义外部获取各属性的一些进阶方法（主要涉及输出一些常用字符串）=====
@@ -222,6 +228,9 @@ class Case():
     
     # 诉讼标的额设定方法
     def SetLitigationAmount(self,LitigationAmount,debugmode=False):
+
+        if isinstance(LitigationAmount,str):
+            return
         # 尝试将输入值转换为浮点数
         try:
             LitigationAmount = float(LitigationAmount)
@@ -369,6 +378,13 @@ class Case():
             if DebugMode:
                 print("SetRejectMediationReasonText报错：该输入对象的类型与属性不匹配,拒绝理由输入值为字符串")
 
+    # 案件开始时间设定方法
+    def SetStartTime(self,StartTime,DebugMode=False):
+        if isinstance(StartTime,str):
+            self._StartTime = StartTime
+        else:
+            if DebugMode:
+                print("SetStartTime报错：该输入对象的类型与属性不匹配,开始时间输入值为字符串")
   
     # 添加诉讼参与人的方法
     def AppendLitigant(self,ALitigant) -> bool:
@@ -437,13 +453,13 @@ class Case():
                     self._CaseId = "Case-" + generate(alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', size=16)
 
         elif Key == 'caseType':
-            self.SetCaseType(int(Value))
+            self.SetCaseType(Value)
 
         elif Key == 'litigationAmount':
-            self.SetLitigationAmount(float(Value))
+            self.SetLitigationAmount(Value)
 
         elif Key == 'causeOfAction':
-            self.SetCauseOfAction(str(Value))
+            self.SetCauseOfAction(Value)
         
         elif Key == 'stages':
             self.SetStage(Value)
@@ -463,6 +479,8 @@ class Case():
         elif Key == 'rejectMediationReasonText':
             self.SetRejectMediationReasonText(Value)
 
+        elif Key == 'startTime':
+            self.SetStartTime(Value)
 
         elif Key == 'plaintiffs' or Key == 'defendants' or Key == 'legalThirdParties':
             for LitigantDict in Value:
@@ -481,6 +499,8 @@ class Case():
 
             # 将该代理情况对象赋值给案件的代理情
             self._AgentCondition = agentCondition
+
+
 
 
    
@@ -541,6 +561,7 @@ class Case():
             OutputStr += "调解意愿：不愿意调解\n"
 
         OutputStr += "拒绝调解理由：%s\n" % self.GetRejectMediationReasonText()
+        OutputStr += "开始时间：%s\n" % self.GetStartTime()
 
         
         # 代理情况
@@ -643,6 +664,9 @@ class Case():
         OutputDict["plaintiffNames"] = self.GetAllPlaintiffNames()
         # 被告名字字符串
         OutputDict["defendantNames"] = self.GetAllDefendantNames()
+
+        # 开始时间
+        OutputDict["startTime"] = self.GetStartTime()
 
         # 字典排序
         OutputDict = dict(sorted(OutputDict.items(),key=lambda x:x[0]))

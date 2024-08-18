@@ -360,6 +360,9 @@ async function getTableData() {
 					// 表格title的数据
 					tableData.value[updateItemIndex].title =
 						cases[i].causeOfAction + "一案，编号：" + cases[i].caseId;
+
+					tableData.value[updateItemIndex].startTime = cases[i].startTime;
+
 				} else {
 					// 如果没有相同的，则将数据添加到tableData中
 					tableData.value.push({
@@ -391,17 +394,13 @@ async function getTableData() {
 
 						rejectMediationReasonText: cases[i].rejectMediationReasonText,
 
-						// riskAgentPostFeeRate: cases[i].riskAgentPostFeeRate,
-
-						// riskAgentStatus: cases[i].riskAgentStatus,
-
-						// riskAgentUpfrontFee: cases[i].riskAgentUpfrontFee,
-
 						stages: cases[i].stages,
 
 						thirdParties: cases[i].thirdParties,
 
 						title: cases[i].causeOfAction + "一案，编号：" + cases[i].caseId,
+
+						startTime: cases[i].startTime,
 					});
 					// console.log(tableData.value);
 				}

@@ -357,7 +357,6 @@ function caseFormInfoInitiation(propData) {
 		// 如果有传递过来的案件信息，则将其赋值给表单
 		let caseData = propData.propCaseData;
 
-		// caseForm.value.agentCondition.agentFixedFee = caseData.agentCondition.agentFixedFee;
 		caseForm.value.agentCondition = caseData.agentCondition;
 		caseForm.value.caseAgentStage = caseData.caseAgentStage;
 		caseForm.value.caseId = caseData.caseId;
@@ -369,7 +368,8 @@ function caseFormInfoInitiation(propData) {
 
 		caseForm.value.mediationIntention = caseData.mediationIntention;
 		caseForm.value.caseFolderGeneratedPath = caseData.caseFolderGeneratedPath;
-		caseForm.value.riskAgentStatus = caseData.riskAgentStatus;
+
+		caseForm.value.startTime = caseData.startTime;
 
 		// 如果原告不为空，则将其赋值给表单
 		if (caseData.plaintiffs != null) {
@@ -437,6 +437,8 @@ function caseFormInfoInitiation(propData) {
 		caseForm.value.claimText = "";
 		caseForm.value.rejectMediationReasonText = "";
 
+		caseForm.value.startTime = new Date();
+
 		caseForm.value.plaintiffs = [];
 		caseForm.value.defendants = [];
 
@@ -499,40 +501,84 @@ watchEffect(() => {
 			</el-button>
 		</el-form-item>
 
-		<el-form-item v-if="inputInfoByFrontEndStatus" label="案由">
-			<el-select-v2
-				v-model="caseForm.causeOfAction"
-				filterable
-				placeholder="请选择案由"
-				style="width: 220px"
-				:options="causeOfActionsOptions"
-				:value="causeOfActionsOptions.value"
-			/>
-		</el-form-item>
+		<!-- 第1行 -->
+		<el-row>
+			<el-form-item v-if="inputInfoByFrontEndStatus" label="案由">
+				<el-select-v2
+					v-model="caseForm.causeOfAction"
+					filterable
+					placeholder="请选择案由"
+					style="width: 240px"
+					:options="causeOfActionsOptions"
+					:value="causeOfActionsOptions.value"
+					margin-right
+				/>
+			</el-form-item>
 
-		<el-form-item
-			v-if="inputInfoByFrontEndStatus"
-			label="标的额"
-			prop="litigationAmount"
-		>
-			<el-input
-				v-model.number="caseForm.litigationAmount"
-				placeholder="计价单位：人民币元"
-				style="width: 240px"
-			/>
-		</el-form-item>
+			<el-form-item v-if="inputInfoByFrontEndStatus" label="案件开始时间">
+				<el-date-picker
+					v-model="caseForm.startTime"
+					type="date"
+					placeholder="choose"
+					value-format="YYYY-MM-DD"
+					style="width: 240px"
+					margin-right
+				/>
+			</el-form-item>
+		</el-row>
 
-		<el-form-item v-if="inputInfoByFrontEndStatus">
-			<el-button
-				type="primary"
-				@click="
-					caseForm.stages.push({stageName: '', courtName: '', caseNumber: ''})
-				"
-				>新增案件阶段<el-icon><CirclePlusFilled /></el-icon
-			></el-button>
-		</el-form-item>
+		<!-- 第2行 -->
+		<el-row>
+			<el-form-item
+				v-if="inputInfoByFrontEndStatus"
+				label="标的额"
+				prop="litigationAmount"
+			>
+				<el-input
+					v-model.number="caseForm.litigationAmount"
+					placeholder="计价单位：人民币元"
+					style="width: 240px"
+					margin-right
+				/>
+			</el-form-item>
+
+			<el-form-item v-if="inputInfoByFrontEndStatus" label="风险收费">
+				<el-switch
+					v-model="caseForm.agentCondition.riskAgentStatus"
+					margin-right
+				/>
+			</el-form-item>
+
+			<el-form-item v-if="inputInfoByFrontEndStatus" label="调解意愿">
+				<el-switch v-model="caseForm.mediationIntention" margin-right />
+			</el-form-item>
+		</el-row>
+
+		<!-- 第3行 -->
+		<el-row>
+			<el-form-item v-if="inputInfoByFrontEndStatus">
+				<el-button
+					type="primary"
+					@click="
+						caseForm.stages.push({stageName: '', courtName: '', caseNumber: ''})
+					"
+					>案件阶段<el-icon><CirclePlusFilled /></el-icon
+				></el-button>
+			</el-form-item>
+
+			<el-form-item v-if="inputInfoByFrontEndStatus">
+				案件类型：
+				<el-radio-group v-model="caseForm.caseType" id="caseType">
+					<el-radio value="1">民事案件</el-radio>
+					<el-radio value="2">行政案件</el-radio>
+					<el-radio value="3">执行案件</el-radio>
+				</el-radio-group>
+			</el-form-item>
+		</el-row>
+
+		<!-- 案件阶段信息【不是委托阶段！】 -->
 		<template v-for="stage in caseForm.stages">
-			<el-form-item v-if="inputInfoByFrontEndStatus" label="案件阶段">
+			<el-form-item v-if="inputInfoByFrontEndStatus">
 				<el-row>
 					<el-select
 						v-model="stage.stageName"
@@ -559,7 +605,7 @@ watchEffect(() => {
 					<el-input
 						v-model="stage.caseNumber"
 						placeholder="请输入案号"
-						style="width: 160px"
+						style="width: 250px"
 					/>
 
 					<el-button
@@ -574,62 +620,54 @@ watchEffect(() => {
 			</el-form-item>
 		</template>
 
+		<!-- 第5行 -->
 		<el-row>
-			<el-col :span="12">
-				<el-form-item v-if="inputInfoByFrontEndStatus" label="风险收费">
-					<el-switch v-model="caseForm.agentCondition.riskAgentStatus" />
-				</el-form-item>
-			</el-col>
-			<el-col :span="12">
-				<el-form-item v-if="inputInfoByFrontEndStatus" label="调解意愿">
-					<el-switch v-model="caseForm.mediationIntention" />
-				</el-form-item>
-			</el-col>
+			<el-form-item v-if="inputInfoByFrontEndStatus" label="前期收费金额">
+				<el-input
+					v-model="caseForm.agentCondition.riskAgentUpfrontFee"
+					style="width: 100px"
+					margin-right
+				/>
+			</el-form-item>
+
+			<el-form-item v-if="inputInfoByFrontEndStatus" label="风险收费比例">
+				<el-input
+					v-model="caseForm.agentCondition.riskAgentPostFeeRate"
+					style="width: 100px"
+					margin-right
+				/>
+			</el-form-item>
 		</el-row>
 
+		<!-- 第6行 -->
 		<el-row>
-			<el-col :span="12">
-				<el-form-item v-if="inputInfoByFrontEndStatus" label="前期风险收费金额">
-					<el-input v-model="caseForm.agentCondition.riskAgentUpfrontFee" />
-				</el-form-item>
-			</el-col>
-			<el-col :span="12">
-				<el-form-item v-if="inputInfoByFrontEndStatus" label="后期风险收费比例">
-					<el-input v-model="caseForm.agentCondition.riskAgentPostFeeRate" />
-				</el-form-item>
-			</el-col>
-		</el-row>
-
-		<el-form-item v-if="inputInfoByFrontEndStatus">
-			委托阶段：
-			<el-checkbox-group
-				v-model="caseForm.agentCondition.agentStage"
-				@change="console.log(caseForm.agentCondition.agentStage)"
-			>
-				<el-checkbox
-					v-for="(stage, index) in caseAgentStageCheckboxOptions"
-					:value="index + 1"
+			<el-form-item v-if="inputInfoByFrontEndStatus">
+				委托阶段：
+				<el-checkbox-group
+					v-model="caseForm.agentCondition.agentStage"
+					@change="console.log(caseForm.agentCondition.agentStage)"
 				>
-					{{ stage }}
-				</el-checkbox>
-			</el-checkbox-group>
-		</el-form-item>
-
-		<el-form-item v-if="inputInfoByFrontEndStatus">
-			案件类型：
-			<el-radio-group v-model="caseForm.caseType" id="caseType">
-				<el-radio value="1">民事案件</el-radio>
-				<el-radio value="2">行政案件</el-radio>
-				<el-radio value="3">执行案件</el-radio>
-			</el-radio-group>
-		</el-form-item>
+					<el-checkbox
+						v-for="(stage, index) in caseAgentStageCheckboxOptions"
+						:value="index + 1"
+					>
+						{{ stage }}
+					</el-checkbox>
+				</el-checkbox-group>
+			</el-form-item>
+		</el-row>
 
 		<el-form-item
 			v-if="inputInfoByFrontEndStatus"
 			label="诉讼请求"
 			prop="claimText"
 		>
-			<el-input v-model="caseForm.claimText" type="textarea" />
+			<el-input
+				v-model="caseForm.claimText"
+				type="textarea"
+				style="width: 650px"
+				:rows="4"
+			/>
 		</el-form-item>
 
 		<el-form-item
@@ -637,11 +675,21 @@ watchEffect(() => {
 			label="事实与理由"
 			prop="factAndReason"
 		>
-			<el-input v-model="caseForm.factAndReason" type="textarea" />
+			<el-input
+				v-model="caseForm.factAndReason"
+				type="textarea"
+				style="width: 650px"
+				:rows="8"
+			/>
 		</el-form-item>
 
 		<el-form-item v-if="inputInfoByFrontEndStatus" label="拒绝调解理由">
-			<el-input v-model="caseForm.rejectMediationReasonText" type="textarea" />
+			<el-input
+				v-model="caseForm.rejectMediationReasonText"
+				type="textarea"
+				style="width: 650px"
+				:rows="2"
+			/>
 		</el-form-item>
 
 		<el-form-item
@@ -651,7 +699,7 @@ watchEffect(() => {
 		>
 			<el-input
 				v-model="caseForm.caseFolderGeneratedPath"
-				style="max-width: 400px"
+				style="width: 650px"
 			/>
 		</el-form-item>
 	</el-form>
@@ -678,17 +726,9 @@ watchEffect(() => {
 </template>
 
 <style>
-/* 展示信息表格的css */
-.cell-item {
-	display: flex;
-	align-items: center;
+
+.margin-right {
+	margin-right: 10px;
 }
 
-.margin-top {
-	margin-top: 20px;
-}
-
-.el-descriptions {
-	margin-top: 20px;
-}
 </style>
