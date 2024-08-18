@@ -289,20 +289,24 @@ class Litigant():
         OutputStr = ""
 
         if self.GetLitigantType() == "Person":
-            OutputStr += "姓名：" + self.GetName() + "\n"
+            OutputStr += "姓名：" + self.GetName() 
+
+            if self.IsOurClient():
+                OutputStr += "(我方当事人)" + "\n"
+
             OutputStr += "身份证号码：" + self.GetIdCode() + "\n"
         else:
-            OutputStr += "名称：" + self.GetName() + "\n"
+            OutputStr += "名称：" + self.GetName() 
+
+            if self.IsOurClient():
+                OutputStr += "(我方当事人)" + "\n"
+
             OutputStr += "统一社会信用代码：" + self.GetIdCode() + "\n"
         
         OutputStr += "联系地址：" + self.GetAddress() + "\n"
         
         OutputStr += "联系方式：" + self.GetContactNumber() + "\n"
 
-        if self.IsOurClient():
-            OutputStr += "是否为我方当事人：是" + "\n"
-        else:
-            OutputStr += "是否为我方当事人：否" + "\n"
 
         if self.GetLitigantType() == "Person":
             OutputStr += "主体类型：自然人" + "\n"
