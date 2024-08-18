@@ -28,8 +28,6 @@
 </template>
 
 <script setup>
-import { render } from 'vue';
-
 
 
 const templateFilesData = ref([]);
