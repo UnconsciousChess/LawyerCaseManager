@@ -106,16 +106,20 @@
 		<el-button type="primary" @click="testOutputCase"
 			>后端输出案件信息</el-button
 		>
+
+
 	</div>
+
 
 	<!-- 下面是按下按钮以后弹出的对话框 -->
 
 	<!-- 编辑对话框 -->
 	<el-dialog
 		title="编辑案件信息"
-		width="700"
+		width="900"
 		align-center
 		v-model="dialogEditDataVisible"
+		draggable
 	>
 		<el-scrollbar height="600px">
 			<CaseInfoForm

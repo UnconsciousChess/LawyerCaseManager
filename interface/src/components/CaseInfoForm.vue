@@ -359,7 +359,6 @@ function caseFormInfoInitiation(propData) {
 			caseForm.value.defendants = caseData.defendants;
 		}
 
-
 		caseForm.value.factAndReason = caseData.factAndReason;
 		caseForm.value.claimText = caseData.claimText;
 		caseForm.value.rejectMediationReasonText =
@@ -397,11 +396,17 @@ function caseFormInfoInitiation(propData) {
 			riskAgentPostFeeRate: "",
 			agentStage: [],
 		};
-		
+
 		caseForm.value.caseId = "";
 		caseForm.value.causeOfAction = "";
 		caseForm.value.litigationAmount = "";
-		caseForm.value.stages = [{stageName: "", courtName: "", caseNumber: ""}];
+		caseForm.value.stages = [
+			{
+				stageName: "",
+				courtName: "",
+				caseNumber: "",
+			},
+		];
 
 		caseForm.value.caseType = "";
 		caseForm.value.mediationIntention = true;
@@ -436,7 +441,7 @@ watchEffect(() => {
 		v-bind:model="caseForm"
 		v-bind:rules="caseFormRules"
 		label-width="150"
-		style="max-width: 700px"
+		style="max-width: 900px"
 		ref="caseFormRef"
 	>
 		<el-form-item>
@@ -494,6 +499,15 @@ watchEffect(() => {
 			/>
 		</el-form-item>
 
+		<el-form-item v-if="inputInfoByFrontEndStatus">
+			<el-button
+				type="primary"
+				@click="
+					caseForm.stages.push({stageName: '', courtName: '', caseNumber: ''})
+				"
+				>新增案件阶段</el-button
+			>
+		</el-form-item>
 		<template v-for="stage in caseForm.stages">
 			<el-form-item v-if="inputInfoByFrontEndStatus" label="案件阶段">
 				<el-row>
@@ -524,6 +538,15 @@ watchEffect(() => {
 						placeholder="请输入案号"
 						style="width: 160px"
 					/>
+
+					<el-button
+						type="danger"
+						:icon="Delete"
+						@click="caseForm.stages.splice(caseForm.stages.indexOf(stage), 1)"
+						style="margin-left: 10px"
+					>
+						<el-icon><RemoveFilled /></el-icon>
+					</el-button>
 				</el-row>
 			</el-form-item>
 		</template>
@@ -543,18 +566,12 @@ watchEffect(() => {
 
 		<el-row>
 			<el-col :span="12">
-				<el-form-item
-					v-if="inputInfoByFrontEndStatus"
-					label="前期风险收费金额"
-				>
+				<el-form-item v-if="inputInfoByFrontEndStatus" label="前期风险收费金额">
 					<el-input v-model="caseForm.agentCondition.riskAgentUpfrontFee" />
 				</el-form-item>
 			</el-col>
 			<el-col :span="12">
-				<el-form-item
-					v-if="inputInfoByFrontEndStatus"
-					label="后期风险收费比例"
-				>
+				<el-form-item v-if="inputInfoByFrontEndStatus" label="后期风险收费比例">
 					<el-input v-model="caseForm.agentCondition.riskAgentPostFeeRate" />
 				</el-form-item>
 			</el-col>
@@ -635,14 +652,6 @@ watchEffect(() => {
 			:show-description-list="showDescriptionList"
 		/>
 	</div>
-
-	<!-- 下面的是用于测试，直接展示从表格中输入的数据 -->
-	<!-- <div>
-		<ul>
-			<p>案件信息</p>
-			<li v-for="(item, key) in caseForm">{{ key }} - {{ item }}</li>
-		</ul>
-	</div> -->
 </template>
 
 <style>
