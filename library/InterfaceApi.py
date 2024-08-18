@@ -349,8 +349,10 @@ class Api:
         
         # 根据templateFilesIdList找到对应的模板文件对象，赋值给TargetTemplateFiles
         TargetTemplateFiles = []
+        
         for templateFileId in templateFilesIdList:
             for templateFile in self._templateFiles:
+                # print(templateFileId)
                 if templateFile.GetId() == templateFileId:
                     TargetTemplateFiles.append(templateFile)
                     break
