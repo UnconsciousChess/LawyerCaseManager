@@ -20,7 +20,8 @@ WebApi = Api()
 window = webview.create_window(title='WorkingDocumentGenerator', 
                                url='../interface/dist/index.html',
                                js_api=WebApi,
-                               width=1100)
+                               width=1160,
+                               height=780,)
 
 # 窗口循环
 webview.start(debug=True)
