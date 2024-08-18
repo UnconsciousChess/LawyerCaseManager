@@ -336,7 +336,8 @@ function caseFormInfoInitiation(propData) {
 		// 如果有传递过来的案件信息，则将其赋值给表单
 		let caseData = propData.propCaseData;
 
-		caseForm.value.agentFixedFee = caseData.agentFixedFee;
+		// caseForm.value.agentCondition.agentFixedFee = caseData.agentCondition.agentFixedFee;
+		caseForm.value.agentCondition = caseData.agentCondition;
 		caseForm.value.caseAgentStage = caseData.caseAgentStage;
 		caseForm.value.caseId = caseData.caseId;
 		caseForm.value.causeOfAction = caseData.causeOfAction;
@@ -358,14 +359,6 @@ function caseFormInfoInitiation(propData) {
 			caseForm.value.defendants = caseData.defendants;
 		}
 
-		// 如果风险代理人状态为true，则将风险代理人的前期风险收费金额和后期风险收费比例赋值给表单
-		if (caseData.riskAgentStatus == true) {
-			caseForm.value.riskAgentUpfrontFee = caseData.riskAgentUpfrontFee;
-			caseForm.value.riskAgentPostFeeRate = caseData.riskAgentPostFeeRate;
-		} else {
-			caseForm.value.riskAgentUpfrontFee = "";
-			caseForm.value.riskAgentPostFeeRate = "";
-		}
 
 		caseForm.value.factAndReason = caseData.factAndReason;
 		caseForm.value.claimText = caseData.claimText;
@@ -397,19 +390,22 @@ function caseFormInfoInitiation(propData) {
 		componentsConfig.value.inputInfoByFile = true;
 
 		// 所有信息回归初始值
-		caseForm.value.agentFixedFee = null;
+		caseForm.value.agentCondition = {
+			agentFixedFee: null,
+			riskAgentStatus: false,
+			riskAgentUpfrontFee: "",
+			riskAgentPostFeeRate: "",
+			agentStage: [],
+		};
+		
 		caseForm.value.caseId = "";
 		caseForm.value.causeOfAction = "";
 		caseForm.value.litigationAmount = "";
 		caseForm.value.stages = [{stageName: "", courtName: "", caseNumber: ""}];
-		caseForm.value.caseAgentStage = [];
+
 		caseForm.value.caseType = "";
 		caseForm.value.mediationIntention = true;
 		caseForm.value.caseFolderGeneratedPath = "";
-		caseForm.value.riskAgentStatus = false;
-
-		caseForm.value.riskAgentUpfrontFee = "";
-		caseForm.value.riskAgentPostFeeRate = "";
 
 		caseForm.value.factAndReason = "";
 		caseForm.value.claimText = "";
@@ -535,7 +531,7 @@ watchEffect(() => {
 		<el-row>
 			<el-col :span="12">
 				<el-form-item v-if="inputInfoByFrontEndStatus" label="风险收费">
-					<el-switch v-model="caseForm.riskAgentStatus" />
+					<el-switch v-model="caseForm.agentCondition.riskAgentStatus" />
 				</el-form-item>
 			</el-col>
 			<el-col :span="12">
@@ -550,18 +546,16 @@ watchEffect(() => {
 				<el-form-item
 					v-if="inputInfoByFrontEndStatus"
 					label="前期风险收费金额"
-					prop="riskAgentUpfrontFee"
 				>
-					<el-input v-model.number="caseForm.riskAgentUpfrontFee" />
+					<el-input v-model="caseForm.agentCondition.riskAgentUpfrontFee" />
 				</el-form-item>
 			</el-col>
 			<el-col :span="12">
 				<el-form-item
 					v-if="inputInfoByFrontEndStatus"
 					label="后期风险收费比例"
-					prop="riskAgentPostFeeRate"
 				>
-					<el-input v-model.number="caseForm.riskAgentPostFeeRate" />
+					<el-input v-model="caseForm.agentCondition.riskAgentPostFeeRate" />
 				</el-form-item>
 			</el-col>
 		</el-row>
@@ -569,8 +563,8 @@ watchEffect(() => {
 		<el-form-item v-if="inputInfoByFrontEndStatus">
 			委托阶段：
 			<el-checkbox-group
-				v-model="caseForm.caseAgentStage"
-				@change="console.log(caseForm.caseAgentStage)"
+				v-model="caseForm.agentCondition.agentStage"
+				@change="console.log(caseForm.agentCondition.agentStage)"
 			>
 				<el-checkbox
 					v-for="(stage, index) in caseAgentStageCheckboxOptions"

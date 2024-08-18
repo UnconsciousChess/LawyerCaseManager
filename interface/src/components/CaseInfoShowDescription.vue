@@ -39,7 +39,7 @@
 			<template #label>
 				<div class="cell-item">委托阶段</div>
 			</template>
-			{{ showText.caseAgentStage }}
+			{{ showText.agentStage }}
 		</el-descriptions-item>
 
 		<el-descriptions-item>
@@ -128,16 +128,16 @@ function showTextInitialize(prop) {
 		prop.propShowTextList[Index].litigationAmount;
 	showText.value.caseType = prop.propShowTextList[Index].caseType;
 	showText.value.stages = prop.propShowTextList[Index].stages;
-	showText.value.caseAgentStage = prop.propShowTextList[Index].caseAgentStage;
+	showText.value.agentStage = prop.propShowTextList[Index].agentStage;
 	showText.value.riskAgentUpfrontFee =
-		prop.propShowTextList[Index].riskAgentUpfrontFee;
+		prop.propShowTextList[Index].agentCondition.riskAgentUpfrontFee;
 	showText.value.riskAgentPostFeeRate =
-		prop.propShowTextList[Index].riskAgentPostFeeRate;
+		prop.propShowTextList[Index].agentCondition.riskAgentPostFeeRate;
 	showText.value.claimText = prop.propShowTextList[Index].claimText;
 	showText.value.factAndReason = prop.propShowTextList[Index].factAndReason;
 	showText.value.rejectMediationReasonText =
 		prop.propShowTextList[Index].rejectMediationReasonText;
-	showText.value.agentFixedFee = prop.propShowTextList[Index].agentFixedFee;
+	showText.value.agentFixedFee = prop.propShowTextList[Index].agentCondition.agentFixedFee;
 	showText.value.caseId = prop.propShowTextList[Index].caseId;
 
 	// 下面是需要转换的字段
@@ -150,7 +150,7 @@ function showTextInitialize(prop) {
 	}
 
 	// 转换风险代理状态为【是】或【否】
-	if (prop.propShowTextList[Index].riskAgentStatus == true) {
+	if (prop.propShowTextList[Index].agentCondition.riskAgentStatus == true) {
 		showText.value.riskAgentStatus = "是";
 	} else {
 		showText.value.riskAgentStatus = "否";
@@ -166,33 +166,33 @@ function showTextInitialize(prop) {
 	}
 
 	// 转换案件阶段为【一审立案阶段】、【一审诉讼阶段】、【二审阶段】、【执行阶段】、【再审阶段】
-	if (prop.propShowTextList[Index].caseAgentStage.length == 0) {
-		showText.value.caseAgentStage = "无";
+	if (prop.propShowTextList[Index].agentCondition.agentStage.length == 0) {
+		showText.value.agentStage = "无";
 	} else {
-		showText.value.caseAgentStage = "";
+		showText.value.agentStage = "";
 		// 遍历数组并转换为字符串
-		prop.propShowTextList[Index].caseAgentStage.forEach((stage) => {
+		prop.propShowTextList[Index].agentCondition.agentStage.forEach((stage) => {
 			if (stage == "1") {
-				showText.value.caseAgentStage += "一审立案阶段" + "、";
+				showText.value.agentStage += "一审立案阶段" + "、";
 			} else if (stage == "2") {
-				showText.value.caseAgentStage += "一审诉讼阶段" + "、";
+				showText.value.agentStage += "一审诉讼阶段" + "、";
 			} else if (stage == "3") {
-				showText.value.caseAgentStage += "二审阶段" + "、";
+				showText.value.agentStage += "二审阶段" + "、";
 			} else if (stage == "4") {
-				showText.value.caseAgentStage += "执行阶段" + "、";
+				showText.value.agentStage += "执行阶段" + "、";
 			} else if (stage == "5") {
-				showText.value.caseAgentStage += "再审阶段" + "、";
+				showText.value.agentStage += "再审阶段" + "、";
 			}
 		});
 		// 如果最后一个字符是顿号，则去掉最后一个字符
 		if (
-			showText.value.caseAgentStage.charAt(
-				showText.value.caseAgentStage.length - 1
+			showText.value.agentStage.charAt(
+				showText.value.agentStage.length - 1
 			) == "、"
 		) {
-			showText.value.caseAgentStage = showText.value.caseAgentStage.substring(
+			showText.value.agentStage = showText.value.agentStage.substring(
 				0,
-				showText.value.caseAgentStage.length - 1
+				showText.value.agentStage.length - 1
 			);
 		}
 	}

@@ -293,13 +293,16 @@ async function getTableData() {
 
 					// 对应的tableData更新数据
 
-					// 代理固定费用
-					tableData.value[updateItemIndex].agentFixedFee =
-						cases[i].agentFixedFee;
+					// 代理条件
+					console.log("更新代理条件信息");
 
-					// 代理阶段
-					tableData.value[updateItemIndex].caseAgentStage =
-						cases[i].caseAgentStage;
+					console.log(cases[i].agentCondition);
+
+					if (cases[i].agentCondition != null) {
+						console.log("代理条件不为空");
+						tableData.value[updateItemIndex].agentCondition =
+							cases[i].agentCondition;
+					}
 
 					// 案件文件夹路径
 					tableData.value[updateItemIndex].caseFolderGeneratedPath =
@@ -344,18 +347,6 @@ async function getTableData() {
 					tableData.value[updateItemIndex].rejectMediationReasonText =
 						cases[i].rejectMediationReasonText;
 
-					// 风险代理后付费率
-					tableData.value[updateItemIndex].riskAgentPostFeeRate =
-						cases[i].riskAgentPostFeeRate;
-
-					// 风险代理状态
-					tableData.value[updateItemIndex].riskAgentStatus =
-						cases[i].riskAgentStatus;
-
-					// 风险代理预付费
-					tableData.value[updateItemIndex].riskAgentUpfrontFee =
-						cases[i].riskAgentUpfrontFee;
-
 					// 案件各阶段
 					tableData.value[updateItemIndex].stages = cases[i].stages;
 
@@ -368,9 +359,8 @@ async function getTableData() {
 				} else {
 					// 如果没有相同的，则将数据添加到tableData中
 					tableData.value.push({
-						agentFixedFee: cases[i].agentFixedFee,
 
-						caseAgentStage: cases[i].caseAgentStage,
+						agentCondition: cases[i].agentCondition,
 
 						caseFolderGeneratedPath: cases[i].caseFolderGeneratedPath,
 
@@ -397,11 +387,11 @@ async function getTableData() {
 
 						rejectMediationReasonText: cases[i].rejectMediationReasonText,
 
-						riskAgentPostFeeRate: cases[i].riskAgentPostFeeRate,
+						// riskAgentPostFeeRate: cases[i].riskAgentPostFeeRate,
 
-						riskAgentStatus: cases[i].riskAgentStatus,
+						// riskAgentStatus: cases[i].riskAgentStatus,
 
-						riskAgentUpfrontFee: cases[i].riskAgentUpfrontFee,
+						// riskAgentUpfrontFee: cases[i].riskAgentUpfrontFee,
 
 						stages: cases[i].stages,
 
@@ -591,10 +581,11 @@ async function documentsGenerate(data) {
 	dialogChooseTemplateVisible.value = false;
 
 	console.log(data);
+
 	// 将data里面的模板文件id传递给后端
 	let templateFileIdList = [];
 	for (let i = 0; i < data.length; i++) {
-		templateFileIdList.push(data[i].templateFileId);
+		templateFileIdList.push(data[i].id);
 	}
 
 	// 前后端通信部分

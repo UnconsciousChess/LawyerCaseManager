@@ -478,8 +478,10 @@ class Case():
             agentCondition = AgentCondition()
             # 调用代理情况对象的读取方法
             agentCondition.InputFromDict(Value)
-            # 将该代理情况对象赋值给案件的代理情况属性
+
+            # 将该代理情况对象赋值给案件的代理情
             self._AgentCondition = agentCondition
+
 
    
     # ===========Input方法：下面定义批量输入案件信息的方法=============
@@ -635,7 +637,7 @@ class Case():
         if self.GetAgentCondition() != None:
             OutputDict["agentCondition"] = self.GetAgentCondition().OutputToDict()
         else:
-            OutputDict["agentCondition"] = {}
+            OutputDict["agentCondition"] = None
 
         # 原告名字字符串
         OutputDict["plaintiffNames"] = self.GetAllPlaintiffNames()

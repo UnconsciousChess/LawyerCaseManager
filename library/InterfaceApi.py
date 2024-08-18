@@ -181,15 +181,12 @@ class Api:
     
     # 该方法用于根据前端输入的案件信息，更新一个已有的案件
     def updateSingleCaseFromFrontEndForm(self,CaseFormDict) -> str:
-        # 导入案件类Case
-        from library.CaseClass import Case
-
         # 遍历案件列表
-        for case in self._cases:
+        for index,case in enumerate(self._cases):
             # 如果案件ID相同，则更新案件信息
             if case.GetCaseId() == CaseFormDict["caseId"]:
-                # 调用Case对象的UpdateCaseInfoFromDict方法，更新案件信息
-                case.InputFromDict(CaseFormDict)
+                # 调用Case对象的UpdateCaseInfoFromDict方法，更新对应案件信息
+                self._cases[index].InputFromDict(CaseFormDict)
                 return "Success"
         # 如果遍历完，都没有找到对应的案件，则返回Fail
         return "Fail"
