@@ -49,9 +49,10 @@ def FolderCreator(case,OutputDir) -> str:
                      "执行":False,
                      "归档":True
                      }
+    AgentCondition = case.GetAgentCondition()
     # 根据案件的代理阶段，修改StageStrDict的值
-    if case.GetCaseAgentStage() != None:
-        for stage in case.GetCaseAgentStage():
+    if AgentCondition.GetAgentStage() != None:
+        for stage in AgentCondition.GetAgentStage():
             if stage == 1:   # 1代表一审立案阶段
                 StageStrDict["立案"] = True
             elif stage == 2:  # 2代表一审审理阶段
@@ -84,10 +85,6 @@ def FilesGenerator(case,
                    RenderTemplatesList:list[TemplateFile]) -> str:
 
     # 检查传入的参数OutputDir
-    if not isinstance(OutputDir,str):
-        print("输出文件夹参数类型错误！")
-        return "OutputDirTypeError"
-
     if not os.path.exists(OutputDir):
         print("输出文件夹不存在！")
         return "OutputDirNotExists"
@@ -96,25 +93,18 @@ def FilesGenerator(case,
         print("输出文件夹应该是一个文件夹！")
         return "OutputDirNotADir"
         
-    #  如果RenderTemplatesList不是列表，则报类型错误
-    if not isinstance(RenderTemplatesList,list):
-        print("模板列表参数类型错误！")
-        return "TemplateListTypeError"
-
 
     #从TemplateFilesList中找到对应阶段的文件，再根据该文件的属性进行文件生成
     for TemplateFile in RenderTemplatesList:
         # 如果该模板文件的FileType为directCopy，调用shutil.copy函数，复制该文件到当前文件夹下
         if TemplateFile.GetRenderType() == "directCopy":
-            shutil.copy(TemplateFile.GetTemplateFileDir(),
+            shutil.copy(TemplateFile.GetDir(),
                         os.path.join(OutputDir,
                                      TemplateFile.GetRenderStage() + "阶段"))
         # 如果该模板文件的FileType为docxtpl，调用RenderFileInDocxtpl函数，用模板来进行文书生成，并保存到当前文件夹下
         elif TemplateFile.GetRenderType() == "docxtpl":
-            RenderFileInDocxtpl(TemplateFileDir=TemplateFile.GetTemplateFileDir(),
-                                Case=case,
-                                OutputDir=os.path.join(OutputDir,
-                                     TemplateFile.GetRenderStage() + "阶段"))
+            RenderFileInDocxtpl(TemplateFileObj=TemplateFile,
+                                Case=case)
                 
     return "Success"
 
