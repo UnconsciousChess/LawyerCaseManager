@@ -55,6 +55,11 @@ class TemplateFile():
                 print("Id should be a string.")
             return -1
         
+        # 如果id为空，则视为用户不输入id，生成一个id
+        if Id == "":
+            self.SetId(generate(alphabet="ABCDEFGHIJKLMNOPQRSTUVWXYZ",size=6))
+            return 0
+
         # 检查id是否为6位
         if len(Id) != 6:
             if Debug:
@@ -161,7 +166,7 @@ class TemplateFile():
             if not isinstance(MultiRenderOption,str):
                 return -1
             
-            if MultiRenderOption not in ["Us","Opponents","Courts",
+            if MultiRenderOption not in ["","Us","Opponents","Courts",
                             "CourtsAndUs","CourtsAndOpponents"]:
                 if Debug:
                     print("Elements in MultiRenderOption should be 'Us' or 'Opponents' or 'Courts'.")
