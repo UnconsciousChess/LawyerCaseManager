@@ -58,14 +58,18 @@ class AgentCondition:
     def SetRiskAgentStatus(self,RiskAgentStatus,DebugMode=False):
         if isinstance(RiskAgentStatus,bool):
             self._RiskAgentStatus = RiskAgentStatus
+            return
         elif isinstance(RiskAgentStatus,str):
             if RiskAgentStatus == "True" or RiskAgentStatus == "true" or RiskAgentStatus == "TRUE" or RiskAgentStatus == "1":
                 self._RiskAgentStatus = True
+                return
             elif RiskAgentStatus == "False" or RiskAgentStatus == "false" or RiskAgentStatus == "FALSE" or RiskAgentStatus == "0":
                 self._RiskAgentStatus = False
+                return
         else:
             if DebugMode:
                 print("SetRiskAgentStatus报错：该输入对象的类型与属性不匹配,风险代理情况输入值为布尔值或字符串")
+                return
     
     # 风险代理前期费用设定方法
     def SetRiskAgentUpfrontFee(self,RiskAgentUpfrontFee,DebugMode=False):
@@ -76,7 +80,7 @@ class AgentCondition:
             if DebugMode:
                 print("输入值并非浮点数")
             return
-        # 诉讼标的额不能小于零
+        # 代理费用不能为负数
         if RiskAgentUpfrontFee >= 0:
             self._RiskAgentUpfrontFee = RiskAgentUpfrontFee
         else:
