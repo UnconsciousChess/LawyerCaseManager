@@ -12,9 +12,10 @@ from nanoid import generate
 # 导入json模块
 import json
 
-# 导入诉讼参与人类
+# 导入自定义类
 from .LitigantClass import *
 from .Stage import *
+from .AgentCondition import *
 
 import json
 class Case():
@@ -47,19 +48,10 @@ class Case():
         self._MediationIntention = False
         # 拒绝调解理由
         self._RejectMediationReasonText = ""
-        # 案件代理的阶段
-        self._CaseAgentStage = []
-        # 风险代理情况
-        self._RiskAgentStatus = None
-        # 风险代理前期费用
-        self._RiskAgentUpfrontFee = 0
-        # 风险代理后期比例
-        self._RiskAgentPostFeeRate = 0
-        # 非风险代理的固定费用(是一个列表，第一个元素对应第一个阶段的费用，第二个元素对应第二个阶段的费用...)
-        self._AgentFixedFeeList = []
         # 案件id（实例化案件时自动生成，用于前后端交互时识别）
         self._CaseId = "Case-" + generate(alphabet='0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz', size=16)
-
+        # 案件代理情况
+        self._AgentCondition = None
 
         # 下面通过读取文件得到一些通用列表,并作为类的属性
 
@@ -115,24 +107,12 @@ class Case():
     # 拒绝调解理由
     def GetRejectMediationReasonText(self):
         return self._RejectMediationReasonText
-    # 案件代理的阶段
-    def GetCaseAgentStage(self):
-        return self._CaseAgentStage
-    # 风险代理情况
-    def GetRiskAgentStatus(self):
-        return self._RiskAgentStatus
-    # 风险代理前期费用
-    def GetRiskAgentUpfrontFee(self):
-        return self._RiskAgentUpfrontFee
-    # 风险代理后期比例
-    def GetRiskAgentPostFeeRate(self):
-        return self._RiskAgentPostFeeRate
-    # 非风险代理的固定费用数组
-    def GetAgentFixedFee(self):
-        return self._AgentFixedFeeList
     # 案件id
     def GetCaseId(self):
         return self._CaseId
+    # 案件代理情况
+    def GetAgentCondition(self):
+        return self._AgentCondition
     
 
     # ===== Get方法：下面定义外部获取各属性的一些进阶方法（主要涉及输出一些常用字符串）=====
@@ -155,10 +135,14 @@ class Case():
     
     # 返回代理阶段代码对应的中文字符串
     def GetCaseAgentStageStr(self) -> str:
+        
+        if self.GetAgentCondition() == None:
+            return "NoAgentCondition"
+        
+        AgentCondition = self.GetAgentCondition()
         CaseAgentStageOutputString = ""
-        if self._CaseAgentStage == []:
-            return CaseAgentStageOutputString
-        for i in self._CaseAgentStage:
+        
+        for i in AgentCondition.GetAgentStage():
             if i == 1:
                 CaseAgentStageOutputString += "一审立案阶段,"
             elif i == 2:
@@ -169,8 +153,10 @@ class Case():
                 CaseAgentStageOutputString += "执行阶段,"
             elif i == 5:
                 CaseAgentStageOutputString += "再审阶段,"
+
         # 去掉最后一个顿号
         CaseAgentStageOutputString = CaseAgentStageOutputString[:-1]
+
         return CaseAgentStageOutputString        
     
     # 返回我方当事人列表及代理方向
@@ -383,101 +369,7 @@ class Case():
             if DebugMode:
                 print("SetRejectMediationReasonText报错：该输入对象的类型与属性不匹配,拒绝理由输入值为字符串")
 
-    # 案件代理阶段设定方法
-    def SetCaseAgentStage(self,CaseAgentStage,DebugMode=False):
-        if isinstance(CaseAgentStage,list):
-            # 对比新列表的数字是否与现有的列表重复
-            for i in CaseAgentStage:
-                if i not in self._CaseAgentStage and i in [1,2,3,4,5]:
-                    self._CaseAgentStage.append(i)
-        elif isinstance(CaseAgentStage,int):
-            if CaseAgentStage not in self._CaseAgentStage and CaseAgentStage in [1,2,3,4,5]:
-                self._CaseAgentStage.append(CaseAgentStage)
-        else:
-            if DebugMode:
-                print("SetCaseAgentStage报错：该输入对象的类型与属性不匹配,案件代理阶段输入值为列表或1-5的整数")
-
-    # 风险代理情况设定方法
-    def SetRiskAgentStatus(self,RiskAgentStatus,DebugMode=False):
-        if isinstance(RiskAgentStatus,bool):
-            self._RiskAgentStatus = RiskAgentStatus
-        elif isinstance(RiskAgentStatus,str):
-            if RiskAgentStatus == "True" or RiskAgentStatus == "true" or RiskAgentStatus == "TRUE" or RiskAgentStatus == "1":
-                self._RiskAgentStatus = True
-            elif RiskAgentStatus == "False" or RiskAgentStatus == "false" or RiskAgentStatus == "FALSE" or RiskAgentStatus == "0":
-                self._RiskAgentStatus = False
-        else:
-            if DebugMode:
-                print("SetRiskAgentStatus报错：该输入对象的类型与属性不匹配,风险代理情况输入值为布尔值或字符串")
-    
-    # 风险代理前期费用设定方法
-    def SetRiskAgentUpfrontFee(self,RiskAgentUpfrontFee,DebugMode=False):
-        # 尝试将输入值转换为浮点数
-        try:
-            RiskAgentUpfrontFee = float(RiskAgentUpfrontFee)
-        except:
-            if DebugMode:
-                print("输入值并非浮点数")
-            return
-        # 诉讼标的额不能小于零
-        if RiskAgentUpfrontFee >= 0:
-            self._RiskAgentUpfrontFee = RiskAgentUpfrontFee
-        else:
-            if DebugMode:
-                print("风险代理前期费用不能小于零")
-            return
-        
-    # 风险代理后期比例设定方法
-    def SetRiskAgentPostFeeRate(self,RiskAgentPostFeeRate,DebugMode=False):
-        # 尝试将输入值转换为浮点数
-        try:
-            RiskAgentPostFeeRate = float(RiskAgentPostFeeRate)
-        except:
-            if DebugMode:
-                print("SetRiskAgentPostFeeRate报错：输入值并非浮点数")
-            return
-        # 诉讼标的额不能小于零
-        if RiskAgentPostFeeRate >= 0:
-            self._RiskAgentPostFeeRate = RiskAgentPostFeeRate
-        else:
-            if DebugMode:
-                print("SetRiskAgentPostFeeRate报错：风险代理后期比例不能小于零")
-            return
-
-    # 非风险代理的固定费用设定方法（方法一直接输入列表）
-    def SetAgentFixedFeeByList(self,AgentFixedFeeList,DebugMode=False):
-        # 判断是否原本列表式否非空
-        if self._AgentFixedFeeList == []:
-            # 判断输入值是否为列表
-            if isinstance(AgentFixedFeeList,list):
-                # 再次判断列表的数量是否小于等于代理阶段的数量
-                if len(AgentFixedFeeList) <= len(self.GetCaseAgentStage()):
-                    self._AgentFixedFeeList = AgentFixedFeeList
-                else:
-                    if DebugMode:
-                        print("SetAgentFixedFee报错：输入的固定费用列表数量超出已有的代理阶段数量")
-            else:
-                if DebugMode:
-                    print("SetAgentFixedFee报错：该输入对象的类型与属性不匹配,非风险代理的固定费用输入值为列表或整数")
-        else:
-            if DebugMode:
-                print("SetAgentFixedFee报错：非风险代理的固定费用列表已经存在，无法再次设定")
-    
-    # 非风险代理的固定费用设定方法（方法二直接输入代理费用和代理阶段）
-    def SetAgentFixedFeeByAdd(self,AgentFixedFee,Stage,DebugMode=False):
-        # 判断输入值是否为整数
-        if isinstance(AgentFixedFee,float) and isinstance(Stage,int):
-            if Stage <= len(self.GetCaseAgentStage()-1):
-                self._AgentFixedFeeList[Stage] = AgentFixedFee
-            else:
-                if DebugMode:
-                    print("SetAgentFixedFee报错：输入的阶段序号超出已有的阶段序号")
-        else:
-            if DebugMode:
-                print("SetAgentFixedFee报错：输入对象的类型与属性不匹配,非风险代理的固定费用输入值为列表或整数")
-        
-
-
+  
     # 添加诉讼参与人的方法
     def AppendLitigant(self,ALitigant) -> bool:
         # 先判断添加进来的东西是什么
@@ -571,27 +463,7 @@ class Case():
         elif Key == 'rejectMediationReasonText':
             self.SetRejectMediationReasonText(Value)
 
-        elif Key == 'caseAgentStage':
-            for stage in Value:
-                self.SetCaseAgentStage(stage)
 
-        elif Key == 'riskAgentStatus':
-            self.SetRiskAgentStatus(Value)
-
-        elif Key == 'riskAgentUpfrontFee':
-            self.SetRiskAgentUpfrontFee(float(Value))
-
-        elif Key == 'riskAgentPostFeeRate':
-            self.SetRiskAgentPostFeeRate(float(Value))
-
-        # elif Key == 'agentFixedFee':
-        #     # 将Value转换为列表
-        #     # 以逗号分割字符串,分割出各阶段的字符串列表
-        #     FixedFeeList = Value.split(",")
-        #     # 将字符串列表转换为浮点数列表
-        #     FixedFeeList = [float(i) for i in FixedFeeList]
-        #     self.SetAgentFixedFeeByList(FixedFeeList)
-        
         elif Key == 'plaintiffs' or Key == 'defendants' or Key == 'legalThirdParties':
             for LitigantDict in Value:
                 # 实例化一个诉讼参与人对象
@@ -600,6 +472,15 @@ class Case():
                 litigant.InputFromDict(LitigantDict)
                 # 调用AppendLitigant方法，添加该诉讼参与人到对应的列表中
                 self.AppendLitigant(litigant)
+        
+        elif Key == 'agentCondition':
+            # 实例化一个代理情况对象
+            agentCondition = AgentCondition()
+            # 调用代理情况对象的读取方法
+            agentCondition.InputFromDict(Value)
+            # 将该代理情况对象赋值给案件的代理情况属性
+            self._AgentCondition = agentCondition
+
    
     # ===========Input方法：下面定义批量输入案件信息的方法=============
 
@@ -623,10 +504,11 @@ class Case():
 
     # 输出案件信息为字符串
     def OutputToStr(self) -> str:
+
         # 初始化输出字符串
         OutputStr = ""
 
-        # 逐个输出案件信息
+        # 案件基础信息
         OutputStr += "案件Id：%s\n" % self.GetCaseId()
 
         OutputStr += "案件文件夹路径：%s\n" % self.GetCaseFolderPath()
@@ -658,21 +540,31 @@ class Case():
 
         OutputStr += "拒绝调解理由：%s\n" % self.GetRejectMediationReasonText()
 
-        OutputStr += "案件代理阶段：%s\n" % self.GetCaseAgentStageStr()
+        
+        # 代理情况
+        OutputStr += "\n=== 委托代理信息 ===\n"
+        
+        AgentCondition = self.GetAgentCondition()
 
-        if self.GetRiskAgentStatus() == True:
-            OutputStr += "采取风险收费\n"
-            OutputStr += "风险代理前期费用：%s\n" % self.GetRiskAgentUpfrontFee()
-            OutputStr += "风险代理后期比例：%s%%\n" % self.GetRiskAgentPostFeeRate()
-        elif self.GetRiskAgentStatus() == False:
-            OutputStr += "采取固定收费\n"
-            OutputStr += "非风险代理的固定费用："
-            if self.GetAgentFixedFee() == []:
-                OutputStr += "无\n"
-            else:
-                for fee in self.GetAgentFixedFee():
-                    OutputStr += "%s," % fee
+        if AgentCondition != None:
+            OutputStr += "案件代理阶段：%s\n" % self.GetCaseAgentStageStr()
+            if AgentCondition.GetRiskAgentStatus() == True:
+                OutputStr += "采取风险收费\n"
+                OutputStr += "风险代理前期费用：%s\n" % AgentCondition.GetRiskAgentUpfrontFee()
+                OutputStr += "风险代理后期比例：%s%%\n" % AgentCondition.GetRiskAgentPostFeeRate()
+            elif AgentCondition.GetRiskAgentStatus() == False:
+                OutputStr += "采取固定收费\n"
+                OutputStr += "非风险代理的固定费用："
+                if AgentCondition.GetAgentFixedFee() == []:
+                    OutputStr += "无\n"
+                else:
+                    for fee in AgentCondition.GetAgentFixedFee():
+                        OutputStr += "%s," % fee
+        else:
+            OutputStr += "本案无代理信息\n"
 
+
+        # 当事人信息
         OutputStr += "\n=== 当事人信息 ===\n"
 
         # 原告列表
@@ -704,7 +596,6 @@ class Case():
         # 需要返回的字典初始化
         OutputDict = {}
 
-        OutputDict["caseAgentStage"] = self.GetCaseAgentStage()
         OutputDict["caseId"] = self.GetCaseId()
         OutputDict["caseType"] = self.GetCaseType()
         OutputDict["claimText"] = self.GetClaimText()
@@ -721,17 +612,6 @@ class Case():
             StageList.append(stage.OutputToDict())
         OutputDict["stages"] = StageList
 
-        # 根据是否为风险收费代理，输出不同的费用信息
-        if self.GetRiskAgentStatus() == True:     #风险收费
-            OutputDict["riskAgentStatus"] = self.GetRiskAgentStatus()
-            OutputDict["riskAgentUpfrontFee"] = self.GetRiskAgentUpfrontFee()
-            OutputDict["riskAgentPostFeeRate"] = self.GetRiskAgentPostFeeRate()
-            OutputDict["agentFixedFee"] = ""
-        else:
-            OutputDict["riskAgentStatus"] = self.GetRiskAgentStatus()
-            OutputDict["riskAgentUpfrontFee"] = ""
-            OutputDict["riskAgentPostFeeRate"] = ""
-            OutputDict["agentFixedFee"] = self.GetAgentFixedFee()
 
         # 原告主体列表（列表归零）
         LitigantList = []
@@ -750,6 +630,12 @@ class Case():
         for thirdparty in self.GetThirdPartyList():
             LitigantList.append(thirdparty.OutputToDict())
         OutputDict["thirdParties"] = LitigantList
+
+        # 代理情况
+        if self.GetAgentCondition() != None:
+            OutputDict["agentCondition"] = self.GetAgentCondition().OutputToDict()
+        else:
+            OutputDict["agentCondition"] = {}
 
         # 原告名字字符串
         OutputDict["plaintiffNames"] = self.GetAllPlaintiffNames()
