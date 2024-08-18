@@ -139,6 +139,14 @@ class Case():
         Defendants = Defendants[:-1]
         return Defendants
     
+    def GetAllCourtNames(self) -> str:
+        CourtName = ""
+        for stage in self._Stages:
+            if stage.GetCourtName() != "":
+                CourtName += stage.GetCourtName() + "、"
+        CourtName = CourtName[:-1]
+        return CourtName
+    
     # 返回代理阶段代码对应的中文字符串
     def GetCaseAgentStageStr(self) -> str:
         
