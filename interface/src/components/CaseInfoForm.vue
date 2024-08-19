@@ -4,6 +4,7 @@ import LitigantForm from "./LitigantForm.vue";
 import courtData from "../../../data/PublicInfomationList/Courts-China.json";
 import causeOfActionData from "../../../data/PublicInfomationList/CauseOfActions-China.json";
 
+
 // 当事人表单实例（原告）
 const litigantFormPlaintiff = ref(null);
 // 当事人表单实例（被告）
@@ -469,14 +470,15 @@ watchEffect(() => {
 	>
 		<el-form-item>
 			<el-button type="primary" plain @click="onAddPlaintiff"
-				>新增原告<el-icon><CirclePlusFilled /></el-icon
+				>原告<el-icon  style="margin-left: 5px"><CirclePlusFilled /></el-icon
 			></el-button>
-			<el-button type="info" plain @click="onAddDefendant"
-				>新增被告<el-icon><CirclePlusFilled /></el-icon
+			<el-button type="warning" plain @click="onAddDefendant"
+				>被告<el-icon  style="margin-left: 5px"><CirclePlusFilled /></el-icon
 			></el-button>
-			<el-button type="danger" @click="onSubmit(ruleFormRef)"
-				>提交案件信息</el-button
-			>
+			<el-button type="success" plain @click="onSubmit(ruleFormRef)" style="margin-left: 40px;"	
+				>确认更改<el-icon  style="margin-left: 5px;"
+					><Finished /></el-icon
+			></el-button>
 		</el-form-item>
 
 		<el-form-item v-if="componentsConfig.inputInfoByFileSwitchStatus">
@@ -558,11 +560,11 @@ watchEffect(() => {
 		<el-row>
 			<el-form-item v-if="inputInfoByFrontEndStatus">
 				<el-button
-					type="primary"
+					type="info"
 					@click="
 						caseForm.stages.push({stageName: '', courtName: '', caseNumber: ''})
 					"
-					>案件阶段<el-icon><CirclePlusFilled /></el-icon
+					>案件阶段<el-icon style="margin-left: 5px"><Plus /></el-icon
 				></el-button>
 			</el-form-item>
 
@@ -614,7 +616,7 @@ watchEffect(() => {
 						@click="caseForm.stages.splice(caseForm.stages.indexOf(stage), 1)"
 						style="margin-left: 10px"
 					>
-						<el-icon><RemoveFilled /></el-icon>
+						<el-icon><Delete /></el-icon>
 					</el-button>
 				</el-row>
 			</el-form-item>
@@ -726,9 +728,7 @@ watchEffect(() => {
 </template>
 
 <style>
-
 .margin-right {
 	margin-right: 10px;
 }
-
 </style>
