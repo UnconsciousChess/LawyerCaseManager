@@ -11,7 +11,7 @@ import Caculator from './components/Caculator.vue'
 import Blank from './components/Blank.vue'
 import CaseInfoShow from './components/CaseInfoShowTable.vue'
 import TemplateFileTable from './components/TemplateFileTable.vue'
-import TemplateFileEditForm from './components/TemplateFileEditForm.vue'
+import CaseInfoShowNew from './components/CaseInfoShowTable2.vue'
 
 // 设置路由
 const routes = [
@@ -19,7 +19,7 @@ const routes = [
   {path: '/caculator', component:Caculator},
   {path: '/case-info-table', component: CaseInfoShow},
   {path: '/template-file', component: TemplateFileTable},
-  {path: '/test',component: TemplateFileEditForm},
+  {path: '/test',component: CaseInfoShowNew},
 ]
 
 // 创建router的实例
