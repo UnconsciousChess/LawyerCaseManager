@@ -17,7 +17,7 @@ from library.InterfaceApi import Api
 WebApi = Api()
 
 # 创建一个窗口实例
-window = webview.create_window(title='WorkingDocumentGenerator', 
+window = webview.create_window(title='LawyerCase-Manager', 
                                url='../interface/dist/index.html',
                                js_api=WebApi,
                                width=1160,
