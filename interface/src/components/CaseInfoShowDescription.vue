@@ -21,20 +21,6 @@
 			{{ showText.litigationAmount }} 元
 		</el-descriptions-item>
 
-		<!-- <el-descriptions-item>
-			<template #label>
-				<div class="cell-item">管辖法院</div>
-			</template>
-			{{ showText.courtName }}
-		</el-descriptions-item>
-
-		<el-descriptions-item>
-			<template #label>
-				<div class="cell-item">法院案号</div>
-			</template>
-			{{ showText.caseCourtCode }}
-		</el-descriptions-item> -->
-
 		<el-descriptions-item>
 			<template #label>
 				<div class="cell-item">委托阶段</div>
