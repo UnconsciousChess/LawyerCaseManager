@@ -397,13 +397,19 @@ class Api:
         for case in self._cases:
             # 如果案件ID相同，则打开案件文件夹
             if case.GetCaseId() == CaseId:
-                # 判断案件文件夹的路径是否存在
-                if os.path.exists(case.GetCaseFolderPath()):
-                    # 调用系统的startfile方法打开文件夹
-                    os.startfile(case.GetCaseFolderPath())
-                    return "Success"
-                else:
+
+                # 判断案件文件夹的路径是否为空
+                if case.GetCaseFolderPath() == "":
+                    return "CaseFolderPathNotExist"
+                
+                # 判断案件文件夹的路径是否在系统中存在
+                if not os.path.exists(case.GetCaseFolderPath()):
                     return "CaseFolderNotExist"
+                
+                # 通过检查后，调用系统的startfile方法打开文件夹
+                os.startfile(case.GetCaseFolderPath())
+                return "Success"
+         
         # 如果遍历完，都没有找到对应的案件，则返回CaseIdNotExist
         return "CaseIdNotExist"
     
