@@ -4,7 +4,7 @@
 			<template #default="{width, height}">
 				<el-table-v2
 					:columns="columns"
-					:data="data"
+					:data="tableData"
 					:width="width"
 					:height="height"
 					fixed
@@ -32,40 +32,100 @@
 		>
 	</div>
 
+	<!-- 下面是按下按钮以后弹出的对话框 -->
 
 	<!-- 编辑对话框 -->
 	<el-dialog
 		title="编辑案件信息"
 		width="900"
 		align-center
-		v-model="dialogEditDataVisible"
+		v-model="editDialogVisible"
 		draggable
 	>
 		<el-scrollbar height="600px">
 			<CaseInfoForm
 				ref="caseInfoFormRef"
-				:propCaseData="currentEditRow"
+				:propCaseData="selectedRowData"
 				:propMode="caseInfoFormMode"
 				@updateCaseData="updateCaseDataFromCaseInfoForm"
 			/>
 		</el-scrollbar>
 	</el-dialog>
 
+	<!-- 删除对话框 -->
+	<el-dialog
+		title="注意"
+		v-model="deleteDialogVisible"
+		width="400"
+		align-center
+	>
+		<span>确认删除当前案件吗？</span>
+		<template #footer>
+			<div>
+				<el-button @click="deleteDialogVisible = false">取消</el-button>
+				<el-button type="danger" @click="deleteData(selectedRowData)"
+					>确定</el-button
+				>
+			</div>
+		</template>
+	</el-dialog>
+
+	<!-- 输出对话框 -->
+	<el-dialog
+		v-model="outputDialogVisible"
+		title="选择输出格式"
+		width="500"
+		align-center
+	>
+		<el-button type="primary" @click="outputToJson(selectedRowData)"
+			>案件信息保存为JSON文件</el-button
+		>
+		<el-button type="success" @click="outputToTxt(selectedRowData)"
+			>案件信息保存为TXT文件</el-button
+		>
+	</el-dialog>
+
+	<!-- 上传功能对话框（待开发）-->
+
+	<!-- 选择生成文书对话框 -->
+	<el-dialog
+		title="选择生成文书"
+		width="600"
+		v-model="chooseTemplateDialogVisible"
+	>
+		<TemplateFileCheckBoxList @generate="documentsGenerate" />
+	</el-dialog>
+
+	<!-- 合并文书对话框 -->
+	<el-dialog title="合并文书" width="800" v-model="mergeFilesDialogVisible">
+		<el-scrollbar height="500px">
+			<MergeFilesTable :caseId="selectedRowData.caseId" />
+		</el-scrollbar>
+	</el-dialog>
 </template>
 
 <script setup lang="jsx">
 import {onMounted} from "vue";
 import {ref} from "vue";
-// import {Column} from "element-plus";
-import {
-	ElButton,
-	ElIcon,
-	ElTag,
-	ElTooltip,
-	TableV2FixedDir,
-} from "element-plus";
 
+// 引入用于测试的案件信息
 import importData from "./test/testdata.json";
+
+// 表格数据
+const tableData = ref([]);
+
+// 当前选中行的案件数据
+const selectedRowData = ref(null);
+
+// 各个对话框的显示状态
+const editDialogVisible = ref(false);
+const deleteDialogVisible = ref(false);
+const outputDialogVisible = ref(false);
+const chooseTemplateDialogVisible = ref(false);
+const mergeFilesDialogVisible = ref(false);
+
+// 案件编辑模式，有edit和create两种模式
+const caseInfoFormMode = ref("");
 
 // 定义列
 const columns = [
@@ -83,22 +143,127 @@ const columns = [
 		key: "operation",
 		dataKey: "operation",
 		title: "操作",
-		cellRenderer: () => (
+		width: 400,
+		align: "center",
+
+		cellRenderer: (tableData) => (
 			<>
-				<ElButton type="primary" size="small" >
-					编辑
-				</ElButton>
+				{/* 案件操作（编辑和删除） */}
+				<el-dropdown
+					size="small"
+					placement="bottom"
+					style="margin-right: 20px"
+					v-slots={{
+						dropdown: () => (
+							<el-dropdown-menu>
+								<el-dropdown-item>
+									<el-button
+										type="primary"
+										size="small"
+										onClick={() => handleEditData(tableData.rowData)}
+									>
+										编辑
+									</el-button>
+								</el-dropdown-item>
+
+								<el-dropdown-item>
+									<el-button
+										type="danger"
+										size="small"
+										onClick={() => handleDeleteData(tableData.rowData)}
+									>
+										删除
+									</el-button>
+								</el-dropdown-item>
+							</el-dropdown-menu>
+						),
+					}}
+				>
+					<span class="el-dropdown-link">
+						案件操作
+						<el-icon class="el-icon--right">
+							<arrow-down />
+						</el-icon>
+					</span>
+				</el-dropdown>
+
+				{/* 输出 */}
+				<el-dropdown
+					size="small"
+					placement="bottom"
+					style="margin-right: 20px"
+					v-slots={{
+						dropdown: () => (
+							<el-dropdown-menu>
+								<el-dropdown-item>
+									<el-button
+										type="success"
+										size="small"
+										onClick={() => handleOutputData(tableData.rowData)}
+									>
+										导出
+									</el-button>
+								</el-dropdown-item>
+								<el-dropdown-item>
+									<el-button color="#626aef" size="small" disabled>
+										上传
+									</el-button>
+								</el-dropdown-item>
+							</el-dropdown-menu>
+						),
+					}}
+				>
+					<span class="el-dropdown-link">
+						输出
+						<el-icon class="el-icon--right">
+							<arrow-down />
+						</el-icon>
+					</span>
+				</el-dropdown>
+
+				{/* 文书 */}
+				<el-dropdown
+					size="small"
+					placement="bottom"
+					style="margin-right: 20px"
+					v-slots={{
+						dropdown: () => (
+							<el-dropdown-menu>
+								<el-dropdown-item
+									onClick={() => handleGenerateDocuments(tableData.rowData)}
+								>
+									文书生成
+								</el-dropdown-item>
+								<el-dropdown-item
+									onClick={() => handleMergeDocuments(tableData.rowData)}
+								>
+									文书合并
+								</el-dropdown-item>
+							</el-dropdown-menu>
+						),
+					}}
+				>
+					<span class="el-dropdown-link">
+						文书
+						<el-icon class="el-icon--right">
+							<arrow-down />
+						</el-icon>
+					</span>
+				</el-dropdown>
+
+				{/* 打开案件文件夹 */}
+
+				<el-button
+					type="primary"
+					size="small"
+					onClick={() => handleOpenCaseFolder(tableData.rowData)}
+				>
+					打开案件文件夹
+				</el-button>
 			</>
 		),
-		width: 200,
-		align: "center",
 	},
 ];
-
-const data = ref([]);
-const currentRow = ref(null);
-const dialogEditDataVisible = ref(false);
-const caseInfoFormMode = ref("");
 
 const loadData = () => {
 	// 读取数据
@@ -111,32 +276,180 @@ const loadData = () => {
 			importData[i].plaintiffNames + " 诉 " + importData[i].defendantNames;
 
 		// 把数据推送到data中
-		data.value.push(newData);
-
-		// console.log(data.value);
+		tableData.value.push(newData);
 	}
 };
 
 // 创建新案件
 function createNewCase() {
-	dialogEditDataVisible.value = true;
+	// 打开编辑（新建）对话框
+	editDialogVisible.value = true;
 	// 改变caseInfoFormMode为create（有edit和create两种模式）
 	caseInfoFormMode.value = "create";
 	// 将案件对象设为null，因为不需要传递现有案件对象到caseInfo之中
-	currentRow.value = null;
+	selectedRowData.value = null;
 }
 
 // 编辑数据的前置函数
 function handleEditData(val) {
 	console.log("当前要编辑的案件id为" + val.caseId);
-	dialogEditDataVisible.value = true;
+	// 打开编辑（新建）对话框
+	editDialogVisible.value = true;
 	// 将当前要编辑的案件的对象传递给currentEditRow，便于接下来的组件调用
-	currentRow.value = val;
+	selectedRowData.value = val;
 	// 改变caseInfoFormMode为edit（有edit和create两种模式）
 	caseInfoFormMode.value = "edit";
-
 }
 
+// 删除数据的前置函数
+function handleDeleteData(val) {
+	console.log("handleDeleteData：当前要删除的案件id为" + val.caseId);
+	// 打开删除对话框
+	deleteDialogVisible.value = true;
+	// 将当前要删除的案件的对象传递给selectedRowData，便于接下来的组件调用
+	selectedRowData.value = val;
+}
+
+// 具体删除数据的函数
+function deleteData(val) {
+	console.log("deleteData：当前确定要删除的案件id为" + val.caseId);
+	// 将对话框隐藏
+	deleteDialogVisible.value = false;
+
+	// 获取要删除的数据的index
+	var deleteItemIndex = tableData.value.findIndex(
+		(item) => item.caseId === val.caseId
+	);
+	console.log("要删除的数据的index为" + deleteItemIndex);
+
+	// 如果未连接后端，则只测试前端
+	if (typeof pywebview === "undefined") {
+		console.log("deleteData()：未连接后端，目前只测试前端");
+	}
+	// 将对应的id传递给后端(实际运行环境)
+	else {
+		pywebview.api.backEndDeleteCase(val.caseId);
+	}
+
+	// 删除前端tableData中对应数组index的数据
+	tableData.value.splice(deleteItemIndex, 1);
+
+	// 重新给tableData的序号赋值
+	for (let i = 0; i < tableData.value.length; i++) {
+		tableData.value[i].index = i + 1;
+	}
+}
+
+// 输出数据的前置函数，作用是打开对话框，随后，再根据在对话框中的选择调用下面的outputToExcel或outputToTxt
+function handleOutputData(val) {
+	console.log("当前要输出的案件id为" + val.caseId);
+	outputDialogVisible.value = true;
+	// 将当前要输出的案件的对象传递给currentOutputRow，便于接下来的组件调用
+	selectedRowData.value = val;
+}
+
+// 输出数据到txt
+function outputToJson(val) {
+	// 将对话框隐藏
+	outputDialogVisible.value = false;
+
+	// 如果未连接后端，则只测试前端
+	if (typeof pywebview === "undefined") {
+		console.log("outputToJson()：未连接后端，目前只测试前端");
+	}
+	// 如果连接了后端，则调用后端的函数(实际运行环境)
+	else {
+		pywebview.api.outputSingleCaseToJson(val.caseId);
+	}
+}
+
+// 输出数据到txt
+function outputToTxt(val) {
+	// 将对话框隐藏
+	outputDialogVisible.value = false;
+
+	// 如果未连接后端，则只测试前端
+	if (typeof pywebview === "undefined") {
+		console.log("outputToTxt()：未连接后端，目前只测试前端");
+	}
+	// 如果连接了后端，则调用后端的函数(实际运行环境)
+	else {
+		pywebview.api.outputSingleCaseToTxt(val.caseId);
+	}
+}
+
+// 唤起文书生成对话框
+function handleGenerateDocuments(val) {
+	chooseTemplateDialogVisible.value = true;
+	selectedRowData.value = val;
+}
+
+// 收到从子组件传来的，文书生成的模板data以后，调用下面的DocumentsGenerate函数生成文书
+async function documentsGenerate(data) {
+
+	console.log("文书生成");
+	console.log("当前要生成文书的案件id为" + currentGenerateRow.value.caseId);
+
+	// 将对话框隐藏
+	chooseTemplateDialogVisible.value = false;
+
+	// 将data里面的模板文件id传递给后端
+	let templateFileIdList = [];
+	for (let i = 0; i < data.length; i++) {
+		templateFileIdList.push(data[i].id);
+	}
+
+	// 前后端通信部分
+
+	// 如果未连接后端，则只测试前端
+	if (typeof pywebview === "undefined") {
+		console.log("handleDocumentGenerate()：未连接后端，目前只测试前端");
+	}
+	// 如果连接了后端，则调用后端的函数,将当前案件id,以及模板id列表传到后端(实际运行环境)
+	else {
+		let result = await pywebview.api.documentsGenerate(
+			selectedRowData.value.caseId,
+			templateFileIdList
+		);
+
+		// 如果后端返回成功
+		if (result == "Success") {
+			console.log("文书生成成功");
+			// 生成成功以后，刷新数据
+			getTableData();
+		}
+		// 如果后端未返回成功则直接输出后端返回的错误信息
+		else {
+			console.log(result);
+		}
+	}
+}
+
+// 唤起文书合并对话框
+function handleMergeDocuments(val) {
+	// 显示文书合并对话框
+	mergeFilesDialogVisible.value = true;
+	selectedRowData.value = val;
+}
+
+function handleOpenCaseFolder(val) {
+	// 如果未连接后端，则只测试前端
+	if (typeof pywebview === "undefined") {
+		console.log("handleOpenCaseFolder()：未连接后端，目前只测试前端");
+		console.log("选择的案件id为:" + val.caseId);
+		// 输出Elmessage
+		ElMessage({
+			message: "所选案件文件夹路径为：" + val.caseFolderGeneratedPath,
+			type: "info",
+		});
+	}
+	// 如果连接了后端，则调用后端的函数(实际运行环境)
+	else {
+		pywebview.api.openCaseFolder(val.caseId);
+	}
+}
+
+// === 以下是表格下方的功能按钮的函数 ===
 
 // 批量加载案件到后端,其中需要调用后端的函数
 async function handleBulkLoadingData() {
@@ -171,13 +484,15 @@ async function handleBulkOutputData() {
 	}
 }
 
-
 // 测试后端输出的代码
 function testOutputCase() {
+	console.log("测试函数，后端输出案件信息");
+	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
 		console.log("testOutputCase()：未连接后端，目前只测试前端");
-	} else {
-		console.log("测试函数，后端输出案件信息");
+	}
+	// 如果连接了后端，则调用后端的函数testCasesOutput
+	else {
 		pywebview.api.testCasesOutput();
 	}
 }
