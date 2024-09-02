@@ -7,6 +7,7 @@
 					:columns="columns"
 					:data="tableData"
 					:width="width"
+					:estimated-row-height="50"
 					:height="height"
 					fixed
 					@column-sort="onSort"
@@ -109,7 +110,7 @@
 <script setup lang="jsx">
 import {onMounted} from "vue";
 import {ref} from "vue";
-import {TableV2SortOrder} from "element-plus";
+import {ElMessage, TableV2SortOrder} from "element-plus";
 
 // 引入用于测试的案件信息
 import importData from "./test/testdata.json";
@@ -140,6 +141,9 @@ const columns = [
 		dataKey: "litigantsNameShowText",
 		title: "当事人",
 		width: 300,
+		// headerCellRenderer : (props) => {
+		// 	return props.column.title
+		// },
 	},
 	{key: "causeOfAction", dataKey: "causeOfAction", title: "案由", width: 200},
 	{
@@ -257,8 +261,9 @@ const columns = [
 				{/* 打开案件文件夹 */}
 
 				<el-button
-					type="primary"
+					type="warning"
 					size="small"
+					link
 					onClick={() => handleOpenCaseFolder(tableData.rowData)}
 				>
 					打开案件文件夹
@@ -271,12 +276,15 @@ const columns = [
 // 设置允许排序的列(按时间排序)
 columns[1].sortable = true;
 
+columns[2].filterable = true;
+
+// 排序状态
 const sortState = ref({
 	startTime: TableV2SortOrder.ASC,
 });
 
+// 排序的方法
 const onSort = ({key, order}) => {
-	console.log(key, order);
 	sortState.value[key] = order;
 
 	// 按案件开始时间排序
@@ -298,18 +306,116 @@ const onSort = ({key, order}) => {
 	}
 };
 
-const loadData = () => {
-	// 读取数据
-	for (let i = 0; i < importData.length; i++) {
-		let newData = {};
+const loadData = async () => {
+	// 未连接后端，只调取前端
+	if (typeof pywebview === "undefined") {
+		for (let i = 0; i < importData.length; i++) {
+			let newData = {};
+			newData = importData[i];
+			newData["index"] = i + 1;
+			newData["litigantsNameShowText"] =
+				importData[i].plaintiffNames + " 诉 " + importData[i].defendantNames;
 
-		newData = importData[i];
-		newData["index"] = i + 1;
-		newData["litigantsNameShowText"] =
-			importData[i].plaintiffNames + " 诉 " + importData[i].defendantNames;
+			// 把数据推送到data中
+			tableData.value.push(newData);
+		}
 
-		// 把数据推送到data中
-		tableData.value.push(newData);
+	// 连接后端后的实际运行环境
+	} else {
+
+		// 开始获取数据
+		await pywebview.api.pushAllCasesToList().then((cases) => {
+			// 遍历cases，将数据根据一定的规则添加到tableData中
+			for (let i = 0; i < cases.length; i++) {
+				// 对比案件的id，如果相同则不添加，改为更新
+				if (
+					tableData.value.findIndex(
+						(item) => item.caseId === cases[i].caseId
+					) !== -1
+				) {
+					// 获取要更新的数据的index
+					var updateItemIndex = tableData.value.findIndex(
+						(item) => item.caseId === cases[i].caseId
+					);
+
+					// 对应的tableData更新数据
+
+					// 代理条件
+					// console.log("更新代理条件信息");
+
+					// console.log(cases[i].agentCondition);
+
+					if (cases[i].agentCondition != null) {
+						console.log("代理条件不为空");
+						tableData.value[updateItemIndex].agentCondition =
+							cases[i].agentCondition;
+					}
+
+					// 案件文件夹路径
+					tableData.value[updateItemIndex].caseFolderGeneratedPath =
+						cases[i].caseFolderGeneratedPath;
+
+					// 案件id
+					// 案件id无须更新
+
+					// 案件类型
+					tableData.value[updateItemIndex].caseType = cases[i].caseType;
+
+					// 案由
+					tableData.value[updateItemIndex].causeOfAction =
+						cases[i].causeOfAction;
+
+					// 诉讼请求
+					tableData.value[updateItemIndex].claimText = cases[i].claimText;
+
+					// 当事人-被告
+					tableData.value[updateItemIndex].defendants = cases[i].defendants;
+
+					// 事实与理由
+					tableData.value[updateItemIndex].factAndReason =
+						cases[i].factAndReason;
+
+					// 当事人-原告与被告
+					tableData.value[updateItemIndex].litigantsNameShowText =
+						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames;
+
+					// 诉讼标的额
+					tableData.value[updateItemIndex].litigationAmount =
+						cases[i].litigationAmount;
+
+					// 调解意向
+					tableData.value[updateItemIndex].mediationIntention =
+						cases[i].mediationIntention;
+
+					// 当事人-原告
+					tableData.value[updateItemIndex].plaintiffs = cases[i].plaintiffs;
+
+					// 拒绝调解理由
+					tableData.value[updateItemIndex].rejectMediationReasonText =
+						cases[i].rejectMediationReasonText;
+
+					// 案件各阶段
+					tableData.value[updateItemIndex].stages = cases[i].stages;
+
+					// 当事人-第三人
+					tableData.value[updateItemIndex].thirdParties = cases[i].thirdParties;
+
+					// 开始时间
+					tableData.value[updateItemIndex].startTime = cases[i].startTime;
+				} else {
+					// 如果没有相同的，则将数据添加到tableData中
+					let newData = {};
+					newData = cases[i];
+					newData["index"] = i + 1;
+					newData["litigantsNameShowText"] =
+						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames;
+
+					tableData.value.push(newData);
+
+				}
+			}
+
+		});
 	}
 };
 
@@ -332,6 +438,15 @@ function handleEditData(val) {
 	selectedRowData.value = val;
 	// 改变caseInfoFormMode为edit（有edit和create两种模式）
 	caseInfoFormMode.value = "edit";
+}
+
+// 收到子组件的编辑数据以后，父组件中的数据进行更新
+function updateCaseDataFromCaseInfoForm() {
+	console.log("更新案件信息");
+	// 将编辑（新建）对话框关闭
+	editDialogVisible.value = false;
+	// 刷新数据
+	loadData();
 }
 
 // 删除数据的前置函数
@@ -464,7 +579,7 @@ function handleMergeDocuments(val) {
 	selectedRowData.value = val;
 }
 
-function handleOpenCaseFolder(val) {
+async function handleOpenCaseFolder(val) {
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
 		console.log("handleOpenCaseFolder()：未连接后端，目前只测试前端");
@@ -477,7 +592,23 @@ function handleOpenCaseFolder(val) {
 	}
 	// 如果连接了后端，则调用后端的函数(实际运行环境)
 	else {
-		pywebview.api.openCaseFolder(val.caseId);
+		var result = await pywebview.api.openCaseFolder(val.caseId);
+		if (result == "Success") {
+			ElMessage({
+				message: "打开案件文件夹成功",
+				type: "success",
+			});
+		} else if (result == "CaseFolderNotExist") {
+			ElMessage({
+				message: "案件文件夹不存在",
+				type: "error",
+			});
+		} else if (result == "CaseFolderPathNotExist") {
+			ElMessage({
+				message: "该案件没有设定文件夹路径",
+				type: "info",
+			});
+		}
 	}
 }
 
