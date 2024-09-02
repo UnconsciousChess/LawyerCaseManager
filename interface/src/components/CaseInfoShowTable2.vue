@@ -3,11 +3,13 @@
 		<el-auto-resizer>
 			<template #default="{width, height}">
 				<el-table-v2
+					v-model:sort-state="sortState"
 					:columns="columns"
 					:data="tableData"
 					:width="width"
 					:height="height"
 					fixed
+					@column-sort="onSort"
 				/>
 			</template>
 		</el-auto-resizer>
@@ -107,6 +109,7 @@
 <script setup lang="jsx">
 import {onMounted} from "vue";
 import {ref} from "vue";
+import {TableV2SortOrder} from "element-plus";
 
 // 引入用于测试的案件信息
 import importData from "./test/testdata.json";
@@ -132,17 +135,17 @@ const columns = [
 	{key: "index", dataKey: "index", title: "序号", width: 50},
 	// {key: "caseId", dataKey: "caseId", title: "案件ID", width: 170},
 	{key: "startTime", dataKey: "startTime", title: "开始时间", width: 100},
-	{key: "causeOfAction", dataKey: "causeOfAction", title: "案由", width: 200},
 	{
 		key: "litigantsNameShowText",
 		dataKey: "litigantsNameShowText",
 		title: "当事人",
 		width: 300,
 	},
+	{key: "causeOfAction", dataKey: "causeOfAction", title: "案由", width: 200},
 	{
 		key: "operation",
 		dataKey: "operation",
-		title: "操作",
+		title: "功能菜单",
 		width: 400,
 		align: "center",
 
@@ -265,6 +268,36 @@ const columns = [
 	},
 ];
 
+// 设置允许排序的列(按时间排序)
+columns[1].sortable = true;
+
+const sortState = ref({
+	startTime: TableV2SortOrder.ASC,
+});
+
+const onSort = ({key, order}) => {
+	console.log(key, order);
+	sortState.value[key] = order;
+
+	// 按案件开始时间排序
+	if (key === "startTime") {
+		if (order === TableV2SortOrder.ASC) {
+			tableData.value = tableData.value.sort(
+				(a, b) => new Date(a.startTime) - new Date(b.startTime)
+			);
+		} else {
+			tableData.value = tableData.value.sort(
+				(a, b) => new Date(b.startTime) - new Date(a.startTime)
+			);
+		}
+
+		// 重新给tableData的序号赋值
+		for (let i = 0; i < tableData.value.length; i++) {
+			tableData.value[i].index = i + 1;
+		}
+	}
+};
+
 const loadData = () => {
 	// 读取数据
 	for (let i = 0; i < importData.length; i++) {
@@ -386,9 +419,8 @@ function handleGenerateDocuments(val) {
 
 // 收到从子组件传来的，文书生成的模板data以后，调用下面的DocumentsGenerate函数生成文书
 async function documentsGenerate(data) {
-
 	console.log("文书生成");
-	console.log("当前要生成文书的案件id为" + currentGenerateRow.value.caseId);
+	console.log("当前要生成文书的案件id为" + selectedRowData.value.caseId);
 
 	// 将对话框隐藏
 	chooseTemplateDialogVisible.value = false;
