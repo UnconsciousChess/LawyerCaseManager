@@ -15,6 +15,15 @@ async function init() {
 	// 等待1000ms，等待后端的服务启动，避免前端调用后端的函数失败
 	await sleep(1000);
 
+	// 检测是否连接了后端服务，如果未连接，则在前端提示仅是测试前端
+	if (typeof pywebview === 'undefined') {
+		ElNotification({
+			title: '仅测试前端',
+			message: '未检测到后端服务！',
+		});
+		return;
+	}
+
 	// 调用后端的函数appStartInit，初始化后端的数据（如果后端已经初始化，后端会识别）
 	let result = await pywebview.api.appStartInit();
 	if (result.caseResult == "Success" && result.templateFileResult == "Success"){
