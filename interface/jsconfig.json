@@ -5,7 +5,8 @@
 		},
 		"resolveJsonModule": true,
 		
-		"jsx": "preserve"
+		"jsx": "preserve",
+		"jsxImportSource": "vue"
 	},
 	"exclude": ["node_modules", "dist"]
 }
