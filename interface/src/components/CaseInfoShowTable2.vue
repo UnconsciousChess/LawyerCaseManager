@@ -163,31 +163,23 @@ const columns = [
 					v-slots={{
 						dropdown: () => (
 							<el-dropdown-menu>
-								<el-dropdown-item>
-									<el-button
-										type="primary"
-										size="small"
-										onClick={() => handleEditData(tableData.rowData)}
-									>
-										编辑
-									</el-button>
+								<el-dropdown-item
+									onClick={() => handleEditData(tableData.rowData)}
+								>
+									编辑
 								</el-dropdown-item>
 
-								<el-dropdown-item>
-									<el-button
-										type="danger"
-										size="small"
-										onClick={() => handleDeleteData(tableData.rowData)}
-									>
-										删除
-									</el-button>
+								<el-dropdown-item
+									onClick={() => handleDeleteData(tableData.rowData)}
+								>
+									删除
 								</el-dropdown-item>
 							</el-dropdown-menu>
 						),
 					}}
 				>
-					<span class="el-dropdown-link">
-						案件操作
+					<span style="color:#00a338">
+						案件
 						<el-icon class="el-icon--right">
 							<arrow-down />
 						</el-icon>
@@ -202,25 +194,17 @@ const columns = [
 					v-slots={{
 						dropdown: () => (
 							<el-dropdown-menu>
-								<el-dropdown-item>
-									<el-button
-										type="success"
-										size="small"
-										onClick={() => handleOutputData(tableData.rowData)}
-									>
-										导出
-									</el-button>
+								<el-dropdown-item
+									onClick={() => handleOutputData(tableData.rowData)}
+								>
+									导出
 								</el-dropdown-item>
-								<el-dropdown-item>
-									<el-button color="#626aef" size="small" disabled>
-										上传
-									</el-button>
-								</el-dropdown-item>
+								<el-dropdown-item disabled>上传</el-dropdown-item>
 							</el-dropdown-menu>
 						),
 					}}
 				>
-					<span class="el-dropdown-link">
+					<span style="color:#626aef">
 						输出
 						<el-icon class="el-icon--right">
 							<arrow-down />
@@ -250,7 +234,7 @@ const columns = [
 						),
 					}}
 				>
-					<span class="el-dropdown-link">
+					<span  style="color:var(--el-color-primary);">
 						文书
 						<el-icon class="el-icon--right">
 							<arrow-down />
@@ -320,9 +304,8 @@ const loadData = async () => {
 			tableData.value.push(newData);
 		}
 
-	// 连接后端后的实际运行环境
+		// 连接后端后的实际运行环境
 	} else {
-
 		// 开始获取数据
 		await pywebview.api.pushAllCasesToList().then((cases) => {
 			// 遍历cases，将数据根据一定的规则添加到tableData中
@@ -411,10 +394,8 @@ const loadData = async () => {
 						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames;
 
 					tableData.value.push(newData);
-
 				}
 			}
-
 		});
 	}
 };
@@ -563,9 +544,9 @@ async function documentsGenerate(data) {
 		if (result == "Success") {
 			console.log("文书生成成功");
 			// 生成成功以后，刷新数据
-			getTableData();
+			loadData();
 		}
-		// 如果后端未返回成功则直接输出后端返回的错误信息
+		// 如果后端未返回成功，则直接输出后端返回的错误信息
 		else {
 			console.log(result);
 		}
@@ -664,3 +645,8 @@ onMounted(() => {
 	loadData();
 });
 </script>
+
+
+<style scoped>
+
+</style>
