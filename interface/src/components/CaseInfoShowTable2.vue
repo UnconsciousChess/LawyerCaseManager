@@ -141,11 +141,19 @@ const columns = [
 		dataKey: "litigantsNameShowText",
 		title: "当事人",
 		width: 300,
-		// headerCellRenderer : (props) => {
-		// 	return props.column.title
-		// },
 	},
-	{key: "causeOfAction", dataKey: "causeOfAction", title: "案由", width: 200},
+	{
+		key: "causeOfAction",
+		dataKey: "causeOfAction",
+		title: "案由",
+		width: 200,
+		align: "center",
+		cellRenderer: ({cellData:causeOfAction}) => (
+			<el-tag  type="warning">
+				{causeOfAction}
+			</el-tag>
+		),
+	},
 	{
 		key: "operation",
 		dataKey: "operation",
@@ -234,7 +242,7 @@ const columns = [
 						),
 					}}
 				>
-					<span  style="color:var(--el-color-primary);">
+					<span style="color:var(--el-color-primary);">
 						文书
 						<el-icon class="el-icon--right">
 							<arrow-down />
@@ -646,7 +654,4 @@ onMounted(() => {
 });
 </script>
 
-
-<style scoped>
-
-</style>
+<style scoped></style>
