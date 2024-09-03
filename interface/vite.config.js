@@ -1,52 +1,34 @@
-import { defineConfig } from 'vite'
+import {defineConfig} from "vite";
 
-import vue from '@vitejs/plugin-vue'
+import vue from "@vitejs/plugin-vue";
 
-import vueJsx from '@vitejs/plugin-vue-jsx'
+import vueJsx from "@vitejs/plugin-vue-jsx";
 
-import AutoImport from 'unplugin-auto-import/vite'
+import AutoImport from "unplugin-auto-import/vite";
 
-import Components from 'unplugin-vue-components/vite'
+import Components from "unplugin-vue-components/vite";
 
-import { ElementPlusResolver } from 'unplugin-vue-components/resolvers'
 
+
+import {ElementPlusResolver} from "unplugin-vue-components/resolvers";
 
 export default defineConfig({
+	//
+	plugins: [
+		vue(),
 
-  // 
-  plugins: [
+		vueJsx(),
 
-    vue(),
+		AutoImport({
+			imports: ["vue", "vue-router"],
+			resolvers: [ElementPlusResolver()],
+		}),
 
-    vueJsx(),
+		Components({
+			dirs: ["src/components/"],
+			extensions: ["vue", "md"],
+			resolvers: [ElementPlusResolver()],
+		}),
 
-    AutoImport({
-
-      imports: [
-        'vue', 
-        'vue-router',
-      ],
-
-      resolvers: [
-        ElementPlusResolver()
-      ],
-
-      // dir: [
-      //   './src/components/',
-      // ]
-
-    }),
-
-    Components({
-
-      dirs: [
-        './src/components/'
-      ],
-
-      resolvers: [
-        ElementPlusResolver()
-      ],
-    }),
-  ],
-
-})
+	],
+});
