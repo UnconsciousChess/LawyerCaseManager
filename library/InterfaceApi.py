@@ -326,6 +326,16 @@ class Api:
         # 返回案件列表
         return CaseList
     
+    # 该方法用于输出指定案件的信息到前端
+    def pushSingleCaseToDict(self,CaseId) -> dict|str:
+        # 遍历案件列表
+        for case in self._cases:
+            # 如果案件ID相同，则返回该案件信息
+            if case.GetCaseId() == CaseId:
+                return case.OutputToDict()
+        # 如果遍历完，都没有找到对应的案件，则返回Fail
+        return "Fail"
+    
 
     # 该方法用于对接前端的文书生成按钮，用于生成案件文件夹及对应的文件模板
     def documentsGenerate(self,caseId,templateFilesIdList) -> str:

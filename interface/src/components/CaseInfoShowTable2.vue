@@ -148,10 +148,8 @@ const columns = [
 		title: "案由",
 		width: 200,
 		align: "center",
-		cellRenderer: ({cellData:causeOfAction}) => (
-			<el-tag  type="warning">
-				{causeOfAction}
-			</el-tag>
+		cellRenderer: ({cellData: causeOfAction}) => (
+			<el-tag type="warning">{causeOfAction}</el-tag>
 		),
 	},
 	{
@@ -318,93 +316,73 @@ const loadData = async () => {
 		await pywebview.api.pushAllCasesToList().then((cases) => {
 			// 遍历cases，将数据根据一定的规则添加到tableData中
 			for (let i = 0; i < cases.length; i++) {
-				// 对比案件的id，如果相同则不添加，改为更新
-				if (
-					tableData.value.findIndex(
-						(item) => item.caseId === cases[i].caseId
-					) !== -1
-				) {
-					// 获取要更新的数据的index
-					var updateItemIndex = tableData.value.findIndex(
-						(item) => item.caseId === cases[i].caseId
-					);
 
+				// 从tableData中获取要更新的数据的index，找不到则返回-1
+				var updateItemIndex = tableData.value.findIndex(
+					(item) => item.caseId === cases[i].caseId
+				);
+				// 如果index不为-1，则为更新模式
+				if (updateItemIndex !== -1) {
 					// 对应的tableData更新数据
-
-					// 代理条件
-					// console.log("更新代理条件信息");
-
-					// console.log(cases[i].agentCondition);
-
-					if (cases[i].agentCondition != null) {
-						console.log("代理条件不为空");
-						tableData.value[updateItemIndex].agentCondition =
-							cases[i].agentCondition;
-					}
-
-					// 案件文件夹路径
-					tableData.value[updateItemIndex].caseFolderGeneratedPath =
-						cases[i].caseFolderGeneratedPath;
-
-					// 案件id
-					// 案件id无须更新
-
-					// 案件类型
-					tableData.value[updateItemIndex].caseType = cases[i].caseType;
-
-					// 案由
-					tableData.value[updateItemIndex].causeOfAction =
-						cases[i].causeOfAction;
-
-					// 诉讼请求
-					tableData.value[updateItemIndex].claimText = cases[i].claimText;
-
-					// 当事人-被告
-					tableData.value[updateItemIndex].defendants = cases[i].defendants;
-
-					// 事实与理由
-					tableData.value[updateItemIndex].factAndReason =
-						cases[i].factAndReason;
-
-					// 当事人-原告与被告
+					tableData.value[updateItemIndex] = cases[i];
+					// 添加原被告名称的显示文本
 					tableData.value[updateItemIndex].litigantsNameShowText =
 						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames;
-
-					// 诉讼标的额
-					tableData.value[updateItemIndex].litigationAmount =
-						cases[i].litigationAmount;
-
-					// 调解意向
-					tableData.value[updateItemIndex].mediationIntention =
-						cases[i].mediationIntention;
-
-					// 当事人-原告
-					tableData.value[updateItemIndex].plaintiffs = cases[i].plaintiffs;
-
-					// 拒绝调解理由
-					tableData.value[updateItemIndex].rejectMediationReasonText =
-						cases[i].rejectMediationReasonText;
-
-					// 案件各阶段
-					tableData.value[updateItemIndex].stages = cases[i].stages;
-
-					// 当事人-第三人
-					tableData.value[updateItemIndex].thirdParties = cases[i].thirdParties;
-
-					// 开始时间
-					tableData.value[updateItemIndex].startTime = cases[i].startTime;
 				} else {
-					// 如果没有相同的，则将数据添加到tableData中
+					// 如果index为-1，即为新增模式，则将数据添加到tableData中
 					let newData = {};
 					newData = cases[i];
-					newData["index"] = i + 1;
+					// 添加原被告名称的显示文本
 					newData["litigantsNameShowText"] =
 						cases[i].plaintiffNames + " 诉 " + cases[i].defendantNames;
 
 					tableData.value.push(newData);
 				}
 			}
+
+			// 重新给tableData的序号赋值
+			for (let i = 0; i < tableData.value.length; i++) {
+				tableData.value[i].index = i + 1;
+			}
 		});
+	}
+};
+
+// 加载单个案件数据
+const loadSingleCaseData = async () => {
+	// 如果未连接后端，则只测试前端
+	if (typeof pywebview === "undefined") {
+		console.log("loadSingleCaseData()：未连接后端，目前只测试前端");
+	}
+	// 如果连接了后端，则调用后端的函数(实际运行环境)
+	else {
+		// 如果selectedRowData不为空
+		if (selectedRowData.value != null) {
+			// 获取当前案件的id
+			let caseId = selectedRowData.value.caseId;
+			// 调用后端函数，获取当前案件的数据
+			let result = await pywebview.api.pushSingleCaseToDict(caseId);
+			// 如果后端返回成功
+			if (result == "Fail") {
+				console.log("获取案件数据失败");
+			} else {
+				// 将该案件的数据更新到tableData中
+				var updateItemIndex = tableData.value.findIndex(
+					(item) => item.caseId === caseId
+				);
+				// 对应的tableData更新数据
+				tableData.value[updateItemIndex] = result;
+				tableData.value[updateItemIndex].litigantsNameShowText =
+					result.plaintiffNames + " 诉 " + result.defendantNames;
+			}
+
+			// 重新给tableData的序号赋值
+			for (let i = 0; i < tableData.value.length; i++) {
+				tableData.value[i].index = i + 1;
+			}
+		} else {
+			console.log("当前案件数据为空");
+		}
 	}
 };
 
@@ -431,11 +409,10 @@ function handleEditData(val) {
 
 // 收到子组件的编辑数据以后，父组件中的数据进行更新
 function updateCaseDataFromCaseInfoForm() {
-	console.log("更新案件信息");
 	// 将编辑（新建）对话框关闭
 	editDialogVisible.value = false;
 	// 刷新数据
-	loadData();
+	loadSingleCaseData();
 }
 
 // 删除数据的前置函数
