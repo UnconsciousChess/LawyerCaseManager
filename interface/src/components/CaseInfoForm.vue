@@ -4,7 +4,6 @@ import LitigantForm from "./LitigantForm.vue";
 import courtData from "../../../data/PublicInfomationList/Courts-China.json";
 import causeOfActionData from "../../../data/PublicInfomationList/CauseOfActions-China.json";
 
-
 // 当事人表单实例（原告）
 const litigantFormPlaintiff = ref(null);
 // 当事人表单实例（被告）
@@ -284,7 +283,7 @@ async function onSubmit() {
 
 		caseFormRef.value.validate((valid) => {
 			if (!valid) {
-				// 如果表单校验不通过
+				如果表单校验不通过;
 				ElMessage({
 					message: "表单校验不通过",
 					type: "error",
@@ -292,10 +291,10 @@ async function onSubmit() {
 				caseFormRulesError.value = true;
 			} else {
 				// 如果表单校验通过
-				ElMessage({
-					message: "表单校验通过",
-					type: "success",
-				});
+				// ElMessage({
+				// 	message: "表单校验通过",
+				// 	type: "success",
+				// });
 				caseFormRulesError.value = false;
 			}
 		});
@@ -356,59 +355,25 @@ function caseFormInfoInitiation(propData) {
 			return;
 		}
 		// 如果有传递过来的案件信息，则将其赋值给表单
-		let caseData = propData.propCaseData;
+		caseForm.value = propData.propCaseData;
 
-		caseForm.value.agentCondition = caseData.agentCondition;
-		caseForm.value.caseAgentStage = caseData.caseAgentStage;
-		caseForm.value.caseId = caseData.caseId;
-		caseForm.value.causeOfAction = caseData.causeOfAction;
-		caseForm.value.stages = caseData.stages;
-		caseForm.value.litigationAmount = caseData.litigationAmount;
+		// 编辑模式，对应进行下面的设置
 
-		caseForm.value.caseType = caseData.caseType.toString();
-
-		caseForm.value.mediationIntention = caseData.mediationIntention;
-		caseForm.value.caseFolderGeneratedPath = caseData.caseFolderGeneratedPath;
-
-		caseForm.value.startTime = caseData.startTime;
-
-		// 如果原告不为空，则将其赋值给表单
-		if (caseData.plaintiffs != null) {
-			caseForm.value.plaintiffs = caseData.plaintiffs;
-		}
-		// 如果被告不为空，则将其赋值给表单
-		if (caseData.defendants != null) {
-			caseForm.value.defendants = caseData.defendants;
-		}
-
-		caseForm.value.factAndReason = caseData.factAndReason;
-		caseForm.value.claimText = caseData.claimText;
-		caseForm.value.rejectMediationReasonText =
-			caseData.rejectMediationReasonText;
-
-		// 因为是编辑模式，所以不显示文件导入模式的开关
+		// 不显示文件导入模式的开关
 		componentsConfig.value.inputInfoByFileSwitchStatus = false;
-		// 因为是编辑模式，所以默认打开前端输入状态
+		// 打开前端输入状态
 		inputInfoByFrontEndStatus.value = true;
-		// 因为是编辑模式，所以默认不需要文件导入
+		// 不需要文件导入
 		componentsConfig.value.inputInfoByFile = false;
 
-		// 因为是编辑模式，所以默认显示描述列表
+		// 默认显示描述列表
 		showDescriptionList.value = true;
 
-		console.log(caseForm.value);
 	}
 
 	// 新建案件的创建模式
 	else if (propData.propMode == "create") {
 		console.log("当前CaseInfoform为新建案件模式");
-
-		// 因为是新建模式，因此显示文件导入模式的开关
-		componentsConfig.value.inputInfoByFileSwitchStatus = true;
-		// 因为是编辑模式，所以默认关闭前端输入状态，
-		inputInfoByFrontEndStatus.value = false;
-		// 因为是编辑模式，所以默认需要文件导入
-		componentsConfig.value.inputInfoByFile = true;
 
 		// 所有信息回归初始值
 		caseForm.value.agentCondition = {
@@ -443,10 +408,22 @@ function caseFormInfoInitiation(propData) {
 		caseForm.value.plaintiffs = [];
 		caseForm.value.defendants = [];
 
-		// 因为是新建模式，所以默认不显示描述列表
+		// 因为是新建模式，对应进行设置
+
+		// 显示文件导入模式的开关
+		componentsConfig.value.inputInfoByFileSwitchStatus = true;
+		// 关闭前端输入状态，
+		inputInfoByFrontEndStatus.value = false;
+		// 默认需要文件导入
+		componentsConfig.value.inputInfoByFile = true;
+		// 不显示描述列表
 		showDescriptionList.value = false;
 	}
 }
+
+const testOutput = () => {
+	console.log(caseForm.value.caseType);
+};
 
 // ====== 下面是在挂载时调用的方法 ======
 onMounted(() => {
@@ -470,14 +447,17 @@ watchEffect(() => {
 	>
 		<el-form-item>
 			<el-button type="primary" plain @click="onAddPlaintiff"
-				>原告<el-icon  style="margin-left: 5px"><CirclePlusFilled /></el-icon
+				>原告<el-icon style="margin-left: 5px"><CirclePlusFilled /></el-icon
 			></el-button>
 			<el-button type="warning" plain @click="onAddDefendant"
-				>被告<el-icon  style="margin-left: 5px"><CirclePlusFilled /></el-icon
+				>被告<el-icon style="margin-left: 5px"><CirclePlusFilled /></el-icon
 			></el-button>
-			<el-button type="success" plain @click="onSubmit(ruleFormRef)" style="margin-left: 40px;"	
-				>确认更改<el-icon  style="margin-left: 5px;"
-					><Finished /></el-icon
+			<el-button
+				type="success"
+				plain
+				@click="onSubmit(ruleFormRef)"
+				style="margin-left: 40px"
+				>确认更改<el-icon style="margin-left: 5px"><Finished /></el-icon
 			></el-button>
 		</el-form-item>
 
@@ -570,10 +550,10 @@ watchEffect(() => {
 
 			<el-form-item v-if="inputInfoByFrontEndStatus">
 				案件类型：
-				<el-radio-group v-model="caseForm.caseType" id="caseType">
-					<el-radio value="1">民事案件</el-radio>
-					<el-radio value="2">行政案件</el-radio>
-					<el-radio value="3">执行案件</el-radio>
+				<el-radio-group v-model="caseForm.caseType" @change="testOutput">
+					<el-radio label="民事案件" :value="1"></el-radio>
+					<el-radio label="行政案件" :value="2"></el-radio>
+					<el-radio label="执行案件" :value="3"></el-radio>
 				</el-radio-group>
 			</el-form-item>
 		</el-row>
