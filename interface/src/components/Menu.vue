@@ -18,8 +18,8 @@ async function init() {
 	// 检测是否连接了后端服务，如果未连接，则在前端提示仅是测试前端
 	if (typeof pywebview === 'undefined') {
 		ElNotification({
-			title: '仅测试前端',
-			message: '未检测到后端服务！',
+			title: '程序初始化',
+			message: '未检测到后端服务，仅测试前端内容',
 		});
 		return;
 	}
@@ -29,7 +29,7 @@ async function init() {
 	if (result.caseResult == "Success" && result.templateFileResult == "Success"){
 		// 初始化成功
 		ElNotification({
-			title: '初始化成功',
+			title: '程序初始化',
 			message: '已成功加载后台数据！',
 			duration: 3500,
 		});
@@ -37,7 +37,7 @@ async function init() {
 	} else {
 		// 初始化失败
 		ElNotification({
-			title: '初始化失败',
+			title: '程序初始化',
 			message: '后台数据加载失败！',
 		});
 	}
@@ -64,7 +64,7 @@ onMounted(() => {
 			<!-- <el-menu-item index="/case-info-form">案件信息录入</el-menu-item> -->
 			<el-menu-item index="/template-file">模板文件选择</el-menu-item>
 			<el-menu-item disabled>归档材料生成</el-menu-item>
-			<el-menu-item index="/test">测试</el-menu-item>
+			<el-menu-item index="/test">测试-新案件列表</el-menu-item>
 		</el-sub-menu>
 		<el-sub-menu index="3">
 			<template #title>其他工具</template>
