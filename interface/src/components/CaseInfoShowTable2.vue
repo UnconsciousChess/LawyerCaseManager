@@ -19,7 +19,7 @@
 	<!-- 表格外的功能按钮 -->
 	<div style="margin-top: 20px">
 		<el-button color="#9EC1DD" @click="createNewCase">新建案件</el-button>
-		<el-button color="#B5BEF2" @click="loadData">刷新数据</el-button>
+		<el-button color="#B5BEF2" @click="loadAllCasesData">刷新数据</el-button>
 		<el-button color="#CEECAB" @click="handleBulkLoadingData"
 			>批量加载案件</el-button
 		>
@@ -296,7 +296,7 @@ const onSort = ({key, order}) => {
 	}
 };
 
-const loadData = async () => {
+const loadAllCasesData = async () => {
 	// 未连接后端，只调取前端
 	if (typeof pywebview === "undefined") {
 		for (let i = 0; i < importData.length; i++) {
@@ -528,8 +528,6 @@ async function documentsGenerate(data) {
 		// 如果后端返回成功
 		if (result == "Success") {
 			console.log("文书生成成功");
-			// 生成成功以后，刷新数据
-			loadData();
 		}
 		// 如果后端未返回成功，则直接输出后端返回的错误信息
 		else {
@@ -593,7 +591,7 @@ async function handleBulkLoadingData() {
 		if (backendResult == "Success") {
 			// 如果后端返回成功，则刷新数据
 			console.log("后端批量加载案件成功");
-			loadData();
+			loadAllCasesData();
 		} else if (backendResult == "Fail") {
 			console.log("后端批量加载案件失败");
 		}
@@ -627,7 +625,7 @@ function testOutputCase() {
 }
 
 onMounted(() => {
-	loadData();
+	loadAllCasesData();
 });
 </script>
 
