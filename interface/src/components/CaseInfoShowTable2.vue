@@ -110,7 +110,7 @@
 <script setup lang="jsx">
 import {onMounted} from "vue";
 import {ref} from "vue";
-import {ElMessage, TableV2SortOrder} from "element-plus";
+import {ElMessage, ElNotification, TableV2SortOrder} from "element-plus";
 
 // 引入用于测试的案件信息
 import importData from "./test/testdata.json";
@@ -266,8 +266,6 @@ const columns = [
 // 设置允许排序的列(按时间排序)
 columns[1].sortable = true;
 
-columns[2].filterable = true;
-
 // 排序状态
 const sortState = ref({
 	startTime: TableV2SortOrder.ASC,
@@ -316,7 +314,6 @@ const loadAllCasesData = async () => {
 		await pywebview.api.pushAllCasesToList().then((cases) => {
 			// 遍历cases，将数据根据一定的规则添加到tableData中
 			for (let i = 0; i < cases.length; i++) {
-
 				// 从tableData中获取要更新的数据的index，找不到则返回-1
 				var updateItemIndex = tableData.value.findIndex(
 					(item) => item.caseId === cases[i].caseId
@@ -425,7 +422,7 @@ function handleDeleteData(val) {
 }
 
 // 具体删除数据的函数
-function deleteData(val) {
+async function deleteData(val) {
 	console.log("deleteData：当前确定要删除的案件id为" + val.caseId);
 	// 将对话框隐藏
 	deleteDialogVisible.value = false;
@@ -434,7 +431,9 @@ function deleteData(val) {
 	var deleteItemIndex = tableData.value.findIndex(
 		(item) => item.caseId === val.caseId
 	);
-	console.log("要删除的数据的index为" + deleteItemIndex);
+
+	let deleteSuccessMessageText =
+		val.litigantsNameShowText + val.causeOfAction + " 一案删除成功";
 
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
@@ -452,6 +451,12 @@ function deleteData(val) {
 	for (let i = 0; i < tableData.value.length; i++) {
 		tableData.value[i].index = i + 1;
 	}
+
+	// 弹出删除成功的提示
+	ElMessage({
+		message: deleteSuccessMessageText,
+		type: "warning",
+	});
 }
 
 // 输出数据的前置函数，作用是打开对话框，随后，再根据在对话框中的选择调用下面的outputToExcel或outputToTxt
@@ -463,7 +468,7 @@ function handleOutputData(val) {
 }
 
 // 输出数据到txt
-function outputToJson(val) {
+async function outputToJson(val) {
 	// 将对话框隐藏
 	outputDialogVisible.value = false;
 
@@ -473,22 +478,53 @@ function outputToJson(val) {
 	}
 	// 如果连接了后端，则调用后端的函数(实际运行环境)
 	else {
-		pywebview.api.outputSingleCaseToJson(val.caseId);
+		let result = await pywebview.api.outputSingleCaseToJson(val.caseId);
+		if (result == "Success") {
+			ElNotification({
+				title: "导出结果",
+				message: "导出成功",
+				type: "success",
+				position: "bottom-right",
+			});
+		} else {
+			ElNotification({
+				title: "导出结果",
+				message: "导出失败",
+				type: "error",
+				position: "bottom-right",
+			});
+		}
 	}
 }
 
 // 输出数据到txt
-function outputToTxt(val) {
+async function outputToTxt(val) {
 	// 将对话框隐藏
 	outputDialogVisible.value = false;
 
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
 		console.log("outputToTxt()：未连接后端，目前只测试前端");
+		return;
 	}
 	// 如果连接了后端，则调用后端的函数(实际运行环境)
 	else {
-		pywebview.api.outputSingleCaseToTxt(val.caseId);
+		let result = await pywebview.api.outputSingleCaseToTxt(val.caseId);
+		if (result == "Success") {
+			ElNotification({
+				title: "导出结果",
+				message: "导出成功",
+				type: "success",
+				position: "bottom-right",
+			});
+		} else {
+			ElNotification({
+				title: "导出结果",
+				message: "导出失败",
+				type: "error",
+				position: "bottom-right",
+			});
+		}
 	}
 }
 
@@ -500,9 +536,6 @@ function handleGenerateDocuments(val) {
 
 // 收到从子组件传来的，文书生成的模板data以后，调用下面的DocumentsGenerate函数生成文书
 async function documentsGenerate(data) {
-	console.log("文书生成");
-	console.log("当前要生成文书的案件id为" + selectedRowData.value.caseId);
-
 	// 将对话框隐藏
 	chooseTemplateDialogVisible.value = false;
 
@@ -517,6 +550,7 @@ async function documentsGenerate(data) {
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
 		console.log("handleDocumentGenerate()：未连接后端，目前只测试前端");
+		return;
 	}
 	// 如果连接了后端，则调用后端的函数,将当前案件id,以及模板id列表传到后端(实际运行环境)
 	else {
@@ -527,11 +561,21 @@ async function documentsGenerate(data) {
 
 		// 如果后端返回成功
 		if (result == "Success") {
-			console.log("文书生成成功");
+			ElNotification({
+				title: "文书生成结果",
+				message: "文书生成完毕",
+				type: "success",
+				position: "bottom-right",
+			});
 		}
 		// 如果后端未返回成功，则直接输出后端返回的错误信息
 		else {
-			console.log(result);
+			ElNotification({
+				title: "文书生成结果",
+				message: result,
+				type: "error",
+				position: "bottom-right",
+			});
 		}
 	}
 }
@@ -543,6 +587,7 @@ function handleMergeDocuments(val) {
 	selectedRowData.value = val;
 }
 
+// 打开案件文件夹
 async function handleOpenCaseFolder(val) {
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
@@ -580,30 +625,36 @@ async function handleOpenCaseFolder(val) {
 
 // 批量加载案件到后端,其中需要调用后端的函数
 async function handleBulkLoadingData() {
-	console.log("批量加载案件");
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
 		console.log("handleBulkLoadingData()：未连接后端，目前只测试前端");
+		return;
 	}
 	// 如果连接了后端，则调用后端的函数
 	else {
 		let backendResult = await pywebview.api.inputAllCasesFromJson();
 		if (backendResult == "Success") {
 			// 如果后端返回成功，则刷新数据
-			console.log("后端批量加载案件成功");
+			ElMessage({
+				message: "批量加载案件成功",
+				type: "success",
+			});
 			loadAllCasesData();
 		} else if (backendResult == "Fail") {
-			console.log("后端批量加载案件失败");
+			ElMessage({
+				message: "批量加载案件失败",
+				type: "error",
+			});
 		}
 	}
 }
 
 // 批量导出案件
 async function handleBulkOutputData() {
-	console.log("批量导出案件");
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === undefined) {
 		console.log("handleBulkOutputData()：未连接后端，目前只测试前端");
+		return;
 	}
 	// 如果连接了后端，则调用后端的函数outputAllCasesInfoToTxt
 	else {
@@ -613,10 +664,10 @@ async function handleBulkOutputData() {
 
 // 测试后端输出的代码
 function testOutputCase() {
-	console.log("测试函数，后端输出案件信息");
 	// 如果未连接后端，则只测试前端
 	if (typeof pywebview === "undefined") {
 		console.log("testOutputCase()：未连接后端，目前只测试前端");
+		return;
 	}
 	// 如果连接了后端，则调用后端的函数testCasesOutput
 	else {
