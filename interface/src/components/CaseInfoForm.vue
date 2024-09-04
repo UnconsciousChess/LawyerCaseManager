@@ -82,12 +82,6 @@ const courtsOptions = ref(
 const caseFormRules = ref({
 	causeOfAction: [{required: true, message: "请选择案由", trigger: "blur"}],
 
-	// riskAgentUpfrontFee: [
-	// 	{required: true, message: "请输入前期风险收费金额", trigger: "blur"},
-	// ],
-	// riskAgentPostFeeRate: [
-	// 	{required: true, message: "请输入后期风险收费比例", trigger: "blur"},
-	// ],
 	caseType: [{required: true, message: "请选择案件类型", trigger: "change"}],
 
 	claimText: [{required: true, message: "请输入诉讼请求", trigger: "blur"}],
@@ -220,7 +214,6 @@ async function onSubmit() {
 
 	// 如果采取的是文件上传
 	if (componentsConfig.value.inputInfoByFile == true) {
-		console.log("onSubmit()：当前导入模式为-从文件中导入案件信息");
 		// // 将案件信息传递给父组件
 		// emit("updateCaseData", caseForm.value);
 
@@ -239,12 +232,11 @@ async function onSubmit() {
 
 	// 如果采取的是前端输入
 	else {
-		console.log("onSubmit()：当前导入模式为-从前端表单中导入案件信息");
-		// 先校验表单
 
-		caseFormRef.value.validate((valid) => {
+		// 先校验表单
+		await caseFormRef.value.validate((valid) => {
 			if (!valid) {
-				如果表单校验不通过;
+				// 如果表单校验不通过;
 				ElMessage({
 					message: "表单校验不通过",
 					type: "error",
@@ -280,7 +272,7 @@ async function onSubmit() {
 					console.log(result);
 					if (result == "Success") {
 						ElMessage({
-							message: "案件信息已经成功传递给后端",
+							message: "案件已经新建完毕",
 							type: "success",
 						});
 						// 触发父组件的事件，让其从后端更新案件信息
@@ -294,7 +286,7 @@ async function onSubmit() {
 					console.log(result);
 					if (result == "Success") {
 						ElMessage({
-							message: "案件信息已经成功传递给后端",
+							message: "案件信息已经更新成功",
 							type: "success",
 						});
 						// 触发父组件的事件，让其从后端更新案件信息
@@ -416,8 +408,8 @@ watchEffect(() => {
 				type="success"
 				plain
 				@click="onSubmit(ruleFormRef)"
-				style="margin-left: 40px"
-				>确认更改<el-icon style="margin-left: 5px"><Finished /></el-icon
+				style="margin-left: 190px;"
+				>确认提交<el-icon style="margin-left: 5px;"><Finished /></el-icon
 			></el-button>
 		</el-form-item>
 
@@ -454,6 +446,7 @@ watchEffect(() => {
 					:options="causeOfActionsOptions"
 					:value="causeOfActionsOptions.value"
 					margin-right
+					prop="causeOfAction"
 				/>
 			</el-form-item>
 
