@@ -162,12 +162,6 @@
 					>
 				</el-form-item>
 
-				<!-- 下面是调试显示部分 -->
-				<!-- <el-form-item>
-			<ul>
-				<li v-for="(value, key) in litigantForm">{{ key }} : {{ value }}</li>
-			</ul>
-		</el-form-item> -->
 			</el-form>
 		</el-card>
 	</div>
