@@ -1,5 +1,5 @@
 // 导入区域代码（用json）
-import areaCodeArray from "../../../data/PublicInfomationList/CitizenIdentificationAreaCode.json" assert {type: "json"};
+import areaCodeArray from "../../../data/public/CitizenIdentificationAreaCode.json" assert {type: "json"};
 
 // 该函数用来检验身份证中的出生日期是否合法
 const checkBirthdayValid = (birthday) => {

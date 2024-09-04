@@ -1,8 +1,10 @@
 <script setup>
 // 局部注册LitigantForm组件
 import LitigantForm from "./LitigantForm.vue";
-import courtData from "../../../data/PublicInfomationList/Courts-China.json";
-import causeOfActionData from "../../../data/PublicInfomationList/CauseOfActions-China.json";
+
+// 导入法院数据和案由数据
+import courtData from "../../../data/public/Courts-China.json";
+import causeOfActionData from "../../../data/public/CauseOfActions-China.json";
 
 // 当事人表单实例（原告）
 const litigantFormPlaintiff = ref(null);
@@ -78,32 +80,22 @@ const courtsOptions = ref(
 
 // 设定表单的校验规则
 const caseFormRules = ref({
-	caseCourtCode: [{required: true, message: "请输入法院案号", trigger: "blur"}],
-	causeOfAction: [{required: true, message: "请输入案由", trigger: "blur"}],
-	litigationAmount: [
-		{required: true, message: "请输入标的额", trigger: "blur"},
-		{type: "number", message: "请输入数字", trigger: "blur"},
-	],
-	riskAgentUpfrontFee: [
-		{required: true, message: "请输入前期风险收费金额", trigger: "blur"},
-	],
-	riskAgentPostFeeRate: [
-		{required: true, message: "请输入后期风险收费比例", trigger: "blur"},
-	],
-	caseAgentStage: [
-		{required: true, message: "请选择委托阶段", trigger: "change"},
-	],
+	causeOfAction: [{required: true, message: "请选择案由", trigger: "blur"}],
+
+	// riskAgentUpfrontFee: [
+	// 	{required: true, message: "请输入前期风险收费金额", trigger: "blur"},
+	// ],
+	// riskAgentPostFeeRate: [
+	// 	{required: true, message: "请输入后期风险收费比例", trigger: "blur"},
+	// ],
 	caseType: [{required: true, message: "请选择案件类型", trigger: "change"}],
-	courtName: [{required: true, message: "请输入管辖法院", trigger: "blur"}],
+
 	claimText: [{required: true, message: "请输入诉讼请求", trigger: "blur"}],
 	factAndReason: [
 		{required: true, message: "请输入事实与理由", trigger: "blur"},
 	],
 	rejectMediationReasonText: [
 		{required: true, message: "请输入拒绝调解理由", trigger: "blur"},
-	],
-	caseFolderGeneratedPath: [
-		{required: true, message: "请输入案件文件夹生成路径", trigger: "blur"},
 	],
 });
 
@@ -187,22 +179,7 @@ const getCurrentplaintiffData = (plaintiffData, id) => {
 		(plaintiff) => plaintiff.id === id
 	);
 	// 赋值
-	caseForm.value.plaintiffs[index].litigantName = plaintiffData.litigantName;
-	caseForm.value.plaintiffs[index].litigantIdCode =
-		plaintiffData.litigantIdCode;
-	caseForm.value.plaintiffs[index].litigantPhoneNumber =
-		plaintiffData.litigantPhoneNumber;
-	caseForm.value.plaintiffs[index].litigantAddress =
-		plaintiffData.litigantAddress;
-	caseForm.value.plaintiffs[index].litigantPosition =
-		plaintiffData.litigantPosition;
-	caseForm.value.plaintiffs[index].litigantType = plaintiffData.litigantType;
-	caseForm.value.plaintiffs[index].legalRepresentative =
-		plaintiffData.legalRepresentative;
-	caseForm.value.plaintiffs[index].legalRepresentativeIdCode =
-		plaintiffData.legalRepresentativeIdCode;
-	caseForm.value.plaintiffs[index].isOurClient = plaintiffData.isOurClient;
-	caseForm.value.plaintiffs[index].bankAccount = plaintiffData.bankAccount;
+	caseForm.value.plaintiffs[index] = plaintiffData;
 };
 
 const getCurrentDefendantData = (defendantData, id) => {
@@ -210,24 +187,8 @@ const getCurrentDefendantData = (defendantData, id) => {
 	var index = caseForm.value.defendants.findIndex(
 		(defendant) => defendant.id === id
 	);
-
 	// 赋值
-	caseForm.value.defendants[index].litigantName = defendantData.litigantName;
-	caseForm.value.defendants[index].litigantIdCode =
-		defendantData.litigantIdCode;
-	caseForm.value.defendants[index].litigantPhoneNumber =
-		defendantData.litigantPhoneNumber;
-	caseForm.value.defendants[index].litigantAddress =
-		defendantData.litigantAddress;
-	caseForm.value.defendants[index].litigantPosition =
-		defendantData.litigantPosition;
-	caseForm.value.defendants[index].litigantType = defendantData.litigantType;
-	caseForm.value.defendants[index].legalRepresentative =
-		defendantData.legalRepresentative;
-	caseForm.value.defendants[index].legalRepresentativeIdCode =
-		defendantData.legalRepresentativeIdCode;
-	caseForm.value.defendants[index].isOurClient = defendantData.isOurClient;
-	caseForm.value.defendants[index].bankAccount = defendantData.bankAccount;
+	caseForm.value.defendants[index] = defendantData;
 };
 
 // 将该方法提供给子组件
@@ -368,7 +329,6 @@ function caseFormInfoInitiation(propData) {
 
 		// 默认显示描述列表
 		showDescriptionList.value = true;
-
 	}
 
 	// 新建案件的创建模式

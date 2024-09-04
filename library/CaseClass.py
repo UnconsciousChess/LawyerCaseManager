@@ -58,7 +58,7 @@ class Case():
         # 下面通过读取文件得到一些通用列表,并作为类的属性
 
         # 准备所有合法案由的列表，方便进行对比，以防止输入的案由有误
-        with open(r"Data\PublicInfomationList\CauseOfActions-China.json","r",encoding="utf-8") as f:
+        with open(r"data\public\CauseOfActions-China.json","r",encoding="utf-8") as f:
             self._CauseOfActionList = json.load(f)
 
 
