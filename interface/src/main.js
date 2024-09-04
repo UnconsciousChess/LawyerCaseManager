@@ -9,7 +9,7 @@ import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 // 导入组件
 import Caculator from './components/Caculator.vue'
 import Blank from './components/Blank.vue'
-import CaseInfoShow from './components/CaseInfoShowTable.vue'
+// import CaseInfoShow from './components/CaseInfoShowTable.vue'
 import TemplateFileTable from './components/TemplateFileTable.vue'
 import CaseInfoShowNew from './components/CaseInfoShowTable2.vue'
 
@@ -17,9 +17,9 @@ import CaseInfoShowNew from './components/CaseInfoShowTable2.vue'
 const routes = [
   {path: '/', component: Blank },
   {path: '/caculator', component:Caculator},
-  {path: '/case-info-table', component: CaseInfoShow},
+  {path: '/case-info-table', component: CaseInfoShowNew},
   {path: '/template-file', component: TemplateFileTable},
-  {path: '/test',component: CaseInfoShowNew},
+  // {path: '/test',component: CaseInfoShowNew},
 ]
 
 // 创建router的实例
