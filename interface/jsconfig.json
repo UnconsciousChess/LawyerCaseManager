@@ -1,8 +1,12 @@
 {
-  "compilerOptions": {
-    "paths": {
-      "@/*": ["./src/*"]
-    }
-  },
-  "exclude": ["node_modules", "dist"]
+	"compilerOptions": {
+		"paths": {
+			"@/*": ["./src/*"]
+		},
+		"resolveJsonModule": true,
+		
+		"jsx": "preserve",
+		"jsxImportSource": "vue"
+	},
+	"exclude": ["node_modules", "dist"]
 }

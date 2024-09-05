@@ -21,7 +21,8 @@ window = webview.create_window(title='LawyerCase-Manager',
                                url='../interface/dist/index.html',
                                js_api=WebApi,
                                width=1160,
-                               height=780,)
+                               height=780,
+                               frameless=True)
 
 # 窗口循环
 webview.start(debug=True)

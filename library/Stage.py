@@ -17,7 +17,7 @@ class Stage:
             
         # 准备所有合法法院名称的列表，方便进行对比，以防止输入的法院名称有误
         global StandardCourtNamesList 
-        with open(r"Data\PublicInfomationList\Courts-China.json","r",encoding="utf-8") as f:
+        with open(r"data\public\Courts-China.json","r",encoding="utf-8") as f:
             StandardCourtNamesList = json.load(f)
         # 去除每个法院名称的换行符,并将其赋值给全局 StandardCourtList
 
