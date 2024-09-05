@@ -1,16 +1,16 @@
 <template>
-	<div style="height: 400px">
+	<div style="height: 300px">
 		<el-auto-resizer>
 			<template #default="{width, height}">
 				<el-table-v2
-					v-model:sort-state="sortState"
+					:sort-state="sortState"
 					:columns="columns"
 					:data="tableData"
 					:width="width"
-					:estimated-row-height="50"
 					:height="height"
-					fixed
+					:estimated-row-height="50"
 					@column-sort="onSort"
+					fixed
 				/>
 			</template>
 		</el-auto-resizer>
@@ -147,7 +147,7 @@ const columns = [
 		dataKey: "causeOfAction",
 		title: "案由",
 		width: 200,
-		align: "center",
+		align: "right",
 		cellRenderer: ({cellData: causeOfAction}) => (
 			<el-tag type="warning">{causeOfAction}</el-tag>
 		),
@@ -157,7 +157,7 @@ const columns = [
 		dataKey: "operation",
 		title: "功能菜单",
 		width: 400,
-		align: "center",
+		align: "right",
 
 		cellRenderer: (tableData) => (
 			<>
