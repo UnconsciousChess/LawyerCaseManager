@@ -16,13 +16,24 @@ from library.InterfaceApi import Api
 # 实例化这个api对象
 WebApi = Api()
 
-# 创建一个窗口实例
+# 实际运行
+# window = webview.create_window(title='LawyerCase-Manager', 
+#                                url='../interface/dist/index.html',
+#                                js_api=WebApi,
+#                                width=1160,
+#                                height=780,
+#                                frameless=True,
+#                                easy_drag=False,)
+
+
+# 测试环境
 window = webview.create_window(title='LawyerCase-Manager', 
                                url='../interface/dist/index.html',
                                js_api=WebApi,
                                width=1160,
-                               height=780,
-                               frameless=True)
+                               height=780,)
+
+
 
 # 窗口循环
 webview.start(debug=True)
