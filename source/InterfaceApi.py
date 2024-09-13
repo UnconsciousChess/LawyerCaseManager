@@ -8,6 +8,8 @@ sys.dont_write_bytecode = True
 # 将当前工作目录添加到系统路径中
 sys.path.append(os.getcwd())
 
+from GetPathWithTkinter import GetOpenFilepath,GetSaveFilepath,GetFolderpath
+
 # api类中暴露给前端的函数名称，命名保持与前端一致（小驼峰），方便前后端对接
 class Api:
     def __init__(self):
@@ -18,6 +20,7 @@ class Api:
         self._templateFiles = []
         # 
         self._isInitial = False
+
 
     # ===== 下面是初始化函数 =====
 
@@ -97,68 +100,6 @@ class Api:
         return Result
         
 
-    # ===== 下面是获取文件或文件夹路径的方法，方便后面的方法复用（该组方法不对接前端） =====
-    def GetOpenFilepath(self,title,filetype="All") -> str:
-        # 下面是用tkinter的方法获取文件的绝对路径
-        from tkinter import filedialog
-        # 根据读入的filetype参数，选择不同的文件类型
-        filetypes = []
-
-        # filetype用逗号进行分割，然后根据不同的文件类型添加到filetypes中,默认值为All
-        filetypeList = filetype.split(",")
-        for type in filetypeList:
-            if type == "All":
-                filetypes.append(("All files", "*.*"))
-            elif type == "Text":
-                filetypes.append(("Text files", "*.txt"))
-            elif type == "Excel":
-                filetypes.append(("Excel files", "*.xlsx"))
-            elif type == "Word":
-                filetypes.append(("Word files", "*.docx"))
-            elif type == "Json":
-                filetypes.append(("Json files", "*.json"))
-
-        # #  获取文件路径
-        SelectedFilePath = filedialog.askopenfilename(title=title,filetypes=filetypes)
-        return SelectedFilePath
-
-    def GetFolderpath(self,title) -> str:
-        # 下面是用tkinter的方法获取文件夹的绝对路径
-        from tkinter import filedialog
-        # 获取文件夹路径
-        SelectedFolderPath = filedialog.askdirectory(title=title)
-        return SelectedFolderPath
-    
-    def GetSaveFilepath(self,title,filetype="All") -> str:
-        # 下面是用tkinter的方法获取文件的绝对路径
-        from tkinter import filedialog
-        # 根据读入的filetype参数，选择不同的文件类型
-        filetypes = []
-
-        # filetype用逗号进行分割，然后根据不同的文件类型添加到filetypes中,默认值为All
-        filetypeList = filetype.split(",")
-        for type in filetypeList:
-            if type == "All":
-                filetypes.append(("All files", "*.*"))
-            elif type == "Text":
-                filetypes.append(("Text files", "*.txt"))
-                defaultextension = ".txt"
-            elif type == "Excel":
-                filetypes.append(("Excel files", "*.xlsx"))
-                defaultextension = ".xlsx"
-            elif type == "Word":
-                filetypes.append(("Word files", "*.docx"))
-                defaultextension = ".docx"
-            elif type == "Json":
-                filetypes.append(("Json files", "*.json"))
-                defaultextension = ".json"
-
-        #  获取文件路径
-        SelectedFilePath = filedialog.asksaveasfilename(title=title,
-                                                        filetypes=filetypes,
-                                                        confirmoverwrite=True,
-                                                        defaultextension=defaultextension)
-        return SelectedFilePath
 
 
 
@@ -218,7 +159,7 @@ class Api:
 
     # 该方法用于前端输入一个json文件的路径，然后生成对应的新的案件    
     def inputAllCasesFromJson(self) -> str:
-        InputPath = self.GetOpenFilepath(title="请选择案件信息输入文件",filetype="Json")
+        InputPath = GetOpenFilepath(title="请选择案件信息输入文件",filetype="Json")
         # 判断输入的路径是否存在
         if not os.path.exists(InputPath):
             print("Error: The path is not exist!")
@@ -296,7 +237,7 @@ class Api:
     
     # 该方法用于输出所有案件的信息到json，并保存到案件文件夹中
     def outputAllCasesToJson(self) -> str:
-        OutputFileName = self.GetSaveFilepath(title="导出案件信息",filetype="Json")
+        OutputFileName = GetSaveFilepath(title="导出案件信息",filetype="Json")
 
 
         # 判断OutputFileName是否为空，如果空就视为取消
@@ -366,7 +307,7 @@ class Api:
 
         # 如果当前案件文件夹路径为空，则获取一个文件夹路径并生成对应的文件夹信息
         if self._cases[TargetCaseIndex].GetCaseFolderPath() == "":
-            OutputDir=self.GetFolderpath(title="请选择案件文件夹保存的文件夹")
+            OutputDir=GetFolderpath(title="请选择案件文件夹保存的文件夹")
             # 其中项目文件夹名称由案件的原告、被告和案由组成
             FolderName = self._cases[TargetCaseIndex].GetAllPlaintiffNames() + "诉" + self._cases[TargetCaseIndex].GetAllDefendantNames() + "-" + self._cases[TargetCaseIndex].GetCauseOfAction() + "一案"
             OutputDir = os.path.join(OutputDir,FolderName)
@@ -472,7 +413,7 @@ class Api:
     def backEndAddTemplateFileData(self) -> str:
 
         # 调用GetOpenFilepath方法获取txt文件路径
-        TemplateFilePath = self.GetOpenFilepath(title="请选择模板列表文件",filetype="Json")
+        TemplateFilePath = GetOpenFilepath(title="请选择模板列表文件",filetype="Json")
         # 导入模板文件类TemplateFile
         from source.Generator import ReadTemplateList
 
@@ -535,7 +476,7 @@ class Api:
     def backEndOutputTemplateFileData(self) -> str:
         import json
         # 调出文本框来输入文件名
-        OutputPath = self.GetSaveFilepath(title="选择模板列表保存路径",filetype="Json")
+        OutputPath = GetSaveFilepath(title="选择模板列表保存路径",filetype="Json")
         # 判断OutputPath是否存在,如果不存在则返回错误
         if OutputPath == "":
             return "Cancel" 
@@ -562,7 +503,7 @@ class Api:
         }
 
         # 调用GetOpenFilepath方法获取文件路径
-        NewTemplateFileDir = self.GetOpenFilepath(title="请选择模板文件",filetype="Word")
+        NewTemplateFileDir = GetOpenFilepath(title="请选择模板文件",filetype="Word")
         # 如果NewTemplateFile为空，则返回Cancel
         if NewTemplateFileDir == "":
             result["res"] = "Cancel"
