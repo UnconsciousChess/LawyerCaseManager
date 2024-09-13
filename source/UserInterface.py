@@ -10,7 +10,7 @@ import webview
 sys.path.append(os.getcwd())
 
 # 导入自写包InterfaceApi中的Api类
-from library.InterfaceApi import Api
+from InterfaceApi import Api
     
 
 # 实例化这个api对象
