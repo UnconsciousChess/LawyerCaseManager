@@ -293,6 +293,8 @@ class Litigant():
 
             if self.IsOurClient():
                 OutputStr += "(我方当事人)" + "\n"
+            else:
+                OutputStr += "\n"
 
             OutputStr += "身份证号码：" + self.GetIdCode() + "\n"
         else:
