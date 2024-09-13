@@ -13,9 +13,9 @@ from nanoid import generate
 import json
 
 # 导入自定义类
-from LitigantClass import *
-from Stage import *
-from AgentCondition import *
+from Class_Litigant import Litigant  
+from Class_Stage import Stage
+from Class_AgentCondition import AgentCondition
 
 import json
 class Case():

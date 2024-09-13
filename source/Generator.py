@@ -10,7 +10,7 @@ sys.dont_write_bytecode = True
 
 # 导入自写库
 from RenderFile import RenderFileInDocxtpl
-from TemplateFile import TemplateFile
+from Class_TemplateFile import TemplateFile
 
 def ReadTemplateList(TemplateListDir:str) -> list[TemplateFile]: 
 

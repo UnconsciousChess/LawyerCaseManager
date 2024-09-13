@@ -59,7 +59,7 @@ class Api:
         # 开始预读取案件信息
         if StartCaseInput:
             # 导入案件类Case
-            from CaseClass import Case
+            from Class_Case import Case
             
             # 打开文件
             with open(CasesInputPath,"r",encoding='utf-8') as f:
@@ -87,7 +87,7 @@ class Api:
 
         # 开始预读取模板文件信息
         if StartTemplateFileInput:
-            from source.Generator import ReadTemplateList
+            from Generator import ReadTemplateList
 
             TemplateFileList = ReadTemplateList(TemplateFilesPath)
             self._templateFiles = TemplateFileList
@@ -110,7 +110,7 @@ class Api:
     # 该方法用于根据前端输入的案件信息，生成一个新的案件
     def inputSingleCaseFromFrontEndForm(self,CaseFormDict) -> str:
         # 导入案件类Case
-        from CaseClass import Case
+        from Class_Case import Case
         # 实例化一个Case对象
         case = Case()
         # 将CaseFormDict中的数据，调用相应方法去生成当前case对象
@@ -140,7 +140,7 @@ class Api:
             return "PathNotExist"
         
         # 导入案件类Case
-        from CaseClass import Case
+        from Class_Case import Case
         import json
 
         # 打开文件
@@ -170,7 +170,7 @@ class Api:
             return "Fail"
         
         # 导入案件类Case
-        from CaseClass import Case
+        from Class_Case import Case
         import json
 
         # 打开文件
@@ -282,7 +282,7 @@ class Api:
     def documentsGenerate(self,caseId,templateFilesIdList) -> str:
 
         # 导入自写包FolderCreator
-        from source.Generator import FolderCreator,FilesGenerator
+        from Generator import FolderCreator,FilesGenerator
 
         # 先将对应caseId的案件对象对应的index找到，赋值给TargetCaseIndex
         for index,case in enumerate(self._cases):
@@ -395,7 +395,7 @@ class Api:
             return "NotTxtFile"
         
         # 导入案件类litigant
-        from LitigantClass import Litigant
+        from Class_Litigant import Litigant
 
         # 实例化一个Litigant对象
         litigant = Litigant()
@@ -415,7 +415,7 @@ class Api:
         # 调用GetOpenFilepath方法获取txt文件路径
         TemplateFilePath = GetOpenFilepath(title="请选择模板列表文件",filetype="Json")
         # 导入模板文件类TemplateFile
-        from source.Generator import ReadTemplateList
+        from Generator import ReadTemplateList
 
         if TemplateFilePath == "":
             return "Cancel"
@@ -542,7 +542,7 @@ class Api:
 
 
     def backEndMergeFiles(self,CaseId,SelectedFiles) -> str:
-        from source.MergeFiles import MergeFiles
+        from MergeFiles import MergeFiles
         # 遍历案件列表
         for case in self._cases:
             # 如果案件ID相同，则调用Mergefiles执行合并文件操作
@@ -563,7 +563,7 @@ class Api:
         # 该方法用于生成案件归档目录
     def generateArchiveDirectoryDocument(self,TemplateFilePath,SavedPath) -> str:
         # 导入自写包RenderFile中的RenderArchiveDirectory函数（生成归档目录）
-        from source.RenderFile import RenderArchiveDirectory
+        from RenderFile import RenderArchiveDirectory
         # 判断输入的路径是否存在
         if not os.path.exists(SavedPath):
             return "Error: The path is not exist!"

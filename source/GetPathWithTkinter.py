@@ -1,4 +1,9 @@
+# 导入自带库
+import sys,os
 from tkinter import filedialog
+
+# 不要生成字节码
+sys.dont_write_bytecode = True
 
 # ===== 下面是获取文件或文件夹路径的方法，方便后面的方法复用（该组方法不对接前端） =====
 def GetOpenFilepath(title,filetype="All") -> str:
