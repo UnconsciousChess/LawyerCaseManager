@@ -7,7 +7,7 @@ from id_validator import validator
 from nanoid import generate
 
 # 导入银行账户类
-from .Property import BankAccount
+from Property import BankAccount
 
 # 不要生成字节码
 sys.dont_write_bytecode = True

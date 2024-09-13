@@ -56,7 +56,7 @@ class Api:
         # 开始预读取案件信息
         if StartCaseInput:
             # 导入案件类Case
-            from library.CaseClass import Case
+            from CaseClass import Case
             
             # 打开文件
             with open(CasesInputPath,"r",encoding='utf-8') as f:
@@ -169,7 +169,7 @@ class Api:
     # 该方法用于根据前端输入的案件信息，生成一个新的案件
     def inputSingleCaseFromFrontEndForm(self,CaseFormDict) -> str:
         # 导入案件类Case
-        from library.CaseClass import Case
+        from CaseClass import Case
         # 实例化一个Case对象
         case = Case()
         # 将CaseFormDict中的数据，调用相应方法去生成当前case对象
@@ -199,7 +199,7 @@ class Api:
             return "PathNotExist"
         
         # 导入案件类Case
-        from library.CaseClass import Case
+        from CaseClass import Case
         import json
 
         # 打开文件
@@ -229,7 +229,7 @@ class Api:
             return "Fail"
         
         # 导入案件类Case
-        from library.CaseClass import Case
+        from CaseClass import Case
         import json
 
         # 打开文件
@@ -454,7 +454,7 @@ class Api:
             return "NotTxtFile"
         
         # 导入案件类litigant
-        from library.LitigantClass import Litigant
+        from LitigantClass import Litigant
 
         # 实例化一个Litigant对象
         litigant = Litigant()

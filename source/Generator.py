@@ -9,8 +9,8 @@ sys.path.append(os.getcwd())
 sys.dont_write_bytecode = True
 
 # 导入自写库
-from source.RenderFile import RenderFileInDocxtpl
-from library.TemplateFile import TemplateFile
+from RenderFile import RenderFileInDocxtpl
+from TemplateFile import TemplateFile
 
 def ReadTemplateList(TemplateListDir:str) -> list[TemplateFile]: 
 
